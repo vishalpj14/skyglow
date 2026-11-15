@@ -37,6 +37,12 @@ pub struct Stage {
     /// Plain-language description of what the sky tends to do.
     #[serde(default)]
     pub description: String,
+    /// Name to show at sunrise, when the stages run in reverse. Falls back to `name`.
+    #[serde(default)]
+    pub morning_name: String,
+    /// Description to show at sunrise. Falls back to `description`.
+    #[serde(default)]
+    pub morning_description: String,
 }
 
 /// A rough colour label for light that dives down to a given altitude.

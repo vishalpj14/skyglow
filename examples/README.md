@@ -31,7 +31,7 @@ Each place file holds the coordinates, **height above sea level**, the local tim
 powershell -File examples\make-showcase.ps1
 ```
 
-This creates one file per place, such as `examples/showcase/quito.txt`, each holding both solstices (with the clock a local wall clock would show, daylight saving included). Open a few to compare the equator against the Arctic, summer against winter, and the days when Tromso and Prudhoe Bay have no sunset at all.
+This creates one file per place, such as `examples/showcase/quito.txt`, each holding sunrise and sunset on both solstices (with the clock a local wall clock would show, daylight saving included). Open a few to compare the equator against the Arctic, summer against winter, and the days when Tromso and Prudhoe Bay have no sunset at all.
 
 ## Things worth trying
 
@@ -85,7 +85,15 @@ cargo run -p skyglow-core -- --place singapore 2026-11-15 --at 18:56 --at 19:00 
 
 For each time it prints how far below the horizon the sun is, which cloud heights are still lit, and how deep the sunlight dived on its way to each cloud (which decides the colour).
 
-**7. Mountains and height.**
+**7. Sunrise.**
+Every report can be flipped to the morning: the stages run in reverse and the highest clouds are lit first.
+
+```powershell
+cargo run -p skyglow-core -- --place kochi 2026-11-15 --event sunrise
+cargo run -p skyglow-core -- --place kochi 2026-11-15 --at 06:10
+```
+
+**8. Mountains and height.**
 Quito sits 2850 m up (the horizon dips about 1.6 degrees, so sunset comes later). Yosemite sits in a valley whose walls hide the sun early, while the clouds above keep glowing.
 
 ```powershell

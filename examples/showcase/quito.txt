@@ -5,7 +5,36 @@ About this place: On the equator but high up: horizon dips about 1.6 degrees. Pi
 ========================================================================
 December solstice  (2026-12-21)
 ========================================================================
-Skyglow  Quito  0.1807°S  78.4678°W   2026-12-21   pack: default
+Skyglow  Quito  0.1807°S  78.4678°W   2026-12-21   sunrise   pack: default
+  Local time: Ecuador Time (ECT), UTC-5
+  Viewpoint: 2850 m above sea level, with a mountain skyline
+
+  Solar noon   12:12:03
+  Sunrise       06:01:10   (look toward azimuth 113°)
+  Sunrise at sea level, flat horizon: 06:07:59
+  Flat horizon from your height:     06:01:10   (horizon dips 1.56°, 7 min earlier)
+  The skyline does not block the sun in its rising direction today.
+
+Morning light stages (by sun elevation, in the order they happen):
+  blue_hour     05:36:42 -> 05:45:26    9 min  [-8.0° to -6.0°]
+                Deep blue sky slowly brightening. The best window before sunrise for twilight and star work.
+  dawn_purple   05:45:26 -> 05:54:10    9 min  [-6.0° to -4.0°]
+                Violet-pink glow building in the east. Only the highest cloud toward the horizon is lit.
+  first_light   05:54:10 -> 06:02:54    9 min  [-4.0° to -2.0°]
+                High clouds catch sunlight first, above Earth's shadow, while the ground is still dim. Colour depends on grazing height, see grazing_colours.
+  sunrise_glow  06:02:54 -> 06:07:59    5 min  [-2.0° to -0.8°]
+                Sun just rising. Orange-red light on low and mid clouds; the eastern horizon is brightest.
+  golden_hour   06:07:59 -> 06:37:48   30 min  [-0.8° to +6.0°]
+                Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.
+
+Cloud layers: when sunlight first reaches a layer directly overhead:
+  low     1.5 km   lit overhead at 06:06:12   (sun 1.24° below horizon)
+  mid     5.0 km   lit overhead at 06:01:43   (sun 2.27° below horizon)
+  high    9.0 km   lit overhead at 05:58:21   (sun 3.04° below horizon)
+
+Clouds toward the sun are lit earlier than these overhead times.
+
+Skyglow  Quito  0.1807°S  78.4678°W   2026-12-21   sunset   pack: default
   Local time: Ecuador Time (ECT), UTC-5
   Viewpoint: 2850 m above sea level, with a mountain skyline
 
@@ -37,7 +66,36 @@ Clouds toward the sun stay lit longer than these overhead times.
 ========================================================================
 June solstice  (2026-06-21)
 ========================================================================
-Skyglow  Quito  0.1807°S  78.4678°W   2026-06-21   pack: default
+Skyglow  Quito  0.1807°S  78.4678°W   2026-06-21   sunrise   pack: default
+  Local time: Ecuador Time (ECT), UTC-5
+  Viewpoint: 2850 m above sea level, with a mountain skyline
+
+  Solar noon   12:15:44
+  Sunrise       06:05:33   (look toward azimuth 67°)
+  Sunrise at sea level, flat horizon: 06:12:22
+  Flat horizon from your height:     06:05:33   (horizon dips 1.56°, 7 min earlier)
+  The skyline does not block the sun in its rising direction today.
+
+Morning light stages (by sun elevation, in the order they happen):
+  blue_hour     05:41:06 -> 05:49:50    9 min  [-8.0° to -6.0°]
+                Deep blue sky slowly brightening. The best window before sunrise for twilight and star work.
+  dawn_purple   05:49:50 -> 05:58:34    9 min  [-6.0° to -4.0°]
+                Violet-pink glow building in the east. Only the highest cloud toward the horizon is lit.
+  first_light   05:58:34 -> 06:07:17    9 min  [-4.0° to -2.0°]
+                High clouds catch sunlight first, above Earth's shadow, while the ground is still dim. Colour depends on grazing height, see grazing_colours.
+  sunrise_glow  06:07:17 -> 06:12:22    5 min  [-2.0° to -0.8°]
+                Sun just rising. Orange-red light on low and mid clouds; the eastern horizon is brightest.
+  golden_hour   06:12:22 -> 06:42:11   30 min  [-0.8° to +6.0°]
+                Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.
+
+Cloud layers: when sunlight first reaches a layer directly overhead:
+  low     1.5 km   lit overhead at 06:10:35   (sun 1.24° below horizon)
+  mid     5.0 km   lit overhead at 06:06:06   (sun 2.27° below horizon)
+  high    9.0 km   lit overhead at 06:02:44   (sun 3.04° below horizon)
+
+Clouds toward the sun are lit earlier than these overhead times.
+
+Skyglow  Quito  0.1807°S  78.4678°W   2026-06-21   sunset   pack: default
   Local time: Ecuador Time (ECT), UTC-5
   Viewpoint: 2850 m above sea level, with a mountain skyline
 

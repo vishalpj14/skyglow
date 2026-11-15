@@ -57,7 +57,7 @@ fn every_example_place_is_valid_and_has_a_sunset_in_mid_november() {
         let tz = p.tz.unwrap_or_else(|| panic!("{name}: missing tz"));
         let tl = build_timeline_for_place(&params, &p, (2026, 11, 15), tz);
         let jd = tl
-            .sunset_jd
+            .event_jd
             .unwrap_or_else(|| panic!("{name}: expected a sunset on 15 November"));
         let local = jd + tz / 24.0 + 0.5;
         let hour = (local - local.floor()) * 24.0;
@@ -134,7 +134,7 @@ fn quito_sits_high_so_its_sunset_comes_later_than_at_sea_level() {
     let params = Params::builtin();
     let q = &example_places()["quito"];
     let tl = build_timeline_for_place(&params, q, (2026, 11, 15), -5.0);
-    let delay = (tl.sea_sunset_jd.unwrap() - tl.sea_level_sunset_jd.unwrap()) * 1440.0;
+    let delay = (tl.sea_event_jd.unwrap() - tl.sea_level_event_jd.unwrap()) * 1440.0;
     assert!(delay > 4.0 && delay < 9.0, "altitude delayed sunset by {delay} min");
 }
 
@@ -144,7 +144,7 @@ fn mountains_hide_the_sun_early_in_srinagar() {
     let s = &example_places()["srinagar"];
     let tl = build_timeline_for_place(&params, s, (2026, 11, 15), 5.5);
     assert!(tl.has_skyline);
-    let early = (tl.sea_sunset_jd.unwrap() - tl.sunset_jd.unwrap()) * 1440.0;
+    let early = (tl.sea_event_jd.unwrap() - tl.event_jd.unwrap()) * 1440.0;
     assert!(early > 3.0, "terrain only hid the sun {early} min early");
 }
 
@@ -153,7 +153,7 @@ fn the_yosemite_valley_walls_bring_the_sun_down_by_an_hour_or_more() {
     let params = Params::builtin();
     let y = &example_places()["yosemite"];
     let tl = build_timeline_for_place(&params, y, (2026, 11, 15), -8.0);
-    let early = (tl.sea_sunset_jd.unwrap() - tl.sunset_jd.unwrap()) * 1440.0;
+    let early = (tl.sea_event_jd.unwrap() - tl.event_jd.unwrap()) * 1440.0;
     assert!(early > 60.0 && early < 150.0, "valley hid the sun {early} min early");
 }
 
@@ -163,7 +163,7 @@ fn a_place_without_a_skyline_never_sees_the_sun_hidden_early() {
     let k = &example_places()["kochi"];
     let tl = build_timeline_for_place(&params, k, (2026, 11, 15), 5.5);
     assert!(!tl.has_skyline);
-    assert_eq!(tl.sunset_jd, tl.sea_sunset_jd);
+    assert_eq!(tl.event_jd, tl.sea_event_jd);
 }
 
 #[test]

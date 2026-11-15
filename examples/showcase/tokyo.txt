@@ -5,7 +5,35 @@ About this place: No daylight saving.
 ========================================================================
 December solstice  (2026-12-21)
 ========================================================================
-Skyglow  Tokyo  35.6762°N  139.6503°E   2026-12-21   pack: default
+Skyglow  Tokyo  35.6762°N  139.6503°E   2026-12-21   sunrise   pack: default
+  Local time: Japan Standard Time (JST), UTC+9
+  Viewpoint: 40 m above sea level
+
+  Solar noon   11:39:17
+  Sunrise       06:45:59   (look toward azimuth 118°)
+  Sunrise at sea level, flat horizon: 06:47:01
+  Flat horizon from your height:     06:45:59   (horizon dips 0.19°, 1 min earlier)
+
+Morning light stages (by sun elevation, in the order they happen):
+  blue_hour     06:07:46 -> 06:18:33   11 min  [-8.0° to -6.0°]
+                Deep blue sky slowly brightening. The best window before sunrise for twilight and star work.
+  dawn_purple   06:18:33 -> 06:29:27   11 min  [-6.0° to -4.0°]
+                Violet-pink glow building in the east. Only the highest cloud toward the horizon is lit.
+  first_light   06:29:27 -> 06:40:30   11 min  [-4.0° to -2.0°]
+                High clouds catch sunlight first, above Earth's shadow, while the ground is still dim. Colour depends on grazing height, see grazing_colours.
+  sunrise_glow  06:40:30 -> 06:47:01    7 min  [-2.0° to -0.8°]
+                Sun just rising. Orange-red light on low and mid clouds; the eastern horizon is brightest.
+  golden_hour   06:47:01 -> 07:26:32   40 min  [-0.8° to +6.0°]
+                Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.
+
+Cloud layers: when sunlight first reaches a layer directly overhead:
+  low     1.5 km   lit overhead at 06:44:43   (sun 1.24° below horizon)
+  mid     5.0 km   lit overhead at 06:39:00   (sun 2.27° below horizon)
+  high    9.0 km   lit overhead at 06:34:43   (sun 3.04° below horizon)
+
+Clouds toward the sun are lit earlier than these overhead times.
+
+Skyglow  Tokyo  35.6762°N  139.6503°E   2026-12-21   sunset   pack: default
   Local time: Japan Standard Time (JST), UTC+9
   Viewpoint: 40 m above sea level
 
@@ -36,7 +64,35 @@ Clouds toward the sun stay lit longer than these overhead times.
 ========================================================================
 June solstice  (2026-06-21)
 ========================================================================
-Skyglow  Tokyo  35.6762°N  139.6503°E   2026-06-21   pack: default
+Skyglow  Tokyo  35.6762°N  139.6503°E   2026-06-21   sunrise   pack: default
+  Local time: Japan Standard Time (JST), UTC+9
+  Viewpoint: 40 m above sea level
+
+  Solar noon   11:43:08
+  Sunrise       04:24:46   (look toward azimuth 60°)
+  Sunrise at sea level, flat horizon: 04:25:49
+  Flat horizon from your height:     04:24:46   (horizon dips 0.19°, 1 min earlier)
+
+Morning light stages (by sun elevation, in the order they happen):
+  blue_hour     03:43:36 -> 03:55:43   12 min  [-8.0° to -6.0°]
+                Deep blue sky slowly brightening. The best window before sunrise for twilight and star work.
+  dawn_purple   03:55:43 -> 04:07:33   12 min  [-6.0° to -4.0°]
+                Violet-pink glow building in the east. Only the highest cloud toward the horizon is lit.
+  first_light   04:07:33 -> 04:19:09   12 min  [-4.0° to -2.0°]
+                High clouds catch sunlight first, above Earth's shadow, while the ground is still dim. Colour depends on grazing height, see grazing_colours.
+  sunrise_glow  04:19:09 -> 04:25:49    7 min  [-2.0° to -0.8°]
+                Sun just rising. Orange-red light on low and mid clouds; the eastern horizon is brightest.
+  golden_hour   04:25:49 -> 05:03:42   38 min  [-0.8° to +6.0°]
+                Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.
+
+Cloud layers: when sunlight first reaches a layer directly overhead:
+  low     1.5 km   lit overhead at 04:23:29   (sun 1.24° below horizon)
+  mid     5.0 km   lit overhead at 04:17:36   (sun 2.27° below horizon)
+  high    9.0 km   lit overhead at 04:13:07   (sun 3.04° below horizon)
+
+Clouds toward the sun are lit earlier than these overhead times.
+
+Skyglow  Tokyo  35.6762°N  139.6503°E   2026-06-21   sunset   pack: default
   Local time: Japan Standard Time (JST), UTC+9
   Viewpoint: 40 m above sea level
 

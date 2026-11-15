@@ -5,14 +5,42 @@ About this place: North of the Arctic Circle: polar night in winter, midnight su
 ========================================================================
 December solstice  (2026-12-21)
 ========================================================================
-Skyglow  Prudhoe Bay  70.2552°N  148.3372°W   2026-12-21   pack: default
+Skyglow  Prudhoe Bay  70.2552°N  148.3372°W   2026-12-21   sunrise   pack: default
+  Local time: Alaska Standard Time (AKST), UTC-9  [this place also uses daylight saving, UTC-8: second Sunday of March to first Sunday of November; use --tz -8 to see that clock]
+  Viewpoint: 5 m above sea level
+
+  Solar noon   12:51:37
+  Sunrise      none today (polar day or night)
+  Sunrise at sea level, flat horizon: --:--:--
+  Flat horizon from your height:     --:--:--   (horizon dips 0.07°, 0 min earlier)
+
+Morning light stages (by sun elevation, in the order they happen):
+  blue_hour     10:09:00 -> 10:53:41   45 min  [-8.0° to -6.0°]
+                Deep blue sky slowly brightening. The best window before sunrise for twilight and star work.
+  dawn_purple   10:53:41 -> 12:08:59   75 min  [-6.0° to -4.0°]
+                Violet-pink glow building in the east. Only the highest cloud toward the horizon is lit.
+  first_light   12:08:59 -> --:--:--        -  [-4.0° to -2.0°]
+                High clouds catch sunlight first, above Earth's shadow, while the ground is still dim. Colour depends on grazing height, see grazing_colours.
+  sunrise_glow  --:--:-- -> --:--:--        -  [-2.0° to -0.8°]
+                Sun just rising. Orange-red light on low and mid clouds; the eastern horizon is brightest.
+  golden_hour   --:--:-- -> --:--:--        -  [-0.8° to +6.0°]
+                Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.
+
+Cloud layers: when sunlight first reaches a layer directly overhead:
+  low     1.5 km   lit overhead at --:--:--   (sun 1.24° below horizon)
+  mid     5.0 km   lit overhead at --:--:--   (sun 2.27° below horizon)
+  high    9.0 km   lit overhead at --:--:--   (sun 3.04° below horizon)
+
+Clouds toward the sun are lit earlier than these overhead times.
+
+Skyglow  Prudhoe Bay  70.2552°N  148.3372°W   2026-12-21   sunset   pack: default
   Local time: Alaska Standard Time (AKST), UTC-9  [this place also uses daylight saving, UTC-8: second Sunday of March to first Sunday of November; use --tz -8 to see that clock]
   Viewpoint: 5 m above sea level
 
   Solar noon   12:51:37
   Sunset       none today (polar day or night)
   Sunset at sea level, flat horizon: --:--:--
-  Flat horizon from your height:     --:--:--   (horizon dips 0.07°, - later)
+  Flat horizon from your height:     --:--:--   (horizon dips 0.07°, 0 min later)
 
 Evening light stages (by sun elevation):
   golden_hour   --:--:-- -> --:--:--        -  [+6.0° to -0.8°]
@@ -36,14 +64,42 @@ Clouds toward the sun stay lit longer than these overhead times.
 ========================================================================
 June solstice  (2026-06-21)
 ========================================================================
-Skyglow  Prudhoe Bay  70.2552°N  148.3372°W   2026-06-21   pack: default
+Skyglow  Prudhoe Bay  70.2552°N  148.3372°W   2026-06-21   sunrise   pack: default
+  Local time: Alaska Daylight Time (AKDT), UTC-8
+  Viewpoint: 5 m above sea level
+
+  Solar noon   13:55:15
+  Sunrise      none today (polar day or night)
+  Sunrise at sea level, flat horizon: --:--:--
+  Flat horizon from your height:     --:--:--   (horizon dips 0.07°, 0 min earlier)
+
+Morning light stages (by sun elevation, in the order they happen):
+  blue_hour     --:--:-- -> --:--:--        -  [-8.0° to -6.0°]
+                Deep blue sky slowly brightening. The best window before sunrise for twilight and star work.
+  dawn_purple   --:--:-- -> --:--:--        -  [-6.0° to -4.0°]
+                Violet-pink glow building in the east. Only the highest cloud toward the horizon is lit.
+  first_light   --:--:-- -> --:--:--        -  [-4.0° to -2.0°]
+                High clouds catch sunlight first, above Earth's shadow, while the ground is still dim. Colour depends on grazing height, see grazing_colours.
+  sunrise_glow  --:--:-- -> --:--:--        -  [-2.0° to -0.8°]
+                Sun just rising. Orange-red light on low and mid clouds; the eastern horizon is brightest.
+  golden_hour   --:--:-- -> 03:53:04        -  [-0.8° to +6.0°]
+                Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.
+
+Cloud layers: when sunlight first reaches a layer directly overhead:
+  low     1.5 km   lit overhead at --:--:--   (sun 1.24° below horizon)
+  mid     5.0 km   lit overhead at --:--:--   (sun 2.27° below horizon)
+  high    9.0 km   lit overhead at --:--:--   (sun 3.04° below horizon)
+
+Clouds toward the sun are lit earlier than these overhead times.
+
+Skyglow  Prudhoe Bay  70.2552°N  148.3372°W   2026-06-21   sunset   pack: default
   Local time: Alaska Daylight Time (AKDT), UTC-8
   Viewpoint: 5 m above sea level
 
   Solar noon   13:55:15
   Sunset       none today (polar day or night)
   Sunset at sea level, flat horizon: --:--:--
-  Flat horizon from your height:     --:--:--   (horizon dips 0.07°, - later)
+  Flat horizon from your height:     --:--:--   (horizon dips 0.07°, 0 min later)
 
 Evening light stages (by sun elevation):
   golden_hour   23:57:23 -> --:--:--        -  [+6.0° to -0.8°]

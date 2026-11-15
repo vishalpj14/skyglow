@@ -36,6 +36,7 @@ A place is a small JSON file: where you are, how high up, what is on the skyline
 - **Time zone.** The report prints the clock name and offset. If a place uses daylight saving and you are viewing standard time, it tells you which `--tz` to use for the daylight-saving clock. Skyglow does not know today's date rules, so you choose.
 - **Height.** Lowers the sea horizon by about `0.0293 x sqrt(elevation_m)` degrees, so the flat-horizon sunset comes later. The shadow edge is also computed from your height.
 - **Skyline.** For the sun's bearing, the higher of the `horizon` line and any `peak` bump is the skyline. A peak's angle is `atan(height difference / distance)` minus a little for Earth's curve. The sun counts as hidden once it is below that angle (refraction corrected).
+- **Sunrise too.** The same skyline and height are used in the morning: a ridge in the east delays the sunrise you see, and standing higher advances it.
 - **Heights are above sea level.** Cloud heights in packs are above sea level too.
 
 ## Honest limits

@@ -13,7 +13,7 @@ use skyglow_core::params::Params;
 use skyglow_core::place::Place;
 use skyglow_core::sun;
 use skyglow_core::time;
-use skyglow_core::timeline::{build_timeline_for_place, Timeline};
+use skyglow_core::timeline::{build_timeline_event, Event, Timeline};
 
 const USAGE: &str = "\
 skyglow - when does the evening sky do its thing?
@@ -31,8 +31,11 @@ ARGUMENTS:
 OPTIONS:
     --tz <hours>     UTC offset of your clock, e.g. 5.5 for India (default 0 = UTC)
     --pack <file>    Use a parameter pack JSON file instead of the built-in default
-    --at <HH:MM>     Report the sun and cloud-shadow state at a local clock time
-                     (can be repeated, e.g. --at 18:08 --at 18:11)
+    --event <name>   sunset, sunrise or both. Default: sunset, unless every --at
+                     time is before solar noon (then sunrise), or the --at times
+                     are mixed (then both)
+    --at <HH:MM>     Report the sun and cloud-shadow state at a local clock time,
+                     morning or evening (can be repeated, e.g. --at 18:08 --at 18:11)
     --place <name>   Use a named place (coordinates, height, skyline, time zone)
     --places <path>  Where places live: a folder of <name>.json files, or one JSON
                      file holding many places. Default search order:
@@ -46,6 +49,8 @@ EXAMPLES:
     skyglow 9.93 76.27 2026-11-15 --tz 5.5
     skyglow 9.93 76.27 2026-11-15 --tz 5.5 --pack packs/kerala.json --at 18:08 --at 18:12
     skyglow --place singapore 2026-11-15
+    skyglow --place quito 2026-11-15 --event sunrise
+    skyglow --place kochi 2026-11-15 --tz 5.5 --at 06:10 --at 06:20
     skyglow --observe test/observations/my-sunset.json";
 
 /// One timed note inside an observation file.
@@ -68,6 +73,8 @@ struct Observation {
     date: String,
     tz: Option<f64>,
     pack: Option<String>,
+    /// "sunset", "sunrise" or "both". Optional: guessed from the event times.
+    event: Option<String>,
     #[serde(default)]
     notes: String,
     events: Vec<ObservationEvent>,
@@ -84,6 +91,7 @@ struct Options {
     /// Explicit places folder or file; `None` means use the default search order.
     places_file: Option<String>,
     observe: Option<String>,
+    event: Option<String>,
 }
 
 fn main() {
@@ -110,6 +118,7 @@ fn parse_args() -> Result<Option<Options>, String> {
         place: None,
         places_file: None,
         observe: None,
+        event: None,
     };
     let mut i = 0;
     while i < args.len() {
@@ -130,6 +139,10 @@ fn parse_args() -> Result<Option<Options>, String> {
             "--at" => {
                 let v = take_value(&args, &mut i, "--at needs a clock time, for example --at 18:08")?;
                 o.at.push(time::parse_clock(&v)?);
+            }
+            "--event" => {
+                let v = take_value(&args, &mut i, "--event needs sunset, sunrise or both")?;
+                o.event = Some(v);
             }
             "--place" => o.place = Some(take_value(&args, &mut i, "--place needs a name")?),
             "--places" => {
@@ -291,6 +304,38 @@ fn clock_label(place: &Place, tz: f64) -> String {
     label
 }
 
+/// Local clock hours of solar noon on a date.
+fn solar_noon_hours(place: &Place, date: (i32, u32, u32), tz: f64) -> f64 {
+    let jd = sun::solar_noon(date.0, date.1, date.2, place.lon, tz);
+    let local = jd + tz / 24.0 + 0.5;
+    (local - local.floor()) * 24.0
+}
+
+/// Decide which events to describe.
+///
+/// An explicit `--event` wins. Otherwise: sunset (what most people watch),
+/// unless the clock times you asked about say otherwise. Times before solar
+/// noon mean sunrise; a mix of morning and evening times means both.
+fn choose_events(
+    explicit: Option<&str>,
+    hours: &[f64],
+    noon_hours: f64,
+) -> Result<Vec<Event>, String> {
+    if let Some(text) = explicit {
+        if text.eq_ignore_ascii_case("both") {
+            return Ok(vec![Event::Sunrise, Event::Sunset]);
+        }
+        return Ok(vec![Event::parse(text)?]);
+    }
+    let morning = hours.iter().filter(|h| **h < noon_hours).count();
+    let evening = hours.len() - morning;
+    Ok(match (morning, evening) {
+        (0, _) => vec![Event::Sunset],
+        (_, 0) => vec![Event::Sunrise],
+        _ => vec![Event::Sunrise, Event::Sunset],
+    })
+}
+
 fn run() -> Result<(), String> {
     let opts = match parse_args()? {
         Some(o) => o,
@@ -322,15 +367,27 @@ fn run() -> Result<(), String> {
     };
     let params = load_params(opts.pack.as_ref())?;
 
-    let timeline = build_timeline_for_place(&params, &place, date, tz);
-    print_report(&timeline, &params, &place, tz);
+    let events = choose_events(
+        opts.event.as_deref(),
+        &opts.at,
+        solar_noon_hours(&place, date, tz),
+    )?;
+    let mut timelines = Vec::new();
+    for (n, event) in events.iter().enumerate() {
+        if n > 0 {
+            println!();
+        }
+        let timeline = build_timeline_event(&params, &place, date, tz, *event);
+        print_report(&timeline, &params, &place, tz);
+        timelines.push(timeline);
+    }
     for hours in &opts.at {
         print_at(&params, &place, date, tz, *hours);
     }
     if opts.explain {
-        match timeline.sunset_jd {
-            Some(jd) => print_explain(jd, place.lat, place.lon),
-            None => println!("\n(no sunset today at this latitude, nothing to explain)"),
+        match timelines.first().and_then(|t| t.event_jd.map(|jd| (t.event, jd))) {
+            Some((event, jd)) => print_explain(event, jd, place.lat, place.lon),
+            None => println!("\n(no sunrise or sunset today at this latitude, nothing to explain)"),
         }
     }
     Ok(())
@@ -361,8 +418,23 @@ fn run_observation(path: &str, opts: &Options) -> Result<(), String> {
     let date = time::parse_date(&obs.date)?;
     let params = load_params(obs.pack.as_ref().or(opts.pack.as_ref()))?;
 
-    let timeline = build_timeline_for_place(&params, &place, date, tz);
-    print_report(&timeline, &params, &place, tz);
+    let hours_list: Vec<f64> = obs
+        .events
+        .iter()
+        .map(|e| time::parse_clock(&e.time))
+        .collect::<Result<_, _>>()?;
+    let events = choose_events(
+        obs.event.as_deref().or(opts.event.as_deref()),
+        &hours_list,
+        solar_noon_hours(&place, date, tz),
+    )?;
+    for (n, event) in events.iter().enumerate() {
+        if n > 0 {
+            println!();
+        }
+        let timeline = build_timeline_event(&params, &place, date, tz, *event);
+        print_report(&timeline, &params, &place, tz);
+    }
     if !obs.notes.is_empty() {
         println!();
         println!("Notes: {}", obs.notes);
@@ -396,6 +468,9 @@ fn minutes(a: Option<f64>, b: Option<f64>) -> String {
 }
 
 fn print_report(t: &Timeline, params: &Params, place: &Place, tz: f64) {
+    let rising = t.event == Event::Sunrise;
+    let word = t.event.word();
+    let cap = if rising { "Sunrise" } else { "Sunset" };
     let ns = if t.lat_deg >= 0.0 { 'N' } else { 'S' };
     let ew = if t.lon_deg >= 0.0 { 'E' } else { 'W' };
     let title = if place.name.is_empty() {
@@ -404,7 +479,7 @@ fn print_report(t: &Timeline, params: &Params, place: &Place, tz: f64) {
         format!("{}  ", place.name)
     };
     println!(
-        "Skyglow  {}{:.4}\u{b0}{}  {:.4}\u{b0}{}   {:04}-{:02}-{:02}   pack: {}",
+        "Skyglow  {}{:.4}\u{b0}{}  {:.4}\u{b0}{}   {:04}-{:02}-{:02}   {}   pack: {}",
         title,
         t.lat_deg.abs(),
         ns,
@@ -413,6 +488,7 @@ fn print_report(t: &Timeline, params: &Params, place: &Place, tz: f64) {
         t.date.0,
         t.date.1,
         t.date.2,
+        word,
         params.name
     );
     println!("  Local time: {}", clock_label(place, tz));
@@ -421,63 +497,96 @@ fn print_report(t: &Timeline, params: &Params, place: &Place, tz: f64) {
     }
     println!();
     println!("  Solar noon   {}", clock(Some(t.solar_noon_jd), t.tz_hours));
-    match (t.sunset_jd, t.sunset_azimuth_deg) {
+
+    // Minutes by which terrain moves the event away from the flat-horizon time
+    // (earlier at sunset, later at sunrise).
+    let terrain_min = match (t.event_jd, t.sea_event_jd) {
+        (Some(a), Some(b)) => {
+            if rising {
+                (a - b) * 1440.0
+            } else {
+                (b - a) * 1440.0
+            }
+        }
+        _ => 0.0,
+    };
+    match (t.event_jd, t.event_azimuth_deg) {
         (Some(jd), Some(az)) => {
-            let blocked = match (t.sunset_jd, t.sea_sunset_jd) {
-                (Some(a), Some(b)) => (b - a) * 1440.0 >= 1.0,
-                _ => false,
+            let label = if terrain_min >= 1.0 {
+                if rising { "Sun appears " } else { "Sun hidden  " }
+            } else {
+                if rising { "Sunrise     " } else { "Sunset      " }
             };
-            let label = if blocked { "Sun hidden " } else { "Sunset      " };
             println!(
-                "  {}  {}   (look toward azimuth {:.0}\u{b0})",
+                "  {} {}   (look toward azimuth {:.0}\u{b0})",
                 label,
                 time::format_clock(jd, t.tz_hours),
                 az
             );
         }
-        _ => println!("  Sunset       none today (polar day or night)"),
+        _ => println!("  {:<12} none today (polar day or night)", cap),
     }
     if t.elevation_m > 0.0 || t.has_skyline {
         println!(
-            "  Sunset at sea level, flat horizon: {}",
-            clock(t.sea_level_sunset_jd, t.tz_hours)
+            "  {} at sea level, flat horizon: {}",
+            cap,
+            clock(t.sea_level_event_jd, t.tz_hours)
         );
         if t.elevation_m > 0.0 {
+            let shift = match (t.sea_level_event_jd, t.sea_event_jd) {
+                (Some(a), Some(b)) => (b - a).abs() * 1440.0,
+                _ => 0.0,
+            };
             println!(
-                "  Flat horizon from your height:     {}   (horizon dips {:.2}\u{b0}, {} later)",
-                clock(t.sea_sunset_jd, t.tz_hours),
+                "  Flat horizon from your height:     {}   (horizon dips {:.2}\u{b0}, {:.0} min {})",
+                clock(t.sea_event_jd, t.tz_hours),
                 t.dip_deg,
-                minutes(t.sea_level_sunset_jd, t.sea_sunset_jd).trim()
+                shift,
+                if rising { "earlier" } else { "later" }
             );
         }
         if t.has_skyline {
-            let early = match (t.sunset_jd, t.sea_sunset_jd) {
-                (Some(a), Some(b)) => (b - a) * 1440.0,
-                _ => 0.0,
-            };
-            if early >= 1.0 {
-                println!(
-                    "  Terrain hides the sun {:.0} min before the flat-horizon sunset;",
-                    early
-                );
-                println!("  high clouds keep glowing after that.");
+            if terrain_min >= 1.0 {
+                if rising {
+                    println!(
+                        "  Terrain hides the sun for {:.0} min after the flat-horizon sunrise;",
+                        terrain_min
+                    );
+                    println!("  high clouds already catch light before the sun clears the skyline.");
+                } else {
+                    println!(
+                        "  Terrain hides the sun {:.0} min before the flat-horizon sunset;",
+                        terrain_min
+                    );
+                    println!("  high clouds keep glowing after that.");
+                }
             } else {
-                println!("  The skyline does not block the sun in its setting direction today.");
+                println!("  The skyline does not block the sun in its {} direction today.", if rising { "rising" } else { "setting" });
             }
         }
     }
 
     println!();
-    println!("Evening light stages (by sun elevation):");
-    for s in &t.stages {
+    if rising {
+        println!("Morning light stages (by sun elevation, in the order they happen):");
+    } else {
+        println!("Evening light stages (by sun elevation):");
+    }
+    let ordered: Vec<_> = if rising {
+        t.stages.iter().rev().collect()
+    } else {
+        t.stages.iter().collect()
+    };
+    for s in ordered {
+        let (first, second) = if rising { (s.to_deg, s.from_deg) } else { (s.from_deg, s.to_deg) };
         println!(
             "  {:<13} {} -> {}  {}  [{:+.1}\u{b0} to {:+.1}\u{b0}]",
             s.name,
             clock(s.start_jd, t.tz_hours),
             clock(s.end_jd, t.tz_hours),
             minutes(s.start_jd, s.end_jd),
-            s.from_deg,
-            s.to_deg
+            first,
+            second
         );
         if !s.description.is_empty() {
             println!("                {}", s.description);
@@ -485,18 +594,27 @@ fn print_report(t: &Timeline, params: &Params, place: &Place, tz: f64) {
     }
 
     println!();
-    println!("Cloud layers: when Earth's shadow reaches a layer directly overhead:");
+    if rising {
+        println!("Cloud layers: when sunlight first reaches a layer directly overhead:");
+    } else {
+        println!("Cloud layers: when Earth's shadow reaches a layer directly overhead:");
+    }
     for l in &t.layers {
         println!(
-            "  {:<5} {:>5.1} km   dark overhead at {}   (sun {:.2}\u{b0} below horizon)",
+            "  {:<5} {:>5.1} km   {} overhead at {}   (sun {:.2}\u{b0} below horizon)",
             l.name,
             l.height_km,
-            clock(l.overhead_dark_jd, t.tz_hours),
+            if rising { "lit" } else { "dark" },
+            clock(l.overhead_shadow_jd, t.tz_hours),
             l.shadow_depression_deg
         );
     }
     println!();
-    println!("Clouds toward the sun stay lit longer than these overhead times.");
+    if rising {
+        println!("Clouds toward the sun are lit earlier than these overhead times.");
+    } else {
+        println!("Clouds toward the sun stay lit longer than these overhead times.");
+    }
 }
 
 /// Report the sun and Earth-shadow state at one local clock time.
@@ -530,9 +648,12 @@ fn print_at(params: &Params, place: &Place, date: (i32, u32, u32), tz: f64, hour
     let depression = -s.elevation_deg;
     let r = params.earth_radius_km;
     let alt_km = place.elevation_m / 1000.0;
+    let noon = sun::solar_noon(date.0, date.1, date.2, lon, tz);
     println!(
-        "  Sun is {:.2}\u{b0} below the horizon, azimuth {:.0}\u{b0}",
-        depression, s.azimuth_deg
+        "  Sun is {:.2}\u{b0} below the horizon ({}), azimuth {:.0}\u{b0}",
+        depression,
+        if jd < noon { "rising" } else { "setting" },
+        s.azimuth_deg
     );
     if depression < 20.0 {
         println!(
@@ -573,10 +694,10 @@ fn print_at(params: &Params, place: &Place, date: (i32, u32, u32), tz: f64, hour
     }
 }
 
-fn print_explain(jd: f64, lat: f64, lon: f64) {
+fn print_explain(event: Event, jd: f64, lat: f64, lon: f64) {
     let s = sun::sun_state(jd, lat, lon);
     println!();
-    println!("Explain: the sun calculation at the moment of sunset");
+    println!("Explain: the sun calculation at the moment of {}", event.word());
     println!("  Julian Day (UT)                  {:.6}", s.jd);
     println!("  Julian centuries since J2000     {:.9}", s.t_centuries);
     println!("  Mean longitude                   {:.4}\u{b0}", s.mean_longitude_deg);

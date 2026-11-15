@@ -14,30 +14,40 @@
       "name": "golden_hour",
       "from_deg": 6.0,
       "to_deg": -0.833,
+      "morning_name": "golden_hour",
+      "morning_description": "Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.",
       "description": "Low, warm, directional light. Over the Arabian Sea horizon this is a short window near the equator."
     },
     {
       "name": "sunset_glow",
       "from_deg": -0.833,
       "to_deg": -2.0,
+      "morning_name": "sunrise_glow",
+      "morning_description": "Sun just rising. Orange-red light on low and mid clouds; the eastern horizon is brightest.",
       "description": "Sun just set. Orange-red light still reaches low and mid clouds."
     },
     {
       "name": "afterglow",
       "from_deg": -2.0,
       "to_deg": -4.0,
+      "morning_name": "first_light",
+      "morning_description": "High clouds catch sunlight first, above Earth's shadow, while the ground is still dim. Colour depends on grazing height, see grazing_colours.",
       "description": "High cloud stays lit here. Pink tends to arrive late in this stage, just before a cloud's own shadow time."
     },
     {
       "name": "purple_light",
       "from_deg": -4.0,
       "to_deg": -6.0,
+      "morning_name": "dawn_purple",
+      "morning_description": "Violet-pink glow building in the east. Only the highest cloud toward the horizon is lit.",
       "description": "Fading violet-pink; only the highest cloud toward the horizon is lit."
     },
     {
       "name": "blue_hour",
       "from_deg": -6.0,
       "to_deg": -8.0,
+      "morning_name": "blue_hour",
+      "morning_description": "Deep blue sky slowly brightening. The best window before sunrise for twilight and star work.",
       "description": "Deep blue sky, cloud colour mostly gone."
     }
   ],

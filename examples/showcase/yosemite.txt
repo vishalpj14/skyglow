@@ -5,12 +5,42 @@ About this place: Deep valley with granite walls; skyline values are rough and i
 ========================================================================
 December solstice  (2026-12-21)
 ========================================================================
-Skyglow  Yosemite National Park (Valley)  37.7456°N  119.5936°W   2026-12-21   pack: default
+Skyglow  Yosemite National Park (Valley)  37.7456°N  119.5936°W   2026-12-21   sunrise   pack: default
   Local time: Pacific Standard Time (PST), UTC-8  [this place also uses daylight saving, UTC-7: second Sunday of March to first Sunday of November; use --tz -7 to see that clock]
   Viewpoint: 1220 m above sea level, with a mountain skyline
 
   Solar noon   11:56:37
-  Sun hidden   14:56:49   (look toward azimuth 222°)
+  Sun appears   08:10:53   (look toward azimuth 129°)
+  Sunrise at sea level, flat horizon: 07:10:06
+  Flat horizon from your height:     07:04:11   (horizon dips 1.02°, 6 min earlier)
+  Terrain hides the sun for 67 min after the flat-horizon sunrise;
+  high clouds already catch light before the sun clears the skyline.
+
+Morning light stages (by sun elevation, in the order they happen):
+  blue_hour     06:29:34 -> 06:40:41   11 min  [-8.0° to -6.0°]
+                Deep blue sky slowly brightening. The best window before sunrise for twilight and star work.
+  dawn_purple   06:40:41 -> 06:51:56   11 min  [-6.0° to -4.0°]
+                Violet-pink glow building in the east. Only the highest cloud toward the horizon is lit.
+  first_light   06:51:56 -> 07:03:21   11 min  [-4.0° to -2.0°]
+                High clouds catch sunlight first, above Earth's shadow, while the ground is still dim. Colour depends on grazing height, see grazing_colours.
+  sunrise_glow  07:03:21 -> 07:10:06    7 min  [-2.0° to -0.8°]
+                Sun just rising. Orange-red light on low and mid clouds; the eastern horizon is brightest.
+  golden_hour   07:10:06 -> 07:51:12   41 min  [-0.8° to +6.0°]
+                Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.
+
+Cloud layers: when sunlight first reaches a layer directly overhead:
+  low     1.5 km   lit overhead at 07:07:43   (sun 1.24° below horizon)
+  mid     5.0 km   lit overhead at 07:01:48   (sun 2.27° below horizon)
+  high    9.0 km   lit overhead at 06:57:22   (sun 3.04° below horizon)
+
+Clouds toward the sun are lit earlier than these overhead times.
+
+Skyglow  Yosemite National Park (Valley)  37.7456°N  119.5936°W   2026-12-21   sunset   pack: default
+  Local time: Pacific Standard Time (PST), UTC-8  [this place also uses daylight saving, UTC-7: second Sunday of March to first Sunday of November; use --tz -7 to see that clock]
+  Viewpoint: 1220 m above sea level, with a mountain skyline
+
+  Solar noon   11:56:37
+  Sun hidden    14:56:49   (look toward azimuth 222°)
   Sunset at sea level, flat horizon: 16:43:08
   Flat horizon from your height:     16:49:03   (horizon dips 1.02°, 6 min later)
   Terrain hides the sun 112 min before the flat-horizon sunset;
@@ -38,12 +68,42 @@ Clouds toward the sun stay lit longer than these overhead times.
 ========================================================================
 June solstice  (2026-06-21)
 ========================================================================
-Skyglow  Yosemite National Park (Valley)  37.7456°N  119.5936°W   2026-06-21   pack: default
+Skyglow  Yosemite National Park (Valley)  37.7456°N  119.5936°W   2026-06-21   sunrise   pack: default
   Local time: Pacific Daylight Time (PDT), UTC-7
   Viewpoint: 1220 m above sea level, with a mountain skyline
 
   Solar noon   13:00:16
-  Sun hidden   18:58:28   (look toward azimuth 289°)
+  Sun appears   06:29:15   (look toward azimuth 67°)
+  Sunrise at sea level, flat horizon: 05:36:52
+  Flat horizon from your height:     05:30:48   (horizon dips 1.02°, 6 min earlier)
+  Terrain hides the sun for 58 min after the flat-horizon sunrise;
+  high clouds already catch light before the sun clears the skyline.
+
+Morning light stages (by sun elevation, in the order they happen):
+  blue_hour     04:52:52 -> 05:05:32   13 min  [-8.0° to -6.0°]
+                Deep blue sky slowly brightening. The best window before sunrise for twilight and star work.
+  dawn_purple   05:05:32 -> 05:17:53   12 min  [-6.0° to -4.0°]
+                Violet-pink glow building in the east. Only the highest cloud toward the horizon is lit.
+  first_light   05:17:53 -> 05:29:57   12 min  [-4.0° to -2.0°]
+                High clouds catch sunlight first, above Earth's shadow, while the ground is still dim. Colour depends on grazing height, see grazing_colours.
+  sunrise_glow  05:29:57 -> 05:36:52    7 min  [-2.0° to -0.8°]
+                Sun just rising. Orange-red light on low and mid clouds; the eastern horizon is brightest.
+  golden_hour   05:36:52 -> 06:16:02   39 min  [-0.8° to +6.0°]
+                Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.
+
+Cloud layers: when sunlight first reaches a layer directly overhead:
+  low     1.5 km   lit overhead at 05:34:27   (sun 1.24° below horizon)
+  mid     5.0 km   lit overhead at 05:28:20   (sun 2.27° below horizon)
+  high    9.0 km   lit overhead at 05:23:41   (sun 3.04° below horizon)
+
+Clouds toward the sun are lit earlier than these overhead times.
+
+Skyglow  Yosemite National Park (Valley)  37.7456°N  119.5936°W   2026-06-21   sunset   pack: default
+  Local time: Pacific Daylight Time (PDT), UTC-7
+  Viewpoint: 1220 m above sea level, with a mountain skyline
+
+  Solar noon   13:00:16
+  Sun hidden    18:58:28   (look toward azimuth 289°)
   Sunset at sea level, flat horizon: 20:23:40
   Flat horizon from your height:     20:29:44   (horizon dips 1.02°, 6 min later)
   Terrain hides the sun 91 min before the flat-horizon sunset;

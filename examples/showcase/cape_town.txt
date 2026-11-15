@@ -5,7 +5,35 @@ About this place: Southern hemisphere, sunset toward the Atlantic.
 ========================================================================
 December solstice  (2026-12-21)
 ========================================================================
-Skyglow  Cape Town  33.9249°S  18.4241°E   2026-12-21   pack: default
+Skyglow  Cape Town  33.9249°S  18.4241°E   2026-12-21   sunrise   pack: default
+  Local time: South Africa Standard Time (SAST), UTC+2
+  Viewpoint: 25 m above sea level
+
+  Solar noon   12:44:20
+  Sunrise       05:31:00   (look toward azimuth 119°)
+  Sunrise at sea level, flat horizon: 05:31:49
+  Flat horizon from your height:     05:31:00   (horizon dips 0.15°, 1 min earlier)
+
+Morning light stages (by sun elevation, in the order they happen):
+  blue_hour     04:50:55 -> 05:02:37   12 min  [-8.0° to -6.0°]
+                Deep blue sky slowly brightening. The best window before sunrise for twilight and star work.
+  dawn_purple   05:02:37 -> 05:14:05   11 min  [-6.0° to -4.0°]
+                Violet-pink glow building in the east. Only the highest cloud toward the horizon is lit.
+  first_light   05:14:05 -> 05:25:20   11 min  [-4.0° to -2.0°]
+                High clouds catch sunlight first, above Earth's shadow, while the ground is still dim. Colour depends on grazing height, see grazing_colours.
+  sunrise_glow  05:25:20 -> 05:31:49    6 min  [-2.0° to -0.8°]
+                Sun just rising. Orange-red light on low and mid clouds; the eastern horizon is brightest.
+  golden_hour   05:31:49 -> 06:08:43   37 min  [-0.8° to +6.0°]
+                Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.
+
+Cloud layers: when sunlight first reaches a layer directly overhead:
+  low     1.5 km   lit overhead at 05:29:32   (sun 1.24° below horizon)
+  mid     5.0 km   lit overhead at 05:23:50   (sun 2.27° below horizon)
+  high    9.0 km   lit overhead at 05:19:29   (sun 3.04° below horizon)
+
+Clouds toward the sun are lit earlier than these overhead times.
+
+Skyglow  Cape Town  33.9249°S  18.4241°E   2026-12-21   sunset   pack: default
   Local time: South Africa Standard Time (SAST), UTC+2
   Viewpoint: 25 m above sea level
 
@@ -36,7 +64,35 @@ Clouds toward the sun stay lit longer than these overhead times.
 ========================================================================
 June solstice  (2026-06-21)
 ========================================================================
-Skyglow  Cape Town  33.9249°S  18.4241°E   2026-06-21   pack: default
+Skyglow  Cape Town  33.9249°S  18.4241°E   2026-06-21   sunrise   pack: default
+  Local time: South Africa Standard Time (SAST), UTC+2
+  Viewpoint: 25 m above sea level
+
+  Solar noon   12:48:07
+  Sunrise       07:50:31   (look toward azimuth 62°)
+  Sunrise at sea level, flat horizon: 07:51:19
+  Flat horizon from your height:     07:50:31   (horizon dips 0.15°, 1 min earlier)
+
+Morning light stages (by sun elevation, in the order they happen):
+  blue_hour     07:13:03 -> 07:23:34   11 min  [-8.0° to -6.0°]
+                Deep blue sky slowly brightening. The best window before sunrise for twilight and star work.
+  dawn_purple   07:23:34 -> 07:34:13   11 min  [-6.0° to -4.0°]
+                Violet-pink glow building in the east. Only the highest cloud toward the horizon is lit.
+  first_light   07:34:13 -> 07:44:59   11 min  [-4.0° to -2.0°]
+                High clouds catch sunlight first, above Earth's shadow, while the ground is still dim. Colour depends on grazing height, see grazing_colours.
+  sunrise_glow  07:44:59 -> 07:51:19    6 min  [-2.0° to -0.8°]
+                Sun just rising. Orange-red light on low and mid clouds; the eastern horizon is brightest.
+  golden_hour   07:51:19 -> 08:29:40   38 min  [-0.8° to +6.0°]
+                Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.
+
+Cloud layers: when sunlight first reaches a layer directly overhead:
+  low     1.5 km   lit overhead at 07:49:05   (sun 1.24° below horizon)
+  mid     5.0 km   lit overhead at 07:43:31   (sun 2.27° below horizon)
+  high    9.0 km   lit overhead at 07:39:20   (sun 3.04° below horizon)
+
+Clouds toward the sun are lit earlier than these overhead times.
+
+Skyglow  Cape Town  33.9249°S  18.4241°E   2026-06-21   sunset   pack: default
   Local time: South Africa Standard Time (SAST), UTC+2
   Viewpoint: 25 m above sea level
 

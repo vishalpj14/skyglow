@@ -29,7 +29,7 @@ fn sunset_to_civil_dusk_minutes(lat: f64, lon: f64, date: (i32, u32, u32), tz: f
 fn kochi_sunset_is_about_six_pm_in_mid_november() {
     let params = Params::builtin();
     let tl = build_timeline(&params, KOCHI.0, KOCHI.1, (2026, 11, 15), IST);
-    let h = local_hours(tl.sunset_jd.expect("sunset exists"), IST);
+    let h = local_hours(tl.event_jd.expect("sunset exists"), IST);
     // Published almanac values for Kochi in mid-November are within a few minutes of 17:59.
     assert!(h > 17.0 + 56.0 / 60.0 && h < 18.0 + 3.0 / 60.0, "sunset at {h} h");
 }
@@ -38,7 +38,7 @@ fn kochi_sunset_is_about_six_pm_in_mid_november() {
 fn kochi_sunset_azimuth_is_west_south_west() {
     let params = Params::builtin();
     let tl = build_timeline(&params, KOCHI.0, KOCHI.1, (2026, 11, 15), IST);
-    let az = tl.sunset_azimuth_deg.expect("sunset exists");
+    let az = tl.event_azimuth_deg.expect("sunset exists");
     // Declination is about -18.7 deg in mid-November: cos(az) = sin(dec)/cos(lat) gives ~251 deg.
     assert!(az > 247.0 && az < 255.0, "azimuth {az}");
 }
@@ -101,6 +101,96 @@ fn stages_follow_each_other_in_time() {
 fn higher_cloud_layers_go_dark_later() {
     let params = Params::builtin();
     let tl = build_timeline(&params, KOCHI.0, KOCHI.1, (2026, 11, 15), IST);
-    let times: Vec<f64> = tl.layers.iter().map(|l| l.overhead_dark_jd.unwrap()).collect();
+    let times: Vec<f64> = tl.layers.iter().map(|l| l.overhead_shadow_jd.unwrap()).collect();
     assert!(times[0] < times[1] && times[1] < times[2], "{times:?}");
+}
+
+// ---------------------------------------------------------------------------
+// Sunrise: the same geometry as sunset, played backwards.
+// ---------------------------------------------------------------------------
+
+use skyglow_core::place::{HorizonPoint, Place};
+use skyglow_core::timeline::{build_timeline_event, Event};
+
+fn kochi_event(event: Event) -> skyglow_core::timeline::Timeline {
+    let params = Params::builtin();
+    let place = Place::flat(KOCHI.0, KOCHI.1);
+    build_timeline_event(&params, &place, (2026, 11, 15), IST, event)
+}
+
+#[test]
+fn kochi_sunrise_is_about_a_quarter_past_six_in_mid_november() {
+    let h = local_hours(kochi_event(Event::Sunrise).event_jd.expect("sunrise exists"), IST);
+    assert!(h > 6.0 && h < 6.6, "sunrise at {h:.2} local hours");
+}
+
+#[test]
+fn sunrise_and_sunset_mirror_each_other_around_solar_noon() {
+    let rise = kochi_event(Event::Sunrise);
+    let set = kochi_event(Event::Sunset);
+    let before = rise.solar_noon_jd - rise.event_jd.unwrap();
+    let after = set.event_jd.unwrap() - set.solar_noon_jd;
+    // The sun's declination drifts by a fraction of a degree in a day, so the
+    // two halves differ by well under two minutes.
+    assert!((before - after).abs() * 86_400.0 < 120.0, "halves differ by {} s", (before - after).abs() * 86_400.0);
+}
+
+#[test]
+fn kochi_sunrise_is_toward_the_east_south_east_in_november() {
+    // cos(azimuth) = sin(declination) / cos(latitude) = -0.32 -> about 109 degrees.
+    let az = kochi_event(Event::Sunrise).event_azimuth_deg.expect("sunrise exists");
+    assert!(az > 100.0 && az < 118.0, "azimuth {az}");
+}
+
+#[test]
+fn sunrise_stages_run_in_the_opposite_order_and_use_morning_names() {
+    let tl = kochi_event(Event::Sunrise);
+    let names: Vec<&str> = tl.stages.iter().map(|s| s.name.as_str()).collect();
+    assert!(names.contains(&"sunrise_glow"), "names: {names:?}");
+    assert!(names.contains(&"first_light"), "names: {names:?}");
+    for s in &tl.stages {
+        assert!(s.start_jd.unwrap() < s.end_jd.unwrap(), "{} runs backwards", s.name);
+    }
+    // The pack lists stages in evening order, so each next entry happens *earlier* at sunrise.
+    for pair in tl.stages.windows(2) {
+        let later = pair[0].start_jd.unwrap();
+        let earlier = pair[1].end_jd.unwrap();
+        assert!((later - earlier).abs() < 1e-6, "stages do not meet at their boundary");
+    }
+}
+
+#[test]
+fn high_clouds_catch_the_morning_light_before_low_clouds() {
+    let tl = kochi_event(Event::Sunrise);
+    let times: Vec<f64> = tl.layers.iter().map(|l| l.overhead_shadow_jd.unwrap()).collect();
+    // layers are low, mid, high: the highest is lit first (earliest time).
+    assert!(times[2] < times[1] && times[1] < times[0], "times: {times:?}");
+}
+
+#[test]
+fn an_eastern_ridge_delays_sunrise_and_height_advances_it() {
+    let params = Params::builtin();
+    let flat = Place::flat(KOCHI.0, KOCHI.1);
+    let mut ridge = Place::flat(KOCHI.0, KOCHI.1);
+    ridge.horizon = vec![HorizonPoint { az: 0.0, elev: 10.0 }];
+    let mut high = Place::flat(KOCHI.0, KOCHI.1);
+    high.elevation_m = 2000.0;
+    let date = (2026, 11, 15);
+    let f = build_timeline_event(&params, &flat, date, IST, Event::Sunrise).event_jd.unwrap();
+    let r = build_timeline_event(&params, &ridge, date, IST, Event::Sunrise).event_jd.unwrap();
+    let h = build_timeline_event(&params, &high, date, IST, Event::Sunrise).event_jd.unwrap();
+    let ridge_delay = (r - f) * 1440.0;
+    let height_gain = (f - h) * 1440.0;
+    assert!(ridge_delay > 35.0 && ridge_delay < 55.0, "ridge delayed sunrise by {ridge_delay} min");
+    assert!(height_gain > 4.0 && height_gain < 8.0, "height advanced sunrise by {height_gain} min");
+}
+
+#[test]
+fn midnight_sun_and_polar_night_have_no_sunrise() {
+    let params = Params::builtin();
+    let tromso = Place::flat(69.6492, 18.9553);
+    for date in [(2026, 6, 21), (2026, 12, 21)] {
+        let tl = build_timeline_event(&params, &tromso, date, 1.0, Event::Sunrise);
+        assert!(tl.event_jd.is_none(), "unexpected sunrise on {date:?}");
+    }
 }

@@ -330,6 +330,46 @@ impl Place {
         }
         None
     }
+
+    /// The morning counterpart of [`Place::evening_crossing_with_skyline`]:
+    /// the Julian Day when the sun first becomes visible, in the half day
+    /// before solar noon (over a distant ridge, or the sea horizon).
+    pub fn morning_crossing_with_skyline(
+        &self,
+        noon_jd: f64,
+        flat_sunset_deg: f64,
+        earth_radius_km: f64,
+    ) -> Option<f64> {
+        let g = |jd: f64| -> f64 {
+            let s = sun::sun_state(jd, self.lat, self.lon);
+            s.elevation_deg
+                - self.sun_visible_threshold_deg(s.azimuth_deg, flat_sunset_deg, earth_radius_km)
+        };
+        if g(noon_jd) <= 0.0 {
+            return None;
+        }
+        let step = 30.0 / 86_400.0;
+        let start = noon_jd - 0.5;
+        let mut b = noon_jd; // sun visible here
+        let mut t = b - step;
+        while b > start {
+            if g(t) <= 0.0 {
+                let (mut lo, mut hi) = (t, b); // lo hidden, hi visible
+                for _ in 0..40 {
+                    let mid = 0.5 * (lo + hi);
+                    if g(mid) > 0.0 {
+                        hi = mid;
+                    } else {
+                        lo = mid;
+                    }
+                }
+                return Some(0.5 * (lo + hi));
+            }
+            b = t;
+            t -= step;
+        }
+        None
+    }
 }
 
 #[cfg(test)]

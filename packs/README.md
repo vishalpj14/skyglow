@@ -17,7 +17,7 @@ A pack is a small JSON file of **numbers** that tune Skyglow's estimates. Packs 
 | `earth_radius_km` | number | Used by the cloud-shadow geometry (6371). |
 | `sunset_elevation_deg` | number | Sun elevation counted as "sunset" (-0.833 includes refraction and the sun's radius). |
 | `cloud_layers` | list of `{name, height_km}` | Typical heights (above sea level) for low, mid, high cloud. |
-| `stages` | list of `{name, from_deg, to_deg, description}` | Named phases of the evening by sun elevation. `from_deg` must be higher than `to_deg`; stages must not overlap. |
+| `stages` | list of `{name, from_deg, to_deg, description, morning_name?, morning_description?}` | Named phases of the evening by sun elevation. `from_deg` must be higher than `to_deg`; stages must not overlap. The optional `morning_` fields give the names used at sunrise, when the same stages run in reverse; without them the evening name is reused. |
 | `grazing_colours` | optional list of `{min_height_km, label}` | Rough colour label for light whose lowest altitude on the way to a cloud is at least `min_height_km`; the matching entry with the highest threshold wins. Uncalibrated. |
 
 Unknown extra fields are ignored, so packs can carry notes for future versions.

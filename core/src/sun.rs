@@ -162,3 +162,23 @@ pub fn evening_crossing(noon_jd: f64, lat_deg: f64, lon_deg: f64, target_deg: f6
     }
     Some(0.5 * (a + b))
 }
+
+/// The morning counterpart of [`evening_crossing`]: the Julian Day, in the
+/// half day *before* `noon_jd`, when the sun climbs through `target_deg`.
+/// Returns `None` if it never does (polar night, midnight sun).
+pub fn morning_crossing(noon_jd: f64, lat_deg: f64, lon_deg: f64, target_deg: f64) -> Option<f64> {
+    let el = |jd: f64| sun_state(jd, lat_deg, lon_deg).elevation_deg;
+    let (mut a, mut b) = (noon_jd - 0.5, noon_jd);
+    if el(a) > target_deg || el(b) < target_deg {
+        return None;
+    }
+    for _ in 0..60 {
+        let mid = 0.5 * (a + b);
+        if el(mid) < target_deg {
+            a = mid;
+        } else {
+            b = mid;
+        }
+    }
+    Some(0.5 * (a + b))
+}

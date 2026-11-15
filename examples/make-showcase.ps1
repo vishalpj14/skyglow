@@ -2,7 +2,7 @@
 #
 # For every example place (examples/places/<name>.json) it runs the skyglow
 # command-line tool on the two solstices and saves what the program printed
-# into ONE file per place: examples/showcase/<name>.txt. Nothing is written by
+# (sunrise and sunset) into ONE file per place: examples/showcase/<name>.txt. Nothing is written by
 # hand, and your private test/ folder is never read.
 #
 # Run from anywhere:
@@ -58,7 +58,7 @@ foreach ($file in Get-ChildItem $placesDir -Filter *.json | Sort-Object Name) {
         $lines.Add(("=" * 72))
         $lines.Add("$($d.label)  ($($d.date))")
         $lines.Add(("=" * 72))
-        $out = & $exe --place $name $d.date --tz $tzArg --places $placesDir 2>&1
+        $out = & $exe --place $name $d.date --tz $tzArg --places $placesDir --event both 2>&1
         if ($LASTEXITCODE -ne 0) { throw "skyglow failed for $name on $($d.date): $out" }
         foreach ($l in $out) { $lines.Add([string]$l) }
     }

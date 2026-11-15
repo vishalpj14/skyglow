@@ -5,12 +5,41 @@ About this place: High valley; the Pir Panjal range to the west is approximate a
 ========================================================================
 December solstice  (2026-12-21)
 ========================================================================
-Skyglow  Srinagar  34.0837°N  74.7973°E   2026-12-21   pack: default
+Skyglow  Srinagar  34.0837°N  74.7973°E   2026-12-21   sunrise   pack: default
   Local time: India Standard Time (IST), UTC+5.5
   Viewpoint: 1585 m above sea level, with a mountain skyline
 
   Solar noon   12:28:46
-  Sun hidden   17:12:53   (look toward azimuth 240°)
+  Sunrise       07:25:58   (look toward azimuth 117°)
+  Sunrise at sea level, flat horizon: 07:32:20
+  Flat horizon from your height:     07:25:58   (horizon dips 1.17°, 6 min earlier)
+  The skyline does not block the sun in its rising direction today.
+
+Morning light stages (by sun elevation, in the order they happen):
+  blue_hour     06:53:58 -> 07:04:31   11 min  [-8.0° to -6.0°]
+                Deep blue sky slowly brightening. The best window before sunrise for twilight and star work.
+  dawn_purple   07:04:31 -> 07:15:11   11 min  [-6.0° to -4.0°]
+                Violet-pink glow building in the east. Only the highest cloud toward the horizon is lit.
+  first_light   07:15:11 -> 07:25:58   11 min  [-4.0° to -2.0°]
+                High clouds catch sunlight first, above Earth's shadow, while the ground is still dim. Colour depends on grazing height, see grazing_colours.
+  sunrise_glow  07:25:58 -> 07:32:20    6 min  [-2.0° to -0.8°]
+                Sun just rising. Orange-red light on low and mid clouds; the eastern horizon is brightest.
+  golden_hour   07:32:20 -> 08:10:47   38 min  [-0.8° to +6.0°]
+                Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.
+
+Cloud layers: when sunlight first reaches a layer directly overhead:
+  low     1.5 km   lit overhead at 07:30:05   (sun 1.24° below horizon)
+  mid     5.0 km   lit overhead at 07:24:31   (sun 2.27° below horizon)
+  high    9.0 km   lit overhead at 07:20:19   (sun 3.04° below horizon)
+
+Clouds toward the sun are lit earlier than these overhead times.
+
+Skyglow  Srinagar  34.0837°N  74.7973°E   2026-12-21   sunset   pack: default
+  Local time: India Standard Time (IST), UTC+5.5
+  Viewpoint: 1585 m above sea level, with a mountain skyline
+
+  Solar noon   12:28:46
+  Sun hidden    17:12:53   (look toward azimuth 240°)
   Sunset at sea level, flat horizon: 17:25:14
   Flat horizon from your height:     17:31:35   (horizon dips 1.17°, 6 min later)
   Terrain hides the sun 19 min before the flat-horizon sunset;
@@ -38,7 +67,36 @@ Clouds toward the sun stay lit longer than these overhead times.
 ========================================================================
 June solstice  (2026-06-21)
 ========================================================================
-Skyglow  Srinagar  34.0837°N  74.7973°E   2026-06-21   pack: default
+Skyglow  Srinagar  34.0837°N  74.7973°E   2026-06-21   sunrise   pack: default
+  Local time: India Standard Time (IST), UTC+5.5
+  Viewpoint: 1585 m above sea level, with a mountain skyline
+
+  Solar noon   12:32:35
+  Sunrise       05:13:12   (look toward azimuth 60°)
+  Sunrise at sea level, flat horizon: 05:19:42
+  Flat horizon from your height:     05:13:12   (horizon dips 1.17°, 6 min earlier)
+  The skyline does not block the sun in its rising direction today.
+
+Morning light stages (by sun elevation, in the order they happen):
+  blue_hour     04:38:42 -> 04:50:25   12 min  [-8.0° to -6.0°]
+                Deep blue sky slowly brightening. The best window before sunrise for twilight and star work.
+  dawn_purple   04:50:25 -> 05:01:55   11 min  [-6.0° to -4.0°]
+                Violet-pink glow building in the east. Only the highest cloud toward the horizon is lit.
+  first_light   05:01:55 -> 05:13:12   11 min  [-4.0° to -2.0°]
+                High clouds catch sunlight first, above Earth's shadow, while the ground is still dim. Colour depends on grazing height, see grazing_colours.
+  sunrise_glow  05:13:12 -> 05:19:42    6 min  [-2.0° to -0.8°]
+                Sun just rising. Orange-red light on low and mid clouds; the eastern horizon is brightest.
+  golden_hour   05:19:42 -> 05:56:41   37 min  [-0.8° to +6.0°]
+                Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.
+
+Cloud layers: when sunlight first reaches a layer directly overhead:
+  low     1.5 km   lit overhead at 05:17:25   (sun 1.24° below horizon)
+  mid     5.0 km   lit overhead at 05:11:41   (sun 2.27° below horizon)
+  high    9.0 km   lit overhead at 05:07:20   (sun 3.04° below horizon)
+
+Clouds toward the sun are lit earlier than these overhead times.
+
+Skyglow  Srinagar  34.0837°N  74.7973°E   2026-06-21   sunset   pack: default
   Local time: India Standard Time (IST), UTC+5.5
   Viewpoint: 1585 m above sea level, with a mountain skyline
 

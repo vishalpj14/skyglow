@@ -69,6 +69,10 @@ So the colour of a cloud depends on **how much air the light crossed to reach it
 
 That sequence matches what happens in a real evening: gold, orange, red, then a last pink flush on the edge of a cloud, then nothing. The pink often comes late because it needs the beam to be skimming low, which only happens right before the shadow arrives.
 
+## Sunrise is a sunset played backwards
+
+Everything above works in the morning too. The sun climbs through the same angles in reverse order, so the stages run backwards: blue hour, a violet-pink glow, first light on the highest clouds, a short sunrise glow, then golden hour. Earth's shadow lifts instead of arriving, so the *highest* clouds catch the light first and low clouds last. Ask for it with `--event sunrise`, or just give a morning time with `--at`.
+
 ## 5. Height and mountains
 
 Two things about where *you* stand change when *you* see the sun go, without changing the sky itself:

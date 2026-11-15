@@ -5,14 +5,42 @@ About this place: North of the Arctic Circle: polar night in winter, midnight su
 ========================================================================
 December solstice  (2026-12-21)
 ========================================================================
-Skyglow  Tromso  69.6492°N  18.9553°E   2026-12-21   pack: default
+Skyglow  Tromso  69.6492°N  18.9553°E   2026-12-21   sunrise   pack: default
+  Local time: Central European Time (CET), UTC+1  [this place also uses daylight saving, UTC+2: last Sunday of March to last Sunday of October; use --tz 2 to see that clock]
+  Viewpoint: 10 m above sea level
+
+  Solar noon   11:42:14
+  Sunrise      none today (polar day or night)
+  Sunrise at sea level, flat horizon: --:--:--
+  Flat horizon from your height:     --:--:--   (horizon dips 0.09°, 0 min earlier)
+
+Morning light stages (by sun elevation, in the order they happen):
+  blue_hour     08:50:34 -> 09:31:13   41 min  [-8.0° to -6.0°]
+                Deep blue sky slowly brightening. The best window before sunrise for twilight and star work.
+  dawn_purple   09:31:13 -> 10:29:30   58 min  [-6.0° to -4.0°]
+                Violet-pink glow building in the east. Only the highest cloud toward the horizon is lit.
+  first_light   10:29:30 -> --:--:--        -  [-4.0° to -2.0°]
+                High clouds catch sunlight first, above Earth's shadow, while the ground is still dim. Colour depends on grazing height, see grazing_colours.
+  sunrise_glow  --:--:-- -> --:--:--        -  [-2.0° to -0.8°]
+                Sun just rising. Orange-red light on low and mid clouds; the eastern horizon is brightest.
+  golden_hour   --:--:-- -> --:--:--        -  [-0.8° to +6.0°]
+                Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.
+
+Cloud layers: when sunlight first reaches a layer directly overhead:
+  low     1.5 km   lit overhead at --:--:--   (sun 1.24° below horizon)
+  mid     5.0 km   lit overhead at --:--:--   (sun 2.27° below horizon)
+  high    9.0 km   lit overhead at --:--:--   (sun 3.04° below horizon)
+
+Clouds toward the sun are lit earlier than these overhead times.
+
+Skyglow  Tromso  69.6492°N  18.9553°E   2026-12-21   sunset   pack: default
   Local time: Central European Time (CET), UTC+1  [this place also uses daylight saving, UTC+2: last Sunday of March to last Sunday of October; use --tz 2 to see that clock]
   Viewpoint: 10 m above sea level
 
   Solar noon   11:42:14
   Sunset       none today (polar day or night)
   Sunset at sea level, flat horizon: --:--:--
-  Flat horizon from your height:     --:--:--   (horizon dips 0.09°, - later)
+  Flat horizon from your height:     --:--:--   (horizon dips 0.09°, 0 min later)
 
 Evening light stages (by sun elevation):
   golden_hour   --:--:-- -> --:--:--        -  [+6.0° to -0.8°]
@@ -36,14 +64,42 @@ Clouds toward the sun stay lit longer than these overhead times.
 ========================================================================
 June solstice  (2026-06-21)
 ========================================================================
-Skyglow  Tromso  69.6492°N  18.9553°E   2026-06-21   pack: default
+Skyglow  Tromso  69.6492°N  18.9553°E   2026-06-21   sunrise   pack: default
+  Local time: Central European Summer Time (CEST), UTC+2
+  Viewpoint: 10 m above sea level
+
+  Solar noon   12:45:59
+  Sunrise      none today (polar day or night)
+  Sunrise at sea level, flat horizon: --:--:--
+  Flat horizon from your height:     --:--:--   (horizon dips 0.09°, 0 min earlier)
+
+Morning light stages (by sun elevation, in the order they happen):
+  blue_hour     --:--:-- -> --:--:--        -  [-8.0° to -6.0°]
+                Deep blue sky slowly brightening. The best window before sunrise for twilight and star work.
+  dawn_purple   --:--:-- -> --:--:--        -  [-6.0° to -4.0°]
+                Violet-pink glow building in the east. Only the highest cloud toward the horizon is lit.
+  first_light   --:--:-- -> --:--:--        -  [-4.0° to -2.0°]
+                High clouds catch sunlight first, above Earth's shadow, while the ground is still dim. Colour depends on grazing height, see grazing_colours.
+  sunrise_glow  --:--:-- -> --:--:--        -  [-2.0° to -0.8°]
+                Sun just rising. Orange-red light on low and mid clouds; the eastern horizon is brightest.
+  golden_hour   --:--:-- -> 02:56:51        -  [-0.8° to +6.0°]
+                Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.
+
+Cloud layers: when sunlight first reaches a layer directly overhead:
+  low     1.5 km   lit overhead at --:--:--   (sun 1.24° below horizon)
+  mid     5.0 km   lit overhead at --:--:--   (sun 2.27° below horizon)
+  high    9.0 km   lit overhead at --:--:--   (sun 3.04° below horizon)
+
+Clouds toward the sun are lit earlier than these overhead times.
+
+Skyglow  Tromso  69.6492°N  18.9553°E   2026-06-21   sunset   pack: default
   Local time: Central European Summer Time (CEST), UTC+2
   Viewpoint: 10 m above sea level
 
   Solar noon   12:45:59
   Sunset       none today (polar day or night)
   Sunset at sea level, flat horizon: --:--:--
-  Flat horizon from your height:     --:--:--   (horizon dips 0.09°, - later)
+  Flat horizon from your height:     --:--:--   (horizon dips 0.09°, 0 min later)
 
 Evening light stages (by sun elevation):
   golden_hour   22:35:08 -> --:--:--        -  [+6.0° to -0.8°]

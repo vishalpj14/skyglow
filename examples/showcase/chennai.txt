@@ -5,7 +5,35 @@ About this place: Coastal city on the east coast: the sea is to the east, so sun
 ========================================================================
 December solstice  (2026-12-21)
 ========================================================================
-Skyglow  Chennai  13.0827°N  80.2707°E   2026-12-21   pack: default
+Skyglow  Chennai  13.0827°N  80.2707°E   2026-12-21   sunrise   pack: default
+  Local time: India Standard Time (IST), UTC+5.5
+  Viewpoint: 6 m above sea level
+
+  Solar noon   12:06:53
+  Sunrise       06:25:49   (look toward azimuth 114°)
+  Sunrise at sea level, flat horizon: 06:26:09
+  Flat horizon from your height:     06:25:49   (horizon dips 0.07°, 0 min earlier)
+
+Morning light stages (by sun elevation, in the order they happen):
+  blue_hour     05:54:09 -> 06:03:02    9 min  [-8.0° to -6.0°]
+                Deep blue sky slowly brightening. The best window before sunrise for twilight and star work.
+  dawn_purple   06:03:02 -> 06:11:58    9 min  [-6.0° to -4.0°]
+                Violet-pink glow building in the east. Only the highest cloud toward the horizon is lit.
+  first_light   06:11:58 -> 06:20:55    9 min  [-4.0° to -2.0°]
+                High clouds catch sunlight first, above Earth's shadow, while the ground is still dim. Colour depends on grazing height, see grazing_colours.
+  sunrise_glow  06:20:55 -> 06:26:09    5 min  [-2.0° to -0.8°]
+                Sun just rising. Orange-red light on low and mid clouds; the eastern horizon is brightest.
+  golden_hour   06:26:09 -> 06:57:04   31 min  [-0.8° to +6.0°]
+                Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.
+
+Cloud layers: when sunlight first reaches a layer directly overhead:
+  low     1.5 km   lit overhead at 06:24:18   (sun 1.24° below horizon)
+  mid     5.0 km   lit overhead at 06:19:42   (sun 2.27° below horizon)
+  high    9.0 km   lit overhead at 06:16:14   (sun 3.04° below horizon)
+
+Clouds toward the sun are lit earlier than these overhead times.
+
+Skyglow  Chennai  13.0827°N  80.2707°E   2026-12-21   sunset   pack: default
   Local time: India Standard Time (IST), UTC+5.5
   Viewpoint: 6 m above sea level
 
@@ -36,7 +64,35 @@ Clouds toward the sun stay lit longer than these overhead times.
 ========================================================================
 June solstice  (2026-06-21)
 ========================================================================
-Skyglow  Chennai  13.0827°N  80.2707°E   2026-06-21   pack: default
+Skyglow  Chennai  13.0827°N  80.2707°E   2026-06-21   sunrise   pack: default
+  Local time: India Standard Time (IST), UTC+5.5
+  Viewpoint: 6 m above sea level
+
+  Solar noon   12:10:41
+  Sunrise       05:43:26   (look toward azimuth 66°)
+  Sunrise at sea level, flat horizon: 05:43:45
+  Flat horizon from your height:     05:43:26   (horizon dips 0.07°, 0 min earlier)
+
+Morning light stages (by sun elevation, in the order they happen):
+  blue_hour     05:11:11 -> 05:20:20    9 min  [-8.0° to -6.0°]
+                Deep blue sky slowly brightening. The best window before sunrise for twilight and star work.
+  dawn_purple   05:20:20 -> 05:29:26    9 min  [-6.0° to -4.0°]
+                Violet-pink glow building in the east. Only the highest cloud toward the horizon is lit.
+  first_light   05:29:26 -> 05:38:29    9 min  [-4.0° to -2.0°]
+                High clouds catch sunlight first, above Earth's shadow, while the ground is still dim. Colour depends on grazing height, see grazing_colours.
+  sunrise_glow  05:38:29 -> 05:43:45    5 min  [-2.0° to -0.8°]
+                Sun just rising. Orange-red light on low and mid clouds; the eastern horizon is brightest.
+  golden_hour   05:43:45 -> 06:14:21   31 min  [-0.8° to +6.0°]
+                Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.
+
+Cloud layers: when sunlight first reaches a layer directly overhead:
+  low     1.5 km   lit overhead at 05:41:54   (sun 1.24° below horizon)
+  mid     5.0 km   lit overhead at 05:37:16   (sun 2.27° below horizon)
+  high    9.0 km   lit overhead at 05:33:46   (sun 3.04° below horizon)
+
+Clouds toward the sun are lit earlier than these overhead times.
+
+Skyglow  Chennai  13.0827°N  80.2707°E   2026-06-21   sunset   pack: default
   Local time: India Standard Time (IST), UTC+5.5
   Viewpoint: 6 m above sea level
 

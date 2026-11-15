@@ -39,3 +39,8 @@ Short records of why things are the way they are. Add new entries at the bottom;
 
 **Decision:** Tests check against known astronomical facts and hand calculations, not outputs copied from the implementation.
 **Why:** A test that only repeats the code's answer cannot catch a wrong formula.
+
+## 0008 - Sunrise is sunset played backwards
+
+**Decision:** One engine handles both events. `--event sunset|sunrise|both` chooses; with no `--event`, sunset is the default (what most people watch) unless every `--at` time is before solar noon (sunrise) or the times are mixed (both). Packs gained optional `morning_name` and `morning_description` for each stage; old packs without them still load (schema stays 1).
+**Why:** The sun-depression angles and Earth-shadow geometry are identical in the morning, only reversed in time. Sharing the stage boundaries avoids two sets of numbers drifting apart, while morning names keep the output natural ("first light", not "afterglow").

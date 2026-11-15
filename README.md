@@ -54,6 +54,9 @@ cargo run -p skyglow-core -- --place quito 2026-11-15
 # 4. What was the sky doing at specific minutes?
 cargo run -p skyglow-core -- 9.93 76.27 2026-11-15 --tz 5.5 --at 18:08 --at 18:12
 
+# Sunrise works too (--event sunrise, or just ask about a morning time)
+cargo run -p skyglow-core -- 9.93 76.27 2026-11-15 --tz 5.5 --at 06:10
+
 # 5. See every step of the sun calculation
 cargo run -p skyglow-core -- 9.93 76.27 2026-11-15 --tz 5.5 --explain
 ```

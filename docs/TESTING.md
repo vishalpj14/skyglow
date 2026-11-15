@@ -24,7 +24,7 @@ cargo test cloud               # every test with "cloud" in its name
 | `core/src/cloud.rs` (bottom) | Earth-shadow geometry: shadow heights, shadow edge, grazing height |
 | `core/src/place.rs` (bottom) | Height above sea level, horizon dip, mountain skyline, terrain-aware sunset |
 | `core/src/params.rs` (bottom) | Pack loading: good packs load, bad schema or backwards stages are rejected |
-| `core/tests/physics.rs` | Whole-engine facts: sunset times, equinox, solstice, equation of time, equator vs London twilight |
+| `core/tests/physics.rs` | Whole-engine facts: sunset times, equinox, solstice, equation of time, equator vs London twilight, sunrise mirroring sunset, ridge and height effects at sunrise |
 | `core/tests/examples.rs` | The shipped `examples/` and `packs/` folders stay valid, and example places behave like the real Earth |
 
 ## What "independent" means here
