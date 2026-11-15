@@ -12,6 +12,9 @@ const BLEND_MS = 220;
 const REST_MS = 380;
 
 const look = ref<LogoLook>({ ...LOGO_REST });
+/** 0 at rest, 1 while playing: lets the wordmark fade its colours in and out. */
+const glow = ref(0);
+let glowFrom = 0;
 let raf = 0;
 let from: LogoLook = { ...LOGO_REST };
 const frameAt = (p: number) => logoFrame(skyMood.value, p);
@@ -24,14 +27,18 @@ function play() {
   cancelAnimationFrame(raf);
   if (reduced()) {
     look.value = frameAt(1);
+    glow.value = 1;
     return;
   }
   from = { ...look.value };
+  glowFrom = glow.value;
   const start = performance.now();
   const step = (now: number) => {
     const e = now - start;
     const p = ease(Math.min(1, e / PLAY_MS));
-    look.value = blend(from, frameAt(p), Math.min(1, e / BLEND_MS));
+    const b = Math.min(1, e / BLEND_MS);
+    look.value = blend(from, frameAt(p), b);
+    glow.value = glowFrom + (1 - glowFrom) * b;
     if (e < PLAY_MS) raf = requestAnimationFrame(step);
   };
   raf = requestAnimationFrame(step);
@@ -41,19 +48,22 @@ function rest() {
   cancelAnimationFrame(raf);
   if (reduced()) {
     look.value = { ...LOGO_REST };
+    glow.value = 0;
     return;
   }
   from = { ...look.value };
+  glowFrom = glow.value;
   const start = performance.now();
   const step = (now: number) => {
     const t = Math.min(1, (now - start) / REST_MS);
     look.value = blend(from, LOGO_REST, ease(t));
+    glow.value = glowFrom * (1 - ease(t));
     if (t < 1) raf = requestAnimationFrame(step);
   };
   raf = requestAnimationFrame(step);
 }
 
-defineExpose({ play, rest });
+defineExpose({ play, rest, look, glow });
 onBeforeUnmount(() => cancelAnimationFrame(raf));
 
 const id = `sky-${Math.random().toString(36).slice(2, 8)}`;

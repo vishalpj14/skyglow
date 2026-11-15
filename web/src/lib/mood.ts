@@ -98,3 +98,25 @@ export function blendLook(a: LogoLook, b: LogoLook, t: number): LogoLook {
     cloud: mix(a.cloud, b.cloud, t),
   };
 }
+
+// ---- the wordmark ("skyglow" text) ------------------------------------------------
+
+/** How far each wordmark colour leans toward the normal text colour, so it stays readable. */
+export const WORDMARK_LEAN = 0.4;
+
+/**
+ * Colours for painting the word "skyglow" in step with the logo: the sun's
+ * colour first, then the horizon, then up into the sky. Each is blended
+ * toward the page's normal text colour (`base`) so the word never fades
+ * into the background, even when the logo's sky has gone to night.
+ */
+export function wordmarkColours(look: LogoLook, base: string, lean = WORDMARK_LEAN): string[] {
+  return [look.sun, look.bottom, look.mid, look.top].map((c) => mix(c, base, lean));
+}
+
+/** "rgb(240, 239, 236)" or "#f0efec" to "#f0efec"; anything else falls back. */
+export function cssColourToHex(css: string, fallback = "#f0efec"): string {
+  if (/^#[0-9a-f]{6}$/i.test(css)) return css.toLowerCase();
+  const m = /rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/i.exec(css);
+  return m ? rgbToHex([Number(m[1]), Number(m[2]), Number(m[3])]) : fallback;
+}

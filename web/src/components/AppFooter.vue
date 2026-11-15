@@ -7,6 +7,7 @@ import { isOnline } from "../lib/network";
 import { DOC_PAGES, REPO as repo, blobUrl as doc } from "../lib/docs";
 import { ref } from "vue";
 import LogoMark from "./LogoMark.vue";
+import WordMark from "./WordMark.vue";
 const version = __APP_VERSION__;
 const year = new Date().getFullYear();
 const logo = ref<InstanceType<typeof LogoMark>>();
@@ -16,7 +17,7 @@ const logo = ref<InstanceType<typeof LogoMark>>();
   <footer class="site-footer">
     <div class="inner">
       <div class="top">
-        <a class="brand" href="#/" @mouseenter="logo?.play()" @mouseleave="logo?.rest()" @focus="logo?.play()" @blur="logo?.rest()"><LogoMark ref="logo" :size="22" />skyglow</a>
+        <a class="brand" href="#/" @mouseenter="logo?.play()" @mouseleave="logo?.rest()" @focus="logo?.play()" @blur="logo?.rest()"><LogoMark ref="logo" :size="22" /><WordMark text="skyglow" :look="logo?.look" :glow="logo?.glow" /></a>
         <nav aria-label="Pages">
           <a v-for="p in DOC_PAGES" :key="p.slug" :href="`#/docs/${p.slug}`" :title="p.blurb">{{ p.title }}</a>
           <a :href="repo" target="_blank" rel="noopener noreferrer">GitHub</a>

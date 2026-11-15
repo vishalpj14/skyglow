@@ -8,6 +8,7 @@ import { route } from "../lib/route";
 import { DOC_PAGES, REPO, guideNumber } from "../lib/docs";
 import { SKY_ACCENT } from "../lib/transition";
 import LogoMark from "./LogoMark.vue";
+import WordMark from "./WordMark.vue";
 
 const logo = ref<InstanceType<typeof LogoMark>>();
 const statusOpen = ref(false);
@@ -71,7 +72,7 @@ watch(menuOpen, async (open) => {
       >
         <LogoMark ref="logo" :size="32" />
         <span class="words">
-          <span class="name">skyglow</span>
+          <span class="name"><WordMark text="skyglow" :look="logo?.look" :glow="logo?.glow" /></span>
           <span class="tag">sunset and twilight light, predicted</span>
         </span>
       </a>

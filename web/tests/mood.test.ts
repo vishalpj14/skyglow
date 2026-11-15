@@ -62,3 +62,43 @@ describe("logo sunset and sunrise", () => {
     expect(logoFrame(morning, 0).cloud).not.toBe(NIGHT);
   });
 });
+
+import { cssColourToHex, hexToRgb as rgb, LOGO_REST, wordmarkColours } from "../src/lib/mood";
+
+describe("wordmark colours", () => {
+  /** Relative luminance (WCAG formula), for a readability check. */
+  const lum = (hex: string) => {
+    const [r, g, b] = rgb(hex).map((v) => {
+      const c = v / 255;
+      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const contrast = (a: string, b: string) => {
+    const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m);
+    return (x + 0.05) / (y + 0.05);
+  };
+
+  it("leans each colour 40% toward the normal text colour", () => {
+    // Black leaning 40% toward white: 0.4 * 255 = 102 = 0x66.
+    const look = { ...LOGO_REST, sun: "#000000", bottom: "#000000", mid: "#000000", top: "#000000" };
+    expect(wordmarkColours(look, "#ffffff")).toEqual(["#666666", "#666666", "#666666", "#666666"]);
+  });
+
+  it("stays readable at night on the dark theme", () => {
+    // End of a sunset: the logo's sky is at its darkest.
+    const night = { ...LOGO_REST, sun: "#e0566b", bottom: NIGHT, mid: mix(NIGHT, NIGHT, 0), top: NIGHT };
+    const darkPage = "#111318"; // --bg in dark mode
+    const darkText = "#f0efec"; // --text in dark mode
+    for (const c of wordmarkColours(night, darkText)) {
+      expect(contrast(c, darkPage), c).toBeGreaterThan(3); // WCAG large-text minimum
+    }
+  });
+
+  it("reads browser colours", () => {
+    expect(cssColourToHex("rgb(240, 239, 236)")).toBe("#f0efec");
+    expect(cssColourToHex("rgba(22, 22, 26, 1)")).toBe("#16161a");
+    expect(cssColourToHex("#ABCDEF")).toBe("#abcdef");
+    expect(cssColourToHex("currentcolor", "#123456")).toBe("#123456");
+  });
+});

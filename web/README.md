@@ -6,6 +6,7 @@ A phone-friendly web app that runs the real Skyglow engine (the Rust code in `co
 
 - **Pick a place:** start typing any town, city, peak or viewpoint: bundled and saved places match instantly, and when you are online, places from all over the world appear as you type. Or use your phone's GPS, type coordinates, or click a map. Set your height above sea level and, if mountains are in the way, the skyline (horizon points or peaks, as in [docs/PLACES.md](../docs/PLACES.md)).
 - **Pick a date and clock:** times are shown on **this device's own clock** (the same time your phone or computer shows, daylight saving included). You can switch to the place's local time or a fixed UTC offset; for a saved place, that choice is remembered.
+- **Other clocks at a glance:** when the place keeps a different time from your device, the time scrubber shows the same moment on the place's clock, in UTC and on yours, and says when it is already tomorrow (or still yesterday) there. If the place's time zone is not known, it is guessed from longitude and marked “about”. The scrubber opens at your device's current time.
 - **Online extras (on by default; switch them off from the status pill at the top):** for places picked by GPS, map, search or typed coordinates, Skyglow fills in the place's **time zone** (so its local time follows daylight saving by itself), its **ground height** from a terrain model, and a proper **name**. Offline, GPS still gives a rough height from the phone, and a note appears when the connection drops or comes back.
 - **Pick a pack:** the bundled `default` and `kerala` packs, or load your own pack file.
 - **See:**
@@ -19,6 +20,7 @@ Click any chart or time to move the scrubber there.
 - **Short guides inside the app:** How it works, Why skies turn pink, Places and mountains, Packs, Help it learn and Privacy. They are plain-language versions written for the app (in `src/content/`), bundled so they work offline, and each ends with “Go deeper” links to the full technical docs on GitHub.
 - **Menu and page transitions:** the four-dot button opens a full-screen menu of every page. Moving between pages, a circle in the next page's colour grows from where you tapped, like a sun rising, and the new page's headline rises in. With “reduce motion” switched on in your device settings, pages simply change.
 - **Online status and settings:** the pill at the top right says whether you are online. Tap it to switch online extras on or off.
+- **The logo:** hover over it (or the word skyglow) and the little sun sets through the pack's stage colours, from day into night, with the word taking the same colours. When the time scrubber is on a morning, it plays as a sunrise instead. It follows the place and time you are looking at.
 
 ## Privacy
 
