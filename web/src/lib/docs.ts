@@ -98,7 +98,7 @@ export const DOC_PAGES: DocPage[] = [
     body: observations,
     deeper: [
       { label: "Observation files and replay", path: "docs/OBSERVATIONS.md" },
-      { label: "How Skyglow is tested", path: "docs/TESTING.md" },
+      { label: "How skyglow is tested", path: "docs/TESTING.md" },
     ],
   },
   {

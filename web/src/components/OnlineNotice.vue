@@ -1,13 +1,8 @@
 <script setup lang="ts">
-// Small popup in the bottom-left corner:
-// - the first time, says that online extras are on and what they send, with
-//   a one-tap way to turn them off;
-// - when the connection drops or comes back, a short note that fades away.
-import { computed, onBeforeUnmount, ref, watch } from "vue";
-import { onlineExtras, onlineNoticeSeen } from "../lib/saved";
+// Small popup in the bottom-left corner when the connection drops or comes
+// back. It fades away by itself.
+import { onBeforeUnmount, ref, watch } from "vue";
 import { isOnline } from "../lib/network";
-
-const firstRun = computed(() => onlineExtras.value && !onlineNoticeSeen.value && isOnline.value);
 
 const flash = ref<{ title: string; text: string; tone: "on" | "off" } | null>(null);
 let timer: number | undefined;
@@ -19,30 +14,11 @@ watch(isOnline, (up) => {
   timer = window.setTimeout(() => (flash.value = null), up ? 3500 : 6000);
 });
 onBeforeUnmount(() => window.clearTimeout(timer));
-
-function gotIt() {
-  onlineNoticeSeen.value = true;
-}
-function turnOff() {
-  onlineExtras.value = false;
-  onlineNoticeSeen.value = true;
-}
 </script>
 
 <template>
   <Transition name="pop">
-    <aside v-if="firstRun" class="notice" role="dialog" aria-labelledby="notice-title" aria-live="polite">
-      <div class="title"><span class="dot on" aria-hidden="true"></span><strong id="notice-title">Online extras are on</strong></div>
-      <p>
-        Places you pick get their time zone, ground height and name filled in. To do that, Skyglow sends only their
-        rough coordinates to Open-Meteo and OpenStreetMap. Everything else stays on your device.
-      </p>
-      <div class="actions">
-        <button type="button" class="primary" @click="gotIt">Got it</button>
-        <button type="button" @click="turnOff">Turn off</button>
-      </div>
-    </aside>
-    <aside v-else-if="flash" class="notice" role="status" aria-live="polite">
+    <aside v-if="flash" class="notice" role="status" aria-live="polite">
       <div class="title">
         <span class="dot" :class="flash.tone" aria-hidden="true"></span><strong>{{ flash.title }}</strong>
         <button type="button" class="close" aria-label="Close" @click="flash = null">&times;</button>
@@ -69,7 +45,6 @@ function turnOff() {
 .title { display: flex; align-items: center; gap: 8px; }
 .title strong { flex: 1; }
 .notice p { margin: 6px 0 0; color: var(--text-2); }
-.actions { display: flex; gap: 8px; margin-top: 10px; }
 .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); flex: 0 0 auto; }
 .dot.on { background: #2f9e44; }
 .close { border: none; background: none; padding: 0 4px; font-size: 1.2rem; line-height: 1; color: var(--muted); }

@@ -67,3 +67,50 @@ describe("online search results", () => {
     ]);
   });
 });
+
+import { compareZones } from "../src/lib/clock";
+
+describe("comparing a faraway place's time with yours", () => {
+  // 2026-01-15 12:00 UTC as a Julian Day: JD 2461056.0 (J2000 = 2451545.0 on
+  // 2000-01-01 12:00, plus 9511 days).
+  const jdNoonUtc = 2451545.0 + 9511;
+  const jan = { year: 2026, month: 1, day: 15 };
+  const india = { tz: 5.5, zone: "Asia/Kolkata" };
+
+  it("says nothing when the place is on your own clock", () => {
+    const kochi = normalisePlace({ name: "Kochi", lat: 9.93, lon: 76.27, zone: "Asia/Kolkata" });
+    expect(compareZones(kochi, false, jan, jdNoonUtc, 5.5, india)).toBeNull();
+  });
+
+  it("lists the place, UTC and you, with day changes", () => {
+    const tokyo = normalisePlace({ name: "Tokyo", lat: 35.68, lon: 139.69, zone: "Asia/Tokyo" });
+    const rows = compareZones(tokyo, false, jan, jdNoonUtc, 5.5, india)!;
+    expect(rows.map((r) => [r.who, r.time, r.dayShift, r.shown])).toEqual([
+      ["place", "21:00", 0, false], // 12:00 UTC + 9 h
+      ["utc", "12:00", 0, false],
+      ["you", "17:30", 0, true], // 12:00 UTC + 5.5 h, the clock on screen
+    ]);
+    expect(rows[0].zone).toBe("Asia/Tokyo, UTC+9");
+    // At 20:00 UTC it is already the next day in Tokyo (05:00) but not in India (01:30 next day too).
+    const late = compareZones(tokyo, false, jan, jdNoonUtc + 8 / 24, 0, india)!;
+    expect(late.map((r) => [r.who, r.time, r.dayShift])).toEqual([
+      ["place", "05:00", 1],
+      ["utc", "20:00", 0],
+      ["you", "01:30", 1],
+    ]);
+  });
+
+  it("guesses a zone from longitude when none is known, and says so", () => {
+    const sea = normalisePlace({ name: "Mid-Pacific", lat: 0, lon: -150 });
+    const rows = compareZones(sea, false, jan, jdNoonUtc, 5.5, india)!;
+    expect(rows[0].time).toBe("02:00"); // -150 / 15 = UTC-10
+    expect(rows[0].zone).toMatch(/^about UTC-10, guessed/);
+    expect(rows[0].dayShift).toBe(0); // 02:00 on the 15th, same day as 17:30 in India
+  });
+
+  it("leaves UTC out when it is the place's own clock", () => {
+    const london = normalisePlace({ name: "London", lat: 51.5, lon: -0.1, zone: "Europe/London" });
+    const rows = compareZones(london, false, jan, jdNoonUtc, 5.5, india)!;
+    expect(rows.map((r) => r.who)).toEqual(["place", "you"]);
+  });
+});

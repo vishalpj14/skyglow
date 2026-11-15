@@ -13,8 +13,8 @@ function close() {
 
 <template>
   <div v-if="offlineReady || needRefresh" class="toast card" role="status">
-    <span v-if="needRefresh">A newer version of Skyglow is ready.</span>
-    <span v-else>Skyglow is saved on this device and now works offline.</span>
+    <span v-if="needRefresh">A newer version of skyglow is ready.</span>
+    <span v-else>skyglow is saved on this device and now works offline.</span>
     <button v-if="needRefresh" type="button" class="primary" @click="updateServiceWorker(true)">Reload</button>
     <button type="button" @click="close">Close</button>
   </div>

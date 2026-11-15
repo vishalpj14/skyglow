@@ -7,8 +7,9 @@ import { isOnline } from "../lib/network";
 import { route } from "../lib/route";
 import { DOC_PAGES, REPO, guideNumber } from "../lib/docs";
 import { SKY_ACCENT } from "../lib/transition";
+import LogoMark from "./LogoMark.vue";
 
-const icon = `${import.meta.env.BASE_URL}icon.svg`;
+const logo = ref<InstanceType<typeof LogoMark>>();
 const statusOpen = ref(false);
 const menuOpen = ref(false);
 const statusBox = ref<HTMLElement>();
@@ -59,10 +60,18 @@ watch(menuOpen, async (open) => {
 <template>
   <header class="site-header" :class="{ 'menu-open': menuOpen }">
     <div class="bar">
-      <a class="brand" href="#/" aria-label="Skyglow, back to the sky">
-        <img :src="icon" alt="" width="32" height="32" />
+      <a
+        class="brand"
+        href="#/"
+        aria-label="skyglow, back to the sky"
+        @mouseenter="logo?.play()"
+        @mouseleave="logo?.rest()"
+        @focus="logo?.play()"
+        @blur="logo?.rest()"
+      >
+        <LogoMark ref="logo" :size="32" />
         <span class="words">
-          <span class="name">Skyglow</span>
+          <span class="name">skyglow</span>
           <span class="tag">sunset and twilight light, predicted</span>
         </span>
       </a>
@@ -98,7 +107,7 @@ watch(menuOpen, async (open) => {
   <Transition name="menu">
     <nav v-if="menuOpen" id="site-menu" class="menu" aria-label="All pages">
       <div class="menu-inner">
-        <p class="caps">Skyglow</p>
+        <p class="caps">skyglow</p>
         <ol>
           <li v-for="(it, i) in items" :key="it.href" :style="{ '--accent-item': it.accent, '--i': i }">
             <span v-if="it.num" class="num">{{ it.num }}</span>
@@ -129,7 +138,7 @@ watch(menuOpen, async (open) => {
 .bar { max-width: 1280px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); margin-right: auto; }
 .menu-open .brand { color: #f0efec; }
-.brand img { border-radius: 9px; }
+.brand :deep(.mark) { border-radius: 9px; }
 .words { display: grid; line-height: 1.15; }
 .name { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.02em; }
 .tag { font-size: 0.74rem; color: var(--muted); }

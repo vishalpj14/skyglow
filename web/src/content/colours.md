@@ -21,7 +21,7 @@ The closer Earth's shadow gets to a cloud, the lower that beam has to dive, and 
 - beam skims the ground: **deep red and pink**, and fading fast;
 - beam would touch the ground: the cloud is in shadow and goes **grey**.
 
-Skyglow tracks exactly how low that beam dips. That is the colour you see in the strips and the readout.
+skyglow tracks exactly how low that beam dips. That is the colour you see in the strips and the readout.
 
 ## The higher the cloud, the longer the show
 

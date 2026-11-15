@@ -19,8 +19,8 @@ export default defineConfig({
       registerType: "prompt",
       includeAssets: ["icon.svg"],
       manifest: {
-        name: "Skyglow",
-        short_name: "Skyglow",
+        name: "skyglow",
+        short_name: "skyglow",
         description: "When, and in what colours, the sky and clouds light up at sunset and twilight.",
         theme_color: "#1d2540",
         background_color: "#141a2e",

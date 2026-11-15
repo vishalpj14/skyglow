@@ -6,7 +6,7 @@ import { computed, onBeforeUnmount, ref, watch } from "vue";
 import type { LocalDate, Pack, Place, SkyState, Timeline } from "./lib/types";
 import type { NamedPlace } from "./lib/places";
 import * as engine from "./lib/engine";
-import { browserTzHours, deviceZoneName, formatDate, hhmm, offsetForZone, parseDate, resolveClock, todayAt, utcLabel, type ClockChoice } from "./lib/clock";
+import { browserTzHours, compareZones, deviceZoneName, formatDate, hhmm, offsetForZone, parseDate, resolveClock, todayAt, utcLabel, type ClockChoice } from "./lib/clock";
 import { findSaved, rememberClock } from "./lib/saved";
 import { examplePlaces, normalisePlace } from "./lib/places";
 import { bundledPacks } from "./lib/packs";
@@ -21,6 +21,7 @@ import AppHeader from "./components/AppHeader.vue";
 import DocPage from "./components/DocPage.vue";
 import IrisOverlay from "./components/IrisOverlay.vue";
 import { route } from "./lib/route";
+import { skyMood } from "./lib/mood";
 import OnlineNotice from "./components/OnlineNotice.vue";
 
 // ---- remembered settings (this browser only; may be unavailable) ----------
@@ -137,8 +138,10 @@ const sunriseStrip = computed(() => windowAround(timelines.value[0], 60, 40));
 const sunsetStrip = computed(() => windowAround(timelines.value[1], 40, 60));
 
 // ---- the time scrubber -----------------------------------------------------
-const minute = ref(18 * 60);
+const minute = ref(0);
 const cursorJd = computed(() => dayStart.value + minute.value / 1440);
+/** The same instant on the place's clock, UTC and yours, when the place keeps a different time. */
+const zoneRows = computed(() => compareZones(place.value, useDst.value, date.value, cursorJd.value, tz.value));
 const skyNow = computed<SkyState | null>(() => safe(() => engine.skyAt(place.value, packText.value, cursorJd.value), null));
 
 function seek(jd: number) {
@@ -148,25 +151,32 @@ function seekEvent(i: number, offsetMin = 0) {
   const jd = timelines.value[i]?.event_jd;
   if (jd != null) seek(jd + offsetMin / 1440);
 }
-// On a new place or date, start the scrubber a little before sunset.
-watch(
-  [() => place.value.lat, () => place.value.lon, dateText],
-  () => seekEvent(1, -15),
-  { immediate: true },
-);
 // Switching only the clock keeps the same instant on screen.
 watch(tz, (now, before) => {
   minute.value = Math.min(1439, Math.max(0, Math.round(minute.value + (now - before) * 60)));
 });
 
 const isToday = computed(() => formatDate(todayAt(tz.value)) === formatDate(date.value));
+// The logo's hover animation follows the scrubber: a sunset in the evening,
+// a sunrise in the morning, in this pack's colours.
+watch(
+  [skyNow, pack],
+  ([s, p]) => {
+    skyMood.value = { rising: s?.rising ?? false, swatches: p.stages.map((st) => st.swatch) };
+  },
+  { immediate: true },
+);
+
 /** Julian Day of this instant: Unix time in days plus the Julian Day of 1970-01-01. */
 function seekNow() {
   seek(Date.now() / 86_400_000 + 2_440_587.5);
 }
+// Open on the time the device's clock shows right now. Picking another place
+// or date keeps the same clock time; the buttons jump to sunrise or sunset.
+seekNow();
 
 watch(route, (r) => {
-  if (r.name === "sky") document.title = "Skyglow";
+  if (r.name === "sky") document.title = "skyglow";
 });
 
 const playing = ref(false);
@@ -193,7 +203,7 @@ onBeforeUnmount(() => window.clearInterval(timer));
 
   <!-- v-show, not v-if: the sky keeps its place, date and scrubber while you read a page. -->
   <main v-show="route.name === 'sky'" class="layout">
-    <h1 class="visually-hidden">Skyglow: sunset and twilight light for any place</h1>
+    <h1 class="visually-hidden">skyglow: sunset and twilight light for any place</h1>
     <div class="side">
       <PlacePanel v-model="place" @chosen="onChosen" />
 
@@ -246,6 +256,13 @@ onBeforeUnmount(() => window.clearInterval(timer));
           <output class="time">{{ hhmm(minute / 60) }}</output>
           <input v-model.number="minute" type="range" min="0" max="1439" step="1" aria-label="Time of day" />
         </div>
+        <ul v-if="zoneRows" class="zones" aria-label="This moment on other clocks">
+          <li v-for="r in zoneRows" :key="r.who" :class="{ shown: r.shown }">
+            <span class="who">{{ r.label }}</span>
+            <span class="t">{{ r.time }}<small v-if="r.dayShift" class="shift">{{ r.dayShift > 0 ? "+" : "−" }}{{ Math.abs(r.dayShift) }} day</small></span>
+            <small class="zone">{{ r.zone }}</small>
+          </li>
+        </ul>
         <div class="row buttons">
           <button type="button" @click="seekEvent(0)">Sunrise</button>
           <button type="button" @click="seekEvent(1)">Sunset</button>
@@ -292,6 +309,16 @@ onBeforeUnmount(() => window.clearInterval(timer));
 .scrub-row { display: flex; gap: 12px; align-items: center; }
 .scrub-row input { flex: 1; min-width: 0; }
 .time { font-size: 1.6rem; font-variant-numeric: tabular-nums; font-weight: 600; min-width: 4.5ch; }
+.zones { list-style: none; padding: 0; margin: 10px 0 2px; display: flex; flex-wrap: wrap; gap: 8px; }
+.zones li {
+  display: grid; gap: 1px; padding: 6px 12px; border-radius: 12px; border: 1px solid var(--line);
+  background: var(--surface-2); min-width: 0; flex: 1 1 140px;
+}
+.zones li.shown { border-color: var(--accent); }
+.zones .who { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.zones .t { font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.zones .shift { font-size: 0.72rem; font-weight: 600; color: var(--text-2); margin-left: 6px; }
+.zones .zone { color: var(--muted); font-size: 0.75rem; }
 .buttons { margin: 8px 0 12px; }
 .buttons button { flex: 0 0 auto; }
 </style>

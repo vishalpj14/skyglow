@@ -1,4 +1,4 @@
-Skyglow's timing is exact, but its **colour guesses** need real evenings to learn from. Every sunset you note down helps.
+skyglow's timing is exact, but its **colour guesses** need real evenings to learn from. Every sunset you note down helps.
 
 ## What to note
 
@@ -12,7 +12,7 @@ Times from your photos are the most accurate. Add roughly how high the clouds lo
 
 ## Compare with the model
 
-Set Skyglow to the same place and date, and drag the **time scrubber** to each time you noted. The readout tells you what the geometry says the sky should be doing at that minute. Where it matches, the guesses are good. Where it does not, that is exactly the data that improves them.
+Set skyglow to the same place and date, and drag the **time scrubber** to each time you noted. The readout tells you what the geometry says the sky should be doing at that minute. Where it matches, the guesses are good. Where it does not, that is exactly the data that improves them.
 
 ## Keep your spots private
 

@@ -16,7 +16,7 @@ const html = computed(() => (page.value ? (marked.parse(page.value.body, { async
 watch(
   page,
   (p) => {
-    document.title = p ? `${p.title} · Skyglow` : "Skyglow";
+    document.title = p ? `${p.title} · skyglow` : "skyglow";
   },
   { immediate: true },
 );

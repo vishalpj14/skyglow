@@ -1,4 +1,4 @@
-Some things about a sunset are exact. Others are educated guesses. Skyglow keeps the guesses in a small settings file called a **pack**, so they can be improved without changing the app.
+Some things about a sunset are exact. Others are educated guesses. skyglow keeps the guesses in a small settings file called a **pack**, so they can be improved without changing the app.
 
 ## What is exact, and what is a guess
 
@@ -14,7 +14,7 @@ Some things about a sunset are exact. Others are educated guesses. Skyglow keeps
 
 A sunset in Kerala is not a sunset in Iceland. Tropical clouds sit higher, the air is wetter, and twilight is shorter. A **regional pack** adjusts the guesses for one part of the world, while the exact maths stays the same everywhere.
 
-Skyglow comes with two:
+skyglow comes with two:
 
 - **default**: a sensible starting point for anywhere.
 - **kerala**: higher tropical clouds and lower cloud bases, for the south-west coast of India.

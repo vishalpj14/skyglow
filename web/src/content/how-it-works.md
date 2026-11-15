@@ -1,8 +1,8 @@
-Skyglow answers two questions about any place on Earth: **when** does the sky do its best colours, and **which clouds** will catch them.
+skyglow answers two questions about any place on Earth: **when** does the sky do its best colours, and **which clouds** will catch them.
 
 ## The sun is completely predictable
 
-Where the sun sits in the sky, at any minute, anywhere, is plain arithmetic: the Earth spins once a day, circles the sun once a year, and leans 23.4 degrees. Skyglow works it out to within a few seconds, with no internet.
+Where the sun sits in the sky, at any minute, anywhere, is plain arithmetic: the Earth spins once a day, circles the sun once a year, and leans 23.4 degrees. skyglow works it out to within a few seconds, with no internet.
 
 That gives you sunrise and sunset, and how fast the sun moves near the horizon. Near the equator it drops almost straight down, so the whole show lasts about 20 minutes. Far north it slides sideways, and twilight can last an hour or more.
 
@@ -26,8 +26,8 @@ On the **colour strips**, each row is one cloud height: you can watch it go from
 
 ## Where you stand matters too
 
-Standing higher lets you see a little further over the curve of the Earth, so your sunset comes slightly later. Mountains in the sun's direction hide it early, while clouds above keep glowing. Tell Skyglow your height and skyline, and it allows for both.
+Standing higher lets you see a little further over the curve of the Earth, so your sunset comes slightly later. Mountains in the sun's direction hide it early, while clouds above keep glowing. Tell skyglow your height and skyline, and it allows for both.
 
 ## What it cannot know yet
 
-The timing is exact. What Skyglow cannot know yet is whether clouds are actually there tonight, how hazy the air is, or how humid. Those decide whether the evening is spectacular or grey. They are the next big step, along with learning better colour guesses from real photos.
+The timing is exact. What skyglow cannot know yet is whether clouds are actually there tonight, how hazy the air is, or how humid. Those decide whether the evening is spectacular or grey. They are the next big step, along with learning better colour guesses from real photos.

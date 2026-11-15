@@ -43,29 +43,12 @@ function readOnline(): boolean {
   }
 }
 /**
- * On unless the user switched it off. It sends picked places' rounded
- * coordinates to outside services, so the app says so in a notice the first
- * time (see OnlineNotice.vue), with a one-tap way to turn it off.
+ * On unless the user switched it off (from the status pill in the header).
+ * It sends picked places' rounded coordinates to outside services; the
+ * privacy guide explains what and why.
  */
 export const onlineExtras = ref(readOnline());
 
-const NOTICE = "skyglow.onlineNoticeSeen.v1";
-function readSeen(): boolean {
-  try {
-    return localStorage.getItem(NOTICE) === "yes";
-  } catch {
-    return false;
-  }
-}
-/** Has the user dismissed the first-run online-extras notice? */
-export const onlineNoticeSeen = ref(readSeen());
-watch(onlineNoticeSeen, (seen) => {
-  try {
-    localStorage.setItem(NOTICE, seen ? "yes" : "no");
-  } catch {
-    /* storage blocked: the notice may show again next time */
-  }
-});
 watch(onlineExtras, (on) => {
   try {
     localStorage.setItem(ONLINE, on ? "on" : "off");

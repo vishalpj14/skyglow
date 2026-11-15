@@ -5,16 +5,18 @@ import { onlineExtras } from "../lib/saved";
 import { isOnline } from "../lib/network";
 
 import { DOC_PAGES, REPO as repo, blobUrl as doc } from "../lib/docs";
+import { ref } from "vue";
+import LogoMark from "./LogoMark.vue";
 const version = __APP_VERSION__;
 const year = new Date().getFullYear();
-const icon = `${import.meta.env.BASE_URL}icon.svg`;
+const logo = ref<InstanceType<typeof LogoMark>>();
 </script>
 
 <template>
   <footer class="site-footer">
     <div class="inner">
       <div class="top">
-        <a class="brand" href="#/"><img :src="icon" alt="" width="22" height="22" />Skyglow</a>
+        <a class="brand" href="#/" @mouseenter="logo?.play()" @mouseleave="logo?.rest()" @focus="logo?.play()" @blur="logo?.rest()"><LogoMark ref="logo" :size="22" />skyglow</a>
         <nav aria-label="Pages">
           <a v-for="p in DOC_PAGES" :key="p.slug" :href="`#/docs/${p.slug}`" :title="p.blurb">{{ p.title }}</a>
           <a :href="repo" target="_blank" rel="noopener noreferrer">GitHub</a>

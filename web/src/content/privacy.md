@@ -1,10 +1,10 @@
-Skyglow does its work **on your device**. The sky engine runs inside your browser, and once the app has loaded it keeps working with no connection at all.
+skyglow does its work **on your device**. The sky engine runs inside your browser, and once the app has loaded it keeps working with no connection at all.
 
 ## What stays on your device
 
 - Your places, saved places and settings.
 - Your phone's location, if you tap **Use my location**. The browser asks your permission first, and the position never leaves the page.
-- Everything Skyglow calculates.
+- Everything skyglow calculates.
 
 ## What goes online, and why
 
@@ -18,4 +18,4 @@ You can switch online extras off at any time: tap the **Online** pill at the top
 
 ## Who those services are
 
-Map pictures, place names and search come from **OpenStreetMap**, a free map made by volunteers. Time zones and ground heights come from **Open-Meteo**, a free weather and terrain service. Skyglow has no accounts, no tracking and no adverts.
+Map pictures, place names and search come from **OpenStreetMap**, a free map made by volunteers. Time zones and ground heights come from **Open-Meteo**, a free weather and terrain service. skyglow has no accounts, no tracking and no adverts.

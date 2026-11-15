@@ -137,3 +137,71 @@ export function resolveClock(
   const c = clockFor(place, useDst);
   return { ...c, label: c.guessed ? c.label : `${c.label}, ${utcLabel(c.tz)}` };
 }
+
+// ---- comparing time zones ----------------------------------------------------
+
+/**
+ * The place's own UTC offset on a date: its time zone if known (daylight
+ * saving included), else the offsets from its place file, else a guess from
+ * longitude (15 degrees per hour), flagged as approximate.
+ */
+export function placeOffset(place: Place, useDst: boolean, d: LocalDate): { tz: number; zone: string; approx: boolean } {
+  if (place.zone) {
+    const tz = offsetForZone(place.zone, d);
+    if (tz != null) return { tz, zone: place.zone, approx: false };
+  }
+  const c = clockFor(place, useDst);
+  const name = useDst && place.dst_tz != null ? place.dst_tz_name : place.tz_name;
+  return { tz: c.tz, zone: c.guessed ? "" : name || "", approx: c.guessed };
+}
+
+export interface ZoneRow {
+  who: "place" | "utc" | "you";
+  label: string;
+  /** "HH:MM" on that clock. */
+  time: string;
+  /** e.g. "Asia/Tokyo, UTC+9" or "about UTC+5". */
+  zone: string;
+  /** Days ahead (+1) or behind (-1) of the date shown on screen. */
+  dayShift: number;
+  /** True for the clock the big time on screen uses. */
+  shown: boolean;
+}
+
+/** Local calendar day number of a Julian Day on a clock `tz` hours from UTC. */
+function dayNumber(jd: number, tz: number): number {
+  return Math.floor(jd + tz / 24 + 0.5);
+}
+
+/**
+ * When the place keeps a different time from this device, list the same
+ * instant on three clocks: the place's, UTC, and yours. `null` when the place
+ * is on the device's own time (nothing useful to compare).
+ */
+export function compareZones(
+  place: Place,
+  useDst: boolean,
+  d: LocalDate,
+  jd: number,
+  shownTz: number,
+  device: { tz: number; zone: string } = { tz: browserTzHours(d), zone: deviceZoneName() },
+): ZoneRow[] | null {
+  const p = placeOffset(place, useDst, d);
+  if (Math.abs(p.tz - device.tz) < 1e-9) return null;
+  const shownDay = dayNumber(jd, shownTz);
+  const row = (who: ZoneRow["who"], label: string, tz: number, zone: string): ZoneRow => ({
+    who,
+    label,
+    time: hhmm(localHours(jd, tz)),
+    zone,
+    dayShift: dayNumber(jd, tz) - shownDay,
+    shown: Math.abs(tz - shownTz) < 1e-9,
+  });
+  const rows = [
+    row("place", place.name || "There", p.tz, p.approx ? `about ${utcLabel(p.tz)}, guessed from longitude` : [p.zone, utcLabel(p.tz)].filter(Boolean).join(", ")),
+    row("you", "You", device.tz, [device.zone, utcLabel(device.tz)].filter(Boolean).join(", ")),
+  ];
+  // UTC only adds something when it is neither the place's clock nor yours.
+  if (Math.abs(p.tz) > 1e-9 && Math.abs(device.tz) > 1e-9) rows.splice(1, 0, row("utc", "UTC", 0, "world time"));
+  return rows;
+}
