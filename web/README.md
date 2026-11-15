@@ -20,6 +20,7 @@ Click any chart or time to move the scrubber there.
 - **Short guides inside the app:** How it works, Why skies turn pink, Places and mountains, Packs, Help it learn and Privacy. They are plain-language versions written for the app (in `src/content/`), bundled so they work offline, and each ends with “Go deeper” links to the full technical docs on GitHub.
 - **Menu and page transitions:** the four-dot button opens a full-screen menu of every page. Moving between pages, a circle in the next page's colour grows from where you tapped, like a sun rising, and the new page's headline rises in. With “reduce motion” switched on in your device settings, pages simply change.
 - **Online status and settings:** the pill at the top right says whether you are online. Tap it to switch online extras on or off.
+- **Colours you can touch:** on the guides, hovering the headline's coloured word makes it flow into its twilight neighbour (“pink” into purple), and bold colour words such as **deep red and pink** or the stage names show their real colours. Nothing animates unless you hover.
 - **The logo:** hover over it (or the word skyglow) and the little sun sets through the pack's stage colours, from day into night, with the word taking the same colours. When the time scrubber is on a morning, it plays as a sunrise instead. It follows the place and time you are looking at.
 
 ## Privacy

@@ -2,7 +2,7 @@
 // The colour strip: minute by minute around sunset (or sunrise), what colour
 // the sky stage is, and whether each cloud layer is lit, and with what light.
 // Colours are the pack's UNCALIBRATED display guesses.
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import type { Pack, SkyState } from "../lib/types";
 import { buildStrip, type StripColumn } from "../lib/strip";
 import { hhmm, localHours } from "../lib/clock";
@@ -14,6 +14,8 @@ const wrap = ref<HTMLDivElement>();
 const width = ref(640);
 let ro: ResizeObserver | null = null;
 onMounted(() => {
+  // Measure straight away (the first frame should already fit), then follow resizes.
+  if (wrap.value?.clientWidth) width.value = Math.max(200, wrap.value.clientWidth);
   ro = new ResizeObserver(([e]) => (width.value = Math.max(200, e.contentRect.width)));
   if (wrap.value) ro.observe(wrap.value);
 });
@@ -54,6 +56,21 @@ function at(ev: PointerEvent | MouseEvent): StripColumn | null {
   return best;
 }
 const pretty = (s: string) => s.replace(/_/g, " ");
+
+// The tooltip sits BELOW the strip, so it never hides the colours it
+// describes. It is centred on the hovered minute, kept inside the card, and
+// a small pointer marks the exact column.
+const tip = ref<HTMLDivElement>();
+const tipW = ref(220);
+const tipLeft = computed(() => {
+  if (!hover.value) return 0;
+  return Math.min(Math.max(0, x(hover.value.jd) - tipW.value / 2), Math.max(0, width.value - tipW.value));
+});
+const pointerX = computed(() => (hover.value ? x(hover.value.jd) - tipLeft.value : 0));
+watch(hover, async () => {
+  await nextTick();
+  if (tip.value) tipW.value = tip.value.offsetWidth;
+});
 const inWindow = computed(() => props.cursorJd >= start.value && props.cursorJd <= end.value);
 </script>
 
@@ -81,7 +98,7 @@ const inWindow = computed(() => props.cursorJd >= start.value && props.cursorJd 
         <line v-if="hover" :x1="x(hover.jd)" :x2="x(hover.jd)" y1="0" :y2="H - axisH" class="crosshair" />
       </svg>
       <p v-else class="muted">No {{ title.toLowerCase() }} today at this latitude (polar day or night).</p>
-      <div v-if="hover" class="tip" :style="{ left: Math.min(x(hover.jd) + 10, width - 220) + 'px', top: '4px' }">
+      <div v-if="hover" ref="tip" class="tip strip-tip" :style="{ left: tipLeft + 'px', top: H + 8 + 'px', '--pointer-x': pointerX + 'px' }">
         <strong>{{ hhmm(localHours(hover.jd, tz)) }}</strong><br />
         <span class="swatch" :style="{ background: hover.sky.colour }"></span>Sky: {{ pretty(hover.sky.label) }}<br />
         <template v-for="(l, i) in hover.layers" :key="i">
@@ -101,4 +118,12 @@ svg { display: block; cursor: crosshair; touch-action: pan-y; }
 .cursor { stroke: var(--accent); stroke-width: 2; }
 .crosshair { stroke: var(--text); stroke-width: 1; opacity: 0.6; }
 .note { font-size: 0.8rem; margin-top: 6px; }
+/* A fixed width, so its size does not change as it moves (and the clamping stays exact). */
+.strip-tip { width: min(260px, 100%); white-space: normal; line-height: 1.5; }
+/* Pointer up to the hovered column. */
+.strip-tip::before {
+  content: ""; position: absolute; top: -6px; left: clamp(10px, var(--pointer-x), calc(100% - 10px));
+  width: 10px; height: 10px; transform: translateX(-50%) rotate(45deg);
+  background: var(--surface); border-left: 1px solid var(--line); border-top: 1px solid var(--line);
+}
 </style>

@@ -4,6 +4,7 @@
 import { computed, watch } from "vue";
 import { marked } from "marked";
 import { DOC_PAGES, blobUrl, guideNumber, pageBySlug } from "../lib/docs";
+import { paintColourWords, sweepFor } from "../lib/hues";
 
 const props = defineProps<{ slug: string }>();
 
@@ -11,7 +12,9 @@ const index = computed(() => DOC_PAGES.findIndex((p) => p.slug === props.slug));
 const page = computed(() => pageBySlug(props.slug));
 const next = computed(() => DOC_PAGES[(index.value + 1) % DOC_PAGES.length]);
 // The text is our own bundled markdown, so no sanitising step is needed.
-const html = computed(() => (page.value ? (marked.parse(page.value.body, { async: false, gfm: true }) as string) : ""));
+// Bold colour words ("deep red and pink") are marked so they show their colours on hover.
+const html = computed(() => (page.value ? paintColourWords(marked.parse(page.value.body, { async: false, gfm: true }) as string) : ""));
+const sweep = computed(() => (page.value ? sweepFor(page.value.accent) : ""));
 
 watch(
   page,
@@ -23,14 +26,14 @@ watch(
 </script>
 
 <template>
-  <div v-if="page" :key="page.slug" class="doc" :style="{ '--accent-page': page.accent }">
+  <div v-if="page" :key="page.slug" class="doc" :style="{ '--accent-page': page.accent, '--accent-sweep': sweep }">
     <section class="hero">
       <p class="eyebrow">
         <span class="chip"><span class="dot"></span>{{ page.eyebrow }}</span>
         <span class="caps">Guide {{ guideNumber(page.slug) }} / {{ guideNumber(DOC_PAGES[DOC_PAGES.length - 1].slug) }}</span>
       </p>
       <h1>
-        <span class="rise r1">{{ page.headline[0] }}</span><span class="rise r2 accent">{{ page.headline[1] }}</span><span class="rise r3">{{ page.headline[2] }}</span>
+        <span class="rise r1">{{ page.headline[0] }}</span><span class="rise r2 accent"><span class="sweep">{{ page.headline[1] }}</span></span><span class="rise r3">{{ page.headline[2] }}</span>
       </h1>
       <p class="blurb rise r4">{{ page.blurb }}</p>
     </section>
@@ -82,6 +85,31 @@ h1 {
   margin: 0 0 18px; color: var(--text);
 }
 h1 .accent { color: var(--accent-page); }
+
+/* Hover the headline's coloured word: the colour flows through its twilight neighbour. */
+.sweep {
+  color: var(--accent-page);
+  background-image: var(--accent-sweep);
+  background-size: 200% 100%;
+  background-position: 0% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  transition: color 0.35s ease;
+}
+.sweep:hover { color: transparent; animation: sweep 2.4s ease-in-out infinite alternate; }
+@keyframes sweep { from { background-position: 0% 0; } to { background-position: 100% 0; } }
+
+/* Bold colour words in the text show their colours on hover, in the order they are named. */
+.prose :deep(strong.hue) {
+  background-image: var(--hue-paint);
+  -webkit-background-clip: text;
+  background-clip: text;
+  transition: color 0.4s ease;
+}
+.prose :deep(strong.hue:hover) { color: transparent; }
+@media (prefers-reduced-motion: reduce) {
+  .sweep:hover { animation: none; }
+}
 .blurb { font-size: clamp(1.05rem, 2.6vw, 1.3rem); color: var(--text-2); max-width: 40ch; margin: 0; }
 
 /* Words rise in one after another as the page arrives. */

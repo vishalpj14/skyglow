@@ -13,6 +13,8 @@ const wrap = ref<HTMLDivElement>();
 const width = ref(640);
 let ro: ResizeObserver | null = null;
 onMounted(() => {
+  // Measure straight away (the first frame should already fit), then follow resizes.
+  if (wrap.value?.clientWidth) width.value = Math.max(200, wrap.value.clientWidth);
   ro = new ResizeObserver(([e]) => (width.value = Math.max(200, e.contentRect.width)));
   if (wrap.value) ro.observe(wrap.value);
 });
