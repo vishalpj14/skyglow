@@ -1,0 +1,29 @@
+# Rust
+target/
+**/*.rs.bk
+
+# Node / web
+node_modules/
+dist/
+.vite/
+
+# Python lab
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+*.sqlite
+*.sqlite3
+
+# Private data: your real spots, observations and personal test notes.
+# Keep these out of the public repo. See docs/OBSERVATIONS.md.
+/test/
+
+# Photos and private data (keep raw photos out of git)
+lab/data/
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

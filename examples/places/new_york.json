@@ -1,0 +1,12 @@
+{
+  "name": "New York",
+  "lat": 40.7128,
+  "lon": -74.006,
+  "elevation_m": 10,
+  "tz": -5,
+  "tz_name": "Eastern Standard Time (EST)",
+  "dst_tz": -4,
+  "dst_tz_name": "Eastern Daylight Time (EDT)",
+  "dst_note": "second Sunday of March to first Sunday of November",
+  "note": "Big city skyline; flat horizon assumed."
+}

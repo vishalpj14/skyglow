@@ -1,0 +1,12 @@
+{
+  "name": "Los Angeles",
+  "lat": 34.0522,
+  "lon": -118.2437,
+  "elevation_m": 90,
+  "tz": -8,
+  "tz_name": "Pacific Standard Time (PST)",
+  "dst_tz": -7,
+  "dst_tz_name": "Pacific Daylight Time (PDT)",
+  "dst_note": "second Sunday of March to first Sunday of November",
+  "note": "Sunsets over the Pacific, so the sea horizon is open to the west."
+}

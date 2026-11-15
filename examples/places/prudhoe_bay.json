@@ -1,0 +1,12 @@
+{
+  "name": "Prudhoe Bay",
+  "lat": 70.2552,
+  "lon": -148.3372,
+  "elevation_m": 5,
+  "tz": -9,
+  "tz_name": "Alaska Standard Time (AKST)",
+  "dst_tz": -8,
+  "dst_tz_name": "Alaska Daylight Time (AKDT)",
+  "dst_note": "second Sunday of March to first Sunday of November",
+  "note": "North of the Arctic Circle: polar night in winter, midnight sun in summer."
+}

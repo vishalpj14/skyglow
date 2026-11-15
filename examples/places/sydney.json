@@ -1,0 +1,12 @@
+{
+  "name": "Sydney",
+  "lat": -33.8688,
+  "lon": 151.2093,
+  "elevation_m": 20,
+  "tz": 10,
+  "tz_name": "Australian Eastern Standard Time (AEST)",
+  "dst_tz": 11,
+  "dst_tz_name": "Australian Eastern Daylight Time (AEDT)",
+  "dst_note": "first Sunday of October to first Sunday of April",
+  "note": "Southern hemisphere: seasons are flipped, so daylight saving is in summer (December)."
+}

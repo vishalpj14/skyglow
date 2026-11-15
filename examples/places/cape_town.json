@@ -1,0 +1,9 @@
+{
+  "name": "Cape Town",
+  "lat": -33.9249,
+  "lon": 18.4241,
+  "elevation_m": 25,
+  "tz": 2,
+  "tz_name": "South Africa Standard Time (SAST)",
+  "note": "Southern hemisphere, sunset toward the Atlantic."
+}

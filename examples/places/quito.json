@@ -1,0 +1,18 @@
+{
+  "name": "Quito",
+  "lat": -0.1807,
+  "lon": -78.4678,
+  "elevation_m": 2850,
+  "tz": -5,
+  "tz_name": "Ecuador Time (ECT)",
+  "peaks": [
+    {
+      "name": "Pichincha (approximate)",
+      "az": 270,
+      "distance_km": 10,
+      "height_m": 4700,
+      "half_width_deg": 10
+    }
+  ],
+  "note": "On the equator but high up: horizon dips about 1.6 degrees. Pichincha volcano to the west is approximate and illustrative."
+}

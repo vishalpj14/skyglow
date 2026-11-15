@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "default",
+  "description": "Global defaults. Mid-latitude cloud heights and rough stage boundaries; the starting point that regional packs override.",
+  "earth_radius_km": 6371.0,
+  "sunset_elevation_deg": -0.833,
+  "cloud_layers": [
+    { "name": "low",  "height_km": 1.5 },
+    { "name": "mid",  "height_km": 5.0 },
+    { "name": "high", "height_km": 9.0 }
+  ],
+  "stages": [
+    {
+      "name": "golden_hour",
+      "from_deg": 6.0,
+      "to_deg": -0.833,
+      "description": "Low, warm, directional light and long shadows. Clouds near the sun glow gold."
+    },
+    {
+      "name": "sunset_glow",
+      "from_deg": -0.833,
+      "to_deg": -2.0,
+      "description": "Sun just set. Orange-red light still reaches low and mid clouds; the western horizon is brightest."
+    },
+    {
+      "name": "afterglow",
+      "from_deg": -2.0,
+      "to_deg": -4.0,
+      "description": "High clouds still catch sunlight above Earth's shadow while the ground is dim. Colour here depends on grazing height, see grazing_colours."
+    },
+    {
+      "name": "purple_light",
+      "from_deg": -4.0,
+      "to_deg": -6.0,
+      "description": "Fading violet-pink. Only the highest cloud toward the horizon is lit; the grey-blue shadow band climbs in the east."
+    },
+    {
+      "name": "blue_hour",
+      "from_deg": -6.0,
+      "to_deg": -8.0,
+      "description": "Deep blue sky, cloud colour mostly gone. Time to switch to twilight and star work."
+    }
+  ],
+  "grazing_colours": [
+    { "min_height_km": 6.0, "label": "gold to bright orange" },
+    { "min_height_km": 3.0, "label": "orange" },
+    { "min_height_km": 1.0, "label": "orange-red to pink" },
+    { "min_height_km": 0.0, "label": "deep red-pink, fading fast" }
+  ]
+}

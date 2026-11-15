@@ -1,0 +1,35 @@
+# Parameter packs
+
+A pack is a small JSON file of **numbers** that tune Skyglow's estimates. Packs never contain code.
+
+## Files
+
+- `default.json`: global defaults, compiled into the program so it always works offline.
+- `kerala.json`: a regional example. **Uncalibrated starting guesses.**
+
+## Format (schema 1)
+
+| Field | Type | Meaning |
+|---|---|---|
+| `schema` | integer | Must be `1`. Builds reject other versions. |
+| `name` | string | Short identifier. |
+| `description` | string, optional | What the pack is for and how trustworthy it is. |
+| `earth_radius_km` | number | Used by the cloud-shadow geometry (6371). |
+| `sunset_elevation_deg` | number | Sun elevation counted as "sunset" (-0.833 includes refraction and the sun's radius). |
+| `cloud_layers` | list of `{name, height_km}` | Typical heights (above sea level) for low, mid, high cloud. |
+| `stages` | list of `{name, from_deg, to_deg, description}` | Named phases of the evening by sun elevation. `from_deg` must be higher than `to_deg`; stages must not overlap. |
+| `grazing_colours` | optional list of `{min_height_km, label}` | Rough colour label for light whose lowest altitude on the way to a cloud is at least `min_height_km`; the matching entry with the highest threshold wins. Uncalibrated. |
+
+Unknown extra fields are ignored, so packs can carry notes for future versions.
+
+## Using a pack
+
+```powershell
+cargo run -p skyglow-core -- 9.93 76.27 2026-11-15 --tz 5.5 --pack packs/kerala.json
+```
+
+## Contributing a regional pack
+
+1. Copy `default.json`, change `name` and `description`.
+2. Adjust numbers only where you have a reason (photos, soundings, literature) and say what in `description`.
+3. Run `cargo test` and the command above to check it loads.

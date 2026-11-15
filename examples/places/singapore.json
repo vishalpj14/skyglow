@@ -1,0 +1,9 @@
+{
+  "name": "Singapore",
+  "lat": 1.3521,
+  "lon": 103.8198,
+  "elevation_m": 15,
+  "tz": 8,
+  "tz_name": "Singapore Standard Time (SGT)",
+  "note": "On the equator: short twilight all year."
+}

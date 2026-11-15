@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "kerala",
+  "description": "UNCALIBRATED starting guesses for Kerala (about 8 to 13 degrees north). Tropical cirrus and anvil outflow sit higher than mid-latitude cirrus, trade cumulus bases are low. The grazing_colours labels are rough guesses that need calibrating against real observations.",
+  "earth_radius_km": 6371.0,
+  "sunset_elevation_deg": -0.833,
+  "cloud_layers": [
+    { "name": "low",  "height_km": 1.0 },
+    { "name": "mid",  "height_km": 5.5 },
+    { "name": "high", "height_km": 13.0 }
+  ],
+  "stages": [
+    {
+      "name": "golden_hour",
+      "from_deg": 6.0,
+      "to_deg": -0.833,
+      "description": "Low, warm, directional light. Over the Arabian Sea horizon this is a short window near the equator."
+    },
+    {
+      "name": "sunset_glow",
+      "from_deg": -0.833,
+      "to_deg": -2.0,
+      "description": "Sun just set. Orange-red light still reaches low and mid clouds."
+    },
+    {
+      "name": "afterglow",
+      "from_deg": -2.0,
+      "to_deg": -4.0,
+      "description": "High cloud stays lit here. Pink tends to arrive late in this stage, just before a cloud's own shadow time."
+    },
+    {
+      "name": "purple_light",
+      "from_deg": -4.0,
+      "to_deg": -6.0,
+      "description": "Fading violet-pink; only the highest cloud toward the horizon is lit."
+    },
+    {
+      "name": "blue_hour",
+      "from_deg": -6.0,
+      "to_deg": -8.0,
+      "description": "Deep blue sky, cloud colour mostly gone."
+    }
+  ],
+  "grazing_colours": [
+    { "min_height_km": 6.0, "label": "gold to bright orange" },
+    { "min_height_km": 3.0, "label": "orange" },
+    { "min_height_km": 1.0, "label": "orange-red to pink" },
+    { "min_height_km": 0.0, "label": "deep red-pink, fading fast" }
+  ]
+}

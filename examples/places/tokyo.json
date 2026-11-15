@@ -1,0 +1,9 @@
+{
+  "name": "Tokyo",
+  "lat": 35.6762,
+  "lon": 139.6503,
+  "elevation_m": 40,
+  "tz": 9,
+  "tz_name": "Japan Standard Time (JST)",
+  "note": "No daylight saving."
+}

@@ -1,0 +1,34 @@
+{
+  "name": "Yosemite National Park (Valley)",
+  "lat": 37.7456,
+  "lon": -119.5936,
+  "elevation_m": 1220,
+  "tz": -8,
+  "tz_name": "Pacific Standard Time (PST)",
+  "dst_tz": -7,
+  "dst_tz_name": "Pacific Daylight Time (PDT)",
+  "dst_note": "second Sunday of March to first Sunday of November",
+  "horizon": [
+    {
+      "az": 0,
+      "elev": 8
+    },
+    {
+      "az": 180,
+      "elev": 10
+    },
+    {
+      "az": 230,
+      "elev": 17
+    },
+    {
+      "az": 270,
+      "elev": 17
+    },
+    {
+      "az": 320,
+      "elev": 11
+    }
+  ],
+  "note": "Deep valley with granite walls; skyline values are rough and illustrative."
+}

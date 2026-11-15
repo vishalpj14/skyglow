@@ -1,0 +1,12 @@
+{
+  "name": "Tromso",
+  "lat": 69.6492,
+  "lon": 18.9553,
+  "elevation_m": 10,
+  "tz": 1,
+  "tz_name": "Central European Time (CET)",
+  "dst_tz": 2,
+  "dst_tz_name": "Central European Summer Time (CEST)",
+  "dst_note": "last Sunday of March to last Sunday of October",
+  "note": "North of the Arctic Circle: polar night in winter, midnight sun in summer."
+}
