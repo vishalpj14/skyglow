@@ -10,7 +10,7 @@ Skyglow  Cape Town  33.9249°S  18.4241°E   2026-12-21   sunrise   pack: defaul
   Viewpoint: 25 m above sea level
 
   Solar noon   12:44:20
-  Sunrise       05:31:00   (look toward azimuth 119°)
+  Sunrise      05:31:00   (look toward azimuth 119°)
   Sunrise at sea level, flat horizon: 05:31:49
   Flat horizon from your height:     05:31:00   (horizon dips 0.15°, 1 min earlier)
 
@@ -38,7 +38,7 @@ Skyglow  Cape Town  33.9249°S  18.4241°E   2026-12-21   sunset   pack: default
   Viewpoint: 25 m above sea level
 
   Solar noon   12:44:20
-  Sunset        19:57:43   (look toward azimuth 241°)
+  Sunset       19:57:43   (look toward azimuth 241°)
   Sunset at sea level, flat horizon: 19:56:54
   Flat horizon from your height:     19:57:43   (horizon dips 0.15°, 1 min later)
 
@@ -69,7 +69,7 @@ Skyglow  Cape Town  33.9249°S  18.4241°E   2026-06-21   sunrise   pack: defaul
   Viewpoint: 25 m above sea level
 
   Solar noon   12:48:07
-  Sunrise       07:50:31   (look toward azimuth 62°)
+  Sunrise      07:50:31   (look toward azimuth 62°)
   Sunrise at sea level, flat horizon: 07:51:19
   Flat horizon from your height:     07:50:31   (horizon dips 0.15°, 1 min earlier)
 
@@ -97,7 +97,7 @@ Skyglow  Cape Town  33.9249°S  18.4241°E   2026-06-21   sunset   pack: default
   Viewpoint: 25 m above sea level
 
   Solar noon   12:48:07
-  Sunset        17:45:43   (look toward azimuth 298°)
+  Sunset       17:45:43   (look toward azimuth 298°)
   Sunset at sea level, flat horizon: 17:44:55
   Flat horizon from your height:     17:45:43   (horizon dips 0.15°, 1 min later)
 

@@ -10,7 +10,7 @@ Skyglow  Srinagar  34.0837°N  74.7973°E   2026-12-21   sunrise   pack: default
   Viewpoint: 1585 m above sea level, with a mountain skyline
 
   Solar noon   12:28:46
-  Sunrise       07:25:58   (look toward azimuth 117°)
+  Sunrise      07:25:58   (look toward azimuth 117°)
   Sunrise at sea level, flat horizon: 07:32:20
   Flat horizon from your height:     07:25:58   (horizon dips 1.17°, 6 min earlier)
   The skyline does not block the sun in its rising direction today.
@@ -39,7 +39,7 @@ Skyglow  Srinagar  34.0837°N  74.7973°E   2026-12-21   sunset   pack: default
   Viewpoint: 1585 m above sea level, with a mountain skyline
 
   Solar noon   12:28:46
-  Sun hidden    17:12:53   (look toward azimuth 240°)
+  Sun hidden   17:12:53   (look toward azimuth 240°)
   Sunset at sea level, flat horizon: 17:25:14
   Flat horizon from your height:     17:31:35   (horizon dips 1.17°, 6 min later)
   Terrain hides the sun 19 min before the flat-horizon sunset;
@@ -72,7 +72,7 @@ Skyglow  Srinagar  34.0837°N  74.7973°E   2026-06-21   sunrise   pack: default
   Viewpoint: 1585 m above sea level, with a mountain skyline
 
   Solar noon   12:32:35
-  Sunrise       05:13:12   (look toward azimuth 60°)
+  Sunrise      05:13:12   (look toward azimuth 60°)
   Sunrise at sea level, flat horizon: 05:19:42
   Flat horizon from your height:     05:13:12   (horizon dips 1.17°, 6 min earlier)
   The skyline does not block the sun in its rising direction today.
@@ -101,7 +101,7 @@ Skyglow  Srinagar  34.0837°N  74.7973°E   2026-06-21   sunset   pack: default
   Viewpoint: 1585 m above sea level, with a mountain skyline
 
   Solar noon   12:32:35
-  Sunset        19:51:59   (look toward azimuth 300°)
+  Sunset       19:51:59   (look toward azimuth 300°)
   Sunset at sea level, flat horizon: 19:45:29
   Flat horizon from your height:     19:51:59   (horizon dips 1.17°, 6 min later)
   The skyline does not block the sun in its setting direction today.

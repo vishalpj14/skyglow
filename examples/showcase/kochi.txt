@@ -10,7 +10,7 @@ Skyglow  Kochi  9.9300°N  76.2700°E   2026-12-21   sunrise   pack: default
   Viewpoint: 3 m above sea level
 
   Solar noon   12:22:53
-  Sunrise       06:36:16   (look toward azimuth 114°)
+  Sunrise      06:36:16   (look toward azimuth 114°)
   Sunrise at sea level, flat horizon: 06:36:29
   Flat horizon from your height:     06:36:16   (horizon dips 0.05°, 0 min earlier)
 
@@ -38,7 +38,7 @@ Skyglow  Kochi  9.9300°N  76.2700°E   2026-12-21   sunset   pack: default
   Viewpoint: 3 m above sea level
 
   Solar noon   12:22:53
-  Sunset        18:09:31   (look toward azimuth 246°)
+  Sunset       18:09:31   (look toward azimuth 246°)
   Sunset at sea level, flat horizon: 18:09:18
   Flat horizon from your height:     18:09:31   (horizon dips 0.05°, 0 min later)
 
@@ -69,7 +69,7 @@ Skyglow  Kochi  9.9300°N  76.2700°E   2026-06-21   sunrise   pack: default
   Viewpoint: 3 m above sea level
 
   Solar noon   12:26:42
-  Sunrise       06:05:18   (look toward azimuth 66°)
+  Sunrise      06:05:18   (look toward azimuth 66°)
   Sunrise at sea level, flat horizon: 06:05:32
   Flat horizon from your height:     06:05:18   (horizon dips 0.05°, 0 min earlier)
 
@@ -97,7 +97,7 @@ Skyglow  Kochi  9.9300°N  76.2700°E   2026-06-21   sunset   pack: default
   Viewpoint: 3 m above sea level
 
   Solar noon   12:26:42
-  Sunset        18:48:06   (look toward azimuth 294°)
+  Sunset       18:48:06   (look toward azimuth 294°)
   Sunset at sea level, flat horizon: 18:47:52
   Flat horizon from your height:     18:48:06   (horizon dips 0.05°, 0 min later)
 

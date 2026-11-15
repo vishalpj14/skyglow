@@ -10,7 +10,7 @@ Skyglow  Chennai  13.0827°N  80.2707°E   2026-12-21   sunrise   pack: default
   Viewpoint: 6 m above sea level
 
   Solar noon   12:06:53
-  Sunrise       06:25:49   (look toward azimuth 114°)
+  Sunrise      06:25:49   (look toward azimuth 114°)
   Sunrise at sea level, flat horizon: 06:26:09
   Flat horizon from your height:     06:25:49   (horizon dips 0.07°, 0 min earlier)
 
@@ -38,7 +38,7 @@ Skyglow  Chennai  13.0827°N  80.2707°E   2026-12-21   sunset   pack: default
   Viewpoint: 6 m above sea level
 
   Solar noon   12:06:53
-  Sunset        17:47:56   (look toward azimuth 246°)
+  Sunset       17:47:56   (look toward azimuth 246°)
   Sunset at sea level, flat horizon: 17:47:37
   Flat horizon from your height:     17:47:56   (horizon dips 0.07°, 0 min later)
 
@@ -69,7 +69,7 @@ Skyglow  Chennai  13.0827°N  80.2707°E   2026-06-21   sunrise   pack: default
   Viewpoint: 6 m above sea level
 
   Solar noon   12:10:41
-  Sunrise       05:43:26   (look toward azimuth 66°)
+  Sunrise      05:43:26   (look toward azimuth 66°)
   Sunrise at sea level, flat horizon: 05:43:45
   Flat horizon from your height:     05:43:26   (horizon dips 0.07°, 0 min earlier)
 
@@ -97,7 +97,7 @@ Skyglow  Chennai  13.0827°N  80.2707°E   2026-06-21   sunset   pack: default
   Viewpoint: 6 m above sea level
 
   Solar noon   12:10:41
-  Sunset        18:37:57   (look toward azimuth 294°)
+  Sunset       18:37:57   (look toward azimuth 294°)
   Sunset at sea level, flat horizon: 18:37:38
   Flat horizon from your height:     18:37:57   (horizon dips 0.07°, 0 min later)
 

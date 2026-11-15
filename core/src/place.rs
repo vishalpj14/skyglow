@@ -23,7 +23,7 @@
 //! sun from you. That is exactly why valley dwellers see colour on clouds
 //! while the ground is already in shade.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::sun::{self, DEG};
 
@@ -33,7 +33,7 @@ pub const REFRACTION_COEFFICIENT: f64 = 0.13;
 
 /// One point of a hand-drawn skyline: the skyline is `elev` degrees high
 /// toward compass bearing `az`.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct HorizonPoint {
     /// Compass bearing in degrees, 0 = north, 90 = east, 270 = west.
     pub az: f64,
@@ -42,7 +42,7 @@ pub struct HorizonPoint {
 }
 
 /// A single mountain, described the way you would read it off a map.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Peak {
     #[serde(default)]
     pub name: String,
@@ -63,7 +63,7 @@ fn default_half_width() -> f64 {
 }
 
 /// A place on Earth, as the engine needs to know it.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Place {
     /// Display name, for example "Srinagar".
     #[serde(default)]

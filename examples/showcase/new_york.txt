@@ -10,7 +10,7 @@ Skyglow  New York  40.7128°N  74.0060°W   2026-12-21   sunrise   pack: default
   Viewpoint: 10 m above sea level
 
   Solar noon   11:54:12
-  Sunrise       07:16:01   (look toward azimuth 121°)
+  Sunrise      07:16:01   (look toward azimuth 121°)
   Sunrise at sea level, flat horizon: 07:16:35
   Flat horizon from your height:     07:16:01   (horizon dips 0.09°, 1 min earlier)
 
@@ -38,7 +38,7 @@ Skyglow  New York  40.7128°N  74.0060°W   2026-12-21   sunset   pack: default
   Viewpoint: 10 m above sea level
 
   Solar noon   11:54:12
-  Sunset        16:32:23   (look toward azimuth 239°)
+  Sunset       16:32:23   (look toward azimuth 239°)
   Sunset at sea level, flat horizon: 16:31:49
   Flat horizon from your height:     16:32:23   (horizon dips 0.09°, 1 min later)
 
@@ -69,7 +69,7 @@ Skyglow  New York  40.7128°N  74.0060°W   2026-06-21   sunrise   pack: default
   Viewpoint: 10 m above sea level
 
   Solar noon   12:57:53
-  Sunrise       05:24:26   (look toward azimuth 57°)
+  Sunrise      05:24:26   (look toward azimuth 57°)
   Sunrise at sea level, flat horizon: 05:25:01
   Flat horizon from your height:     05:24:26   (horizon dips 0.09°, 1 min earlier)
 
@@ -97,7 +97,7 @@ Skyglow  New York  40.7128°N  74.0060°W   2026-06-21   sunset   pack: default
   Viewpoint: 10 m above sea level
 
   Solar noon   12:57:53
-  Sunset        20:31:20   (look toward azimuth 303°)
+  Sunset       20:31:20   (look toward azimuth 303°)
   Sunset at sea level, flat horizon: 20:30:46
   Flat horizon from your height:     20:31:20   (horizon dips 0.09°, 1 min later)
 

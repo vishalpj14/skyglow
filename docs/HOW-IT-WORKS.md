@@ -82,6 +82,10 @@ Two things about where *you* stand change when *you* see the sun go, without cha
 
 Earth's shadow still arrives at the clouds on its own schedule, so high clouds keep glowing after the ground is in shade. That gap is the glow you see from a valley. See [PLACES.md](PLACES.md) for the format. Cloud heights in packs are heights above sea level, and the skyline is an approximation, so treat mountain results as a guide, not a measurement.
 
+### The sky at one moment
+
+Everything above can also be asked about a single instant instead of a whole evening: "it is 18:08, what is the sky doing?" Skyglow answers with where the sun is, whether it is climbing or sinking, whether a ridge hides it, the lowest height an overhead cloud needs to still catch light, and, for each cloud layer, whether it is lit overhead (and roughly what colour), lit only toward the sun (and where the shadow edge sits), or dark. Ask for it with `--at 18:08`. The planned web app's time slider will call the same calculation, so the two always agree. See `core/src/sky.rs`.
+
 ## 6. The honest list of what is missing
 
 The sun position and the shadow geometry are exact. Everything about what the sky will *actually* look like depends on things Skyglow cannot know yet:

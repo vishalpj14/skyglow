@@ -8,9 +8,9 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::path::Path;
 
-use skyglow_core::cloud;
 use skyglow_core::params::Params;
 use skyglow_core::place::Place;
+use skyglow_core::sky::{self, LayerLight};
 use skyglow_core::sun;
 use skyglow_core::time;
 use skyglow_core::timeline::{build_timeline_event, Event, Timeline};
@@ -618,78 +618,61 @@ fn print_report(t: &Timeline, params: &Params, place: &Place, tz: f64) {
 }
 
 /// Report the sun and Earth-shadow state at one local clock time.
+///
+/// All the physics is in [`sky::sky_state`]; this function only prints it.
 fn print_at(params: &Params, place: &Place, date: (i32, u32, u32), tz: f64, hours: f64) {
-    let (lat, lon) = (place.lat, place.lon);
     let jd = time::jd_from_local(date, hours, tz);
-    let s = sun::sun_state(jd, lat, lon);
+    let st = sky::sky_state(params, place, jd);
     println!();
     println!("At {}:", time::format_clock(jd, tz));
-    if s.elevation_deg >= 0.0 {
+    if st.sun_up() {
         println!(
             "  Sun is above the horizon: {:.2}\u{b0} elevation, azimuth {:.0}\u{b0}",
-            s.elevation_deg, s.azimuth_deg
+            st.elevation_deg, st.azimuth_deg
         );
-        if place.has_skyline() {
-            let sky = place.horizon_elevation_deg(s.azimuth_deg, params.earth_radius_km);
-            let hidden = s.elevation_deg
-                < place.sun_visible_threshold_deg(
-                    s.azimuth_deg,
-                    params.sunset_elevation_deg,
-                    params.earth_radius_km,
-                );
+        if let Some(view) = st.skyline {
             println!(
                 "  Skyline in that direction: {:.1}\u{b0}  ->  sun is {}",
-                sky,
-                if hidden { "hidden behind terrain" } else { "visible" }
+                view.horizon_elevation_deg,
+                if view.sun_hidden { "hidden behind terrain" } else { "visible" }
             );
         }
         return;
     }
-    let depression = -s.elevation_deg;
-    let r = params.earth_radius_km;
-    let alt_km = place.elevation_m / 1000.0;
-    let noon = sun::solar_noon(date.0, date.1, date.2, lon, tz);
     println!(
         "  Sun is {:.2}\u{b0} below the horizon ({}), azimuth {:.0}\u{b0}",
-        depression,
-        if jd < noon { "rising" } else { "setting" },
-        s.azimuth_deg
+        st.depression_deg,
+        if st.rising { "rising" } else { "setting" },
+        st.azimuth_deg
     );
-    if depression < 20.0 {
-        println!(
-            "  A cloud directly overhead is lit only if it is higher than {:.1} km",
-            cloud::overhead_shadow_height_km(depression, r)
-        );
+    // Past 20 degrees the threshold is hundreds of km: not worth printing.
+    if let Some(km) = st.overhead_lit_above_km.filter(|_| st.depression_deg < 20.0) {
+        println!("  A cloud directly overhead is lit only if it is higher than {km:.1} km");
     }
-    for l in &params.cloud_layers {
-        match cloud::shadow_edge_elevation_from_altitude_deg(l.height_km, depression, r, alt_km) {
-            None => match cloud::overhead_grazing_height_km(l.height_km, depression, r) {
-                Some(z) => {
-                    let hint = match params.colour_hint(z) {
-                        Some(label) => format!(", likely {label}"),
-                        None => String::new(),
-                    };
-                    println!(
-                        "  {:<5} {:>5.1} km   lit overhead; sunlight skims {:.1} km above ground{}",
-                        l.name, l.height_km, z, hint
-                    );
-                }
-                None => println!(
-                    "  {:<5} {:>5.1} km   in Earth's shadow overhead",
-                    l.name, l.height_km
-                ),
-            },
-            Some(e) if e <= 0.0 => println!(
+    for l in &st.layers {
+        match &l.light {
+            LayerLight::LitOverhead { grazing_km, colour, .. } => {
+                let hint = match colour {
+                    Some(label) => format!(", likely {label}"),
+                    None => String::new(),
+                };
+                println!(
+                    "  {:<5} {:>5.1} km   lit overhead; sunlight skims {:.1} km above ground{}",
+                    l.name, l.height_km, grazing_km, hint
+                );
+            }
+            LayerLight::ShadowOverhead => println!(
+                "  {:<5} {:>5.1} km   in Earth's shadow overhead",
+                l.name, l.height_km
+            ),
+            LayerLight::EdgeBeyondHorizon => println!(
                 "  {:<5} {:>5.1} km   shadow edge is past your horizon: none of this layer is lit",
                 l.name, l.height_km
             ),
-            Some(e) => {
-                let km = cloud::shadow_edge_arc_deg(l.height_km, depression, r) * sun::DEG * r;
-                println!(
-                    "  {:<5} {:>5.1} km   lit only below {:.1}\u{b0} elevation toward the sun (shadow edge {:.0} km away; edge light is deep red-pink)",
-                    l.name, l.height_km, e, km
-                );
-            }
+            LayerLight::LitTowardSun { edge_elevation_deg, edge_distance_km } => println!(
+                "  {:<5} {:>5.1} km   lit only below {:.1}\u{b0} elevation toward the sun (shadow edge {:.0} km away; edge light is deep red-pink)",
+                l.name, l.height_km, edge_elevation_deg, edge_distance_km
+            ),
         }
     }
 }

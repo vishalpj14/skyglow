@@ -18,13 +18,15 @@
 //! 6. Latitude + declination + **hour angle** (how far past solar noon) give
 //!    the sun's **elevation** and **azimuth** for the observer.
 
+use serde::Serialize;
+
 use crate::time::julian_day;
 
 /// Degrees-to-radians factor. Divide radians by this to get degrees.
 pub const DEG: f64 = std::f64::consts::PI / 180.0;
 
 /// Every intermediate value of the calculation (used by `--explain`).
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize)]
 pub struct SunState {
     /// Julian Day (UT) the state was computed for.
     pub jd: f64,

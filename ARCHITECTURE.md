@@ -32,7 +32,8 @@ Skyglow answers one question: *given a place and a time, what will the evening s
 |---|---|---|
 | `core/` | All maths. Pure functions, no I/O in the library. | serde (packs only) |
 | `packs/` | Tunable numbers as JSON with a schema version. | nothing |
-| `web/` | UI, GPS, offline caching, optional live data. | core (WASM) |
+| `wasm/` | Bridge: JSON in, JSON out, no physics. | core, wasm-bindgen |
+| `web/` | UI, GPS, offline caching, optional live data. | core (via `wasm/`) |
 | `lab/` | Photo analysis, correlation, pack generation. | core (Python binding) |
 
 ## Core modules
@@ -42,6 +43,7 @@ Skyglow answers one question: *given a place and a time, what will the evening s
 - `cloud`: Earth-shadow geometry for cloud layers.
 - `params`: loads and validates packs.
 - `timeline`: assembles the evening timeline for a place and date.
+- `sky`: the sky at one instant, `sky_state(params, place, jd)`: sun position, rising or setting, skyline, which cloud layers are lit and where the shadow edge is. The CLI's `--at` and the web time scrubber both use it.
 
 ## Live inputs (planned, v2)
 
@@ -73,6 +75,8 @@ Packs hold numbers only, never code. They carry a `schema` version, and a build 
 ## Testing strategy
 
 - Rust unit tests next to each module, plus `core/tests/physics.rs` for facts checkable from outside (equinox, solstice, equation-of-time extremes, a Kochi sunset sanity check, equatorial twilight shorter than London).
+- `wasm/` has its own Rust tests, and `web/tests/` runs the compiled WebAssembly engine from TypeScript (Kochi's almanac times, the CLI's wording, bad input becoming errors).
+- CI (`.github/workflows/pages.yml`) runs both test suites before publishing the web app.
 - Expected values come from known facts or hand calculation, not from the code under test.
 - Later: golden test vectors generated from a trusted reference (Astropy or Skyfield) so the Rust core and any future port can be compared independently.
 

@@ -8,7 +8,7 @@
 //! The built-in default pack is compiled into the binary from
 //! `packs/default.json`, so the engine always works offline.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// Pack schema version this build understands. Packs with another number are
 /// rejected instead of being half-understood.
@@ -18,7 +18,7 @@ pub const SUPPORTED_SCHEMA: u32 = 1;
 pub const DEFAULT_PACK_JSON: &str = include_str!("../../packs/default.json");
 
 /// A cloud layer used for shadow calculations.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CloudLayer {
     /// Short label such as `low`, `mid`, `high`.
     pub name: String,
@@ -27,7 +27,7 @@ pub struct CloudLayer {
 }
 
 /// One named phase of the evening, defined by sun elevation.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Stage {
     pub name: String,
     /// Sun elevation (degrees) where the stage begins (higher number).
@@ -43,20 +43,27 @@ pub struct Stage {
     /// Description to show at sunrise. Falls back to `description`.
     #[serde(default)]
     pub morning_description: String,
+    /// Optional display colour for this stage's sky, as `#rrggbb`. Only for
+    /// drawing (the web colour strip); an uncalibrated guess, not physics.
+    #[serde(default)]
+    pub swatch: String,
 }
 
 /// A rough colour label for light that dives down to a given altitude.
 ///
 /// The label applies when the beam's lowest altitude is at least
 /// `min_height_km`; the entry with the highest matching threshold wins.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct GrazingColour {
     pub min_height_km: f64,
     pub label: String,
+    /// Optional display colour for this band, as `#rrggbb`. Uncalibrated.
+    #[serde(default)]
+    pub swatch: String,
 }
 
 /// A full parameter set.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Params {
     pub schema: u32,
     pub name: String,
@@ -90,6 +97,11 @@ impl Params {
     /// Colour label for light whose lowest altitude is `grazing_km`, if the
     /// pack defines any.
     pub fn colour_hint(&self, grazing_km: f64) -> Option<&str> {
+        self.colour_band(grazing_km).map(|c| c.label.as_str())
+    }
+
+    /// The whole colour band (label and swatch) for a grazing height.
+    pub fn colour_band(&self, grazing_km: f64) -> Option<&GrazingColour> {
         self.grazing_colours
             .iter()
             .filter(|c| grazing_km >= c.min_height_km)
@@ -98,7 +110,14 @@ impl Params {
                     .partial_cmp(&b.min_height_km)
                     .unwrap_or(std::cmp::Ordering::Equal)
             })
-            .map(|c| c.label.as_str())
+    }
+
+    /// Index of the stage whose elevation range holds `elevation_deg`
+    /// (`from_deg` >= elevation > `to_deg`), or `None` outside every stage.
+    pub fn stage_index(&self, elevation_deg: f64) -> Option<usize> {
+        self.stages
+            .iter()
+            .position(|s| elevation_deg <= s.from_deg && elevation_deg > s.to_deg)
     }
 
     /// Check that the numbers make physical and logical sense.
@@ -128,6 +147,18 @@ impl Params {
                 ));
             }
         }
+        let swatches = self
+            .stages
+            .iter()
+            .map(|s| (&s.name, &s.swatch))
+            .chain(self.grazing_colours.iter().map(|c| (&c.label, &c.swatch)));
+        for (name, swatch) in swatches {
+            if !swatch.is_empty() && !is_hex_colour(swatch) {
+                return Err(format!(
+                    "swatch '{swatch}' for '{name}' must look like #rrggbb"
+                ));
+            }
+        }
         for pair in self.stages.windows(2) {
             if pair[1].from_deg > pair[0].to_deg + 1e-9 {
                 return Err(format!(
@@ -138,6 +169,11 @@ impl Params {
         }
         Ok(())
     }
+}
+
+/// True for `#rrggbb` (six hex digits after a hash).
+fn is_hex_colour(s: &str) -> bool {
+    s.len() == 7 && s.starts_with('#') && s[1..].chars().all(|c| c.is_ascii_hexdigit())
 }
 
 #[cfg(test)]
@@ -166,6 +202,18 @@ mod tests {
         let lowest = p.colour_hint(0.2).expect("hint for 0.2 km");
         assert_ne!(high, low);
         assert_ne!(low, lowest);
+    }
+
+    #[test]
+    fn swatches_are_optional_but_must_be_hex() {
+        let mut p = Params::builtin();
+        assert!(p.stages.iter().all(|s| s.swatch.len() == 7));
+        p.stages[0].swatch = String::new();
+        assert!(p.validate().is_ok(), "an empty swatch means none");
+        p.stages[0].swatch = "orange".to_string();
+        assert!(p.validate().is_err());
+        p.stages[0].swatch = "#12345g".to_string();
+        assert!(p.validate().is_err());
     }
 
     #[test]

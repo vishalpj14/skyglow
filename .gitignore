@@ -25,6 +25,9 @@ __pycache__/
 # Photos and private data (keep raw photos out of git)
 lab/data/
 
+# Claude Code's local folder (preview settings, scratch worktrees)
+/.claude/
+
 # Editors and OS
 .vscode/
 .idea/

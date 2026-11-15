@@ -12,6 +12,7 @@
   "stages": [
     {
       "name": "golden_hour",
+      "swatch": "#f2b45a",
       "from_deg": 6.0,
       "to_deg": -0.833,
       "morning_name": "golden_hour",
@@ -20,6 +21,7 @@
     },
     {
       "name": "sunset_glow",
+      "swatch": "#e9794a",
       "from_deg": -0.833,
       "to_deg": -2.0,
       "morning_name": "sunrise_glow",
@@ -28,6 +30,7 @@
     },
     {
       "name": "afterglow",
+      "swatch": "#c8607e",
       "from_deg": -2.0,
       "to_deg": -4.0,
       "morning_name": "first_light",
@@ -36,6 +39,7 @@
     },
     {
       "name": "purple_light",
+      "swatch": "#7a5a9e",
       "from_deg": -4.0,
       "to_deg": -6.0,
       "morning_name": "dawn_purple",
@@ -44,6 +48,7 @@
     },
     {
       "name": "blue_hour",
+      "swatch": "#2e4a7d",
       "from_deg": -6.0,
       "to_deg": -8.0,
       "morning_name": "blue_hour",
@@ -52,9 +57,9 @@
     }
   ],
   "grazing_colours": [
-    { "min_height_km": 6.0, "label": "gold to bright orange" },
-    { "min_height_km": 3.0, "label": "orange" },
-    { "min_height_km": 1.0, "label": "orange-red to pink" },
-    { "min_height_km": 0.0, "label": "deep red-pink, fading fast" }
+    { "min_height_km": 6.0, "label": "gold to bright orange", "swatch": "#f6c35b" },
+    { "min_height_km": 3.0, "label": "orange", "swatch": "#f08a3c" },
+    { "min_height_km": 1.0, "label": "orange-red to pink", "swatch": "#e0566b" },
+    { "min_height_km": 0.0, "label": "deep red-pink, fading fast", "swatch": "#a8325a" }
   ]
 }

@@ -8,7 +8,14 @@ Skyglow's tests are written to be read. Each one states a fact about the real wo
 cargo test
 ```
 
-You should see every test pass. To run just one file:
+You should see every test pass. That covers the engine, the command line and the web bridge (`wasm/`). The web app has its own tests, which run the real engine compiled to WebAssembly:
+
+```powershell
+cd web
+npm test
+```
+
+To run just one Rust test file:
 
 ```powershell
 cargo test --test physics      # core/tests/physics.rs
@@ -23,8 +30,12 @@ cargo test cloud               # every test with "cloud" in its name
 | `core/src/time.rs` (bottom) | Date and clock helpers: Julian Day numbers, date parsing, leap years, clock formatting |
 | `core/src/cloud.rs` (bottom) | Earth-shadow geometry: shadow heights, shadow edge, grazing height |
 | `core/src/place.rs` (bottom) | Height above sea level, horizon dip, mountain skyline, terrain-aware sunset |
+| `core/src/sky.rs` (bottom) | The sky at one instant: noon sun height in Kochi (90 - latitude - declination), rising vs setting, the overhead lit-height threshold and grazing height worked by hand, a shadow edge past the horizon, skyline hiding a low sun, colour label from the pack |
 | `core/src/params.rs` (bottom) | Pack loading: good packs load, bad schema or backwards stages are rejected |
 | `core/tests/physics.rs` | Whole-engine facts: sunset times, equinox, solstice, equation of time, equator vs London twilight, sunrise mirroring sunset, ridge and height effects at sunrise |
+| `wasm/src/lib.rs` (bottom) | The web bridge: Kochi's almanac sunset through JSON, series spacing and limits, bad input becomes an error |
+| `web/tests/clock.test.ts` | Clock helpers: J2000 epoch hours, leap years, dates across time zones, UTC labels, standard vs daylight time |
+| `web/tests/engine.test.ts` | The compiled WebAssembly engine from TypeScript: Kochi sunrise and sunset against the almanac, the overhead lit height worked by hand, a day of sky states and colour strip, bundled places and packs |
 | `core/tests/examples.rs` | The shipped `examples/` and `packs/` folders stay valid, and example places behave like the real Earth |
 
 ## What "independent" means here

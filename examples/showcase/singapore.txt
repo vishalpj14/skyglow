@@ -10,7 +10,7 @@ Skyglow  Singapore  1.3521°N  103.8198°E   2026-12-21   sunrise   pack: defaul
   Viewpoint: 15 m above sea level
 
   Solar noon   13:02:38
-  Sunrise       07:00:45   (look toward azimuth 113°)
+  Sunrise      07:00:45   (look toward azimuth 113°)
   Sunrise at sea level, flat horizon: 07:01:15
   Flat horizon from your height:     07:00:45   (horizon dips 0.11°, 0 min earlier)
 
@@ -38,7 +38,7 @@ Skyglow  Singapore  1.3521°N  103.8198°E   2026-12-21   sunset   pack: default
   Viewpoint: 15 m above sea level
 
   Solar noon   13:02:38
-  Sunset        19:04:34   (look toward azimuth 247°)
+  Sunset       19:04:34   (look toward azimuth 247°)
   Sunset at sea level, flat horizon: 19:04:04
   Flat horizon from your height:     19:04:34   (horizon dips 0.11°, 0 min later)
 
@@ -69,7 +69,7 @@ Skyglow  Singapore  1.3521°N  103.8198°E   2026-06-21   sunrise   pack: defaul
   Viewpoint: 15 m above sea level
 
   Solar noon   13:06:28
-  Sunrise       06:59:57   (look toward azimuth 67°)
+  Sunrise      06:59:57   (look toward azimuth 67°)
   Sunrise at sea level, flat horizon: 07:00:27
   Flat horizon from your height:     06:59:57   (horizon dips 0.11°, 0 min earlier)
 
@@ -97,7 +97,7 @@ Skyglow  Singapore  1.3521°N  103.8198°E   2026-06-21   sunset   pack: default
   Viewpoint: 15 m above sea level
 
   Solar noon   13:06:28
-  Sunset        19:13:01   (look toward azimuth 293°)
+  Sunset       19:13:01   (look toward azimuth 293°)
   Sunset at sea level, flat horizon: 19:12:31
   Flat horizon from your height:     19:13:01   (horizon dips 0.11°, 0 min later)
 

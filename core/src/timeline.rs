@@ -15,13 +15,16 @@
 //! height or skyline. Only the sunset/sunrise times do: those are about what
 //! *you* can see.
 
+use serde::Serialize;
+
 use crate::cloud;
 use crate::params::Params;
 use crate::place::Place;
 use crate::sun;
 
 /// Which half of the day to describe.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Event {
     /// The evening: sun going down.
     Sunset,
@@ -50,7 +53,7 @@ impl Event {
 
 /// When one named stage of the light begins and ends (in time order, so at
 /// sunrise `start_jd` is the *lower* sun elevation).
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct StageTime {
     pub name: String,
     pub description: String,
@@ -63,7 +66,7 @@ pub struct StageTime {
 }
 
 /// When Earth's shadow reaches a cloud layer directly overhead.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct LayerReport {
     pub name: String,
     pub height_km: f64,
@@ -75,7 +78,7 @@ pub struct LayerReport {
 }
 
 /// Everything computed for one place, day and event.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Timeline {
     pub event: Event,
     pub lat_deg: f64,

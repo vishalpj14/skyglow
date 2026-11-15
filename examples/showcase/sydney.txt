@@ -10,7 +10,7 @@ Skyglow  Sydney  33.8688°S  151.2093°E   2026-12-21   sunrise   pack: default
   Viewpoint: 20 m above sea level
 
   Solar noon   12:53:01
-  Sunrise       05:39:55   (look toward azimuth 119°)
+  Sunrise      05:39:55   (look toward azimuth 119°)
   Sunrise at sea level, flat horizon: 05:40:39
   Flat horizon from your height:     05:39:55   (horizon dips 0.13°, 1 min earlier)
 
@@ -38,7 +38,7 @@ Skyglow  Sydney  33.8688°S  151.2093°E   2026-12-21   sunset   pack: default
   Viewpoint: 20 m above sea level
 
   Solar noon   12:53:01
-  Sunset        20:06:09   (look toward azimuth 241°)
+  Sunset       20:06:09   (look toward azimuth 241°)
   Sunset at sea level, flat horizon: 20:05:26
   Flat horizon from your height:     20:06:09   (horizon dips 0.13°, 1 min later)
 
@@ -69,7 +69,7 @@ Skyglow  Sydney  33.8688°S  151.2093°E   2026-06-21   sunrise   pack: default
   Viewpoint: 20 m above sea level
 
   Solar noon   11:56:54
-  Sunrise       06:59:15   (look toward azimuth 62°)
+  Sunrise      06:59:15   (look toward azimuth 62°)
   Sunrise at sea level, flat horizon: 06:59:57
   Flat horizon from your height:     06:59:15   (horizon dips 0.13°, 1 min earlier)
 
@@ -97,7 +97,7 @@ Skyglow  Sydney  33.8688°S  151.2093°E   2026-06-21   sunset   pack: default
   Viewpoint: 20 m above sea level
 
   Solar noon   11:56:54
-  Sunset        16:54:33   (look toward azimuth 298°)
+  Sunset       16:54:33   (look toward azimuth 298°)
   Sunset at sea level, flat horizon: 16:53:50
   Flat horizon from your height:     16:54:33   (horizon dips 0.13°, 1 min later)
 

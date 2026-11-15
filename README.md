@@ -2,7 +2,7 @@
 
 **Find out when the sky will do its best colours, for any place on Earth.**
 
-Skyglow tells you, for any GPS coordinate and date, when the sun sets, how long each phase of the evening light lasts, and when Earth's shadow reaches clouds at different heights. That is the timing behind the orange, pink and magenta skies that photographers chase. It runs on your own computer, needs no internet, and shows its working so you can learn the physics as you use it.
+Skyglow tells you, for any GPS coordinate and date, when the sun sets, how long each phase of the evening light lasts, and when Earth's shadow reaches clouds at different heights. That is the timing behind the orange, pink and magenta skies that photographers chase. It runs on your own computer or phone, needs no internet, and shows its working so you can learn the physics as you use it.
 
 It is made for sunset and star photographers who want to know *when* to be ready, and for anyone curious about why skies look the way they do.
 
@@ -65,6 +65,10 @@ Southern and western coordinates are negative (Sydney is `-33.87 151.21`). Put o
 
 Want ideas? **[examples/](examples/README.md)** has 14 ready-made places (New York, Tokyo, Chennai, Srinagar, Yosemite, Quito, Tromso, Prudhoe Bay and more), guided experiments like equator vs Arctic, and a showcase of real program output for every place that you can regenerate with one command.
 
+## In your browser
+
+The same engine also runs as a web app that works offline on a phone: pick a place (GPS, search, map or coordinates), drag a time scrubber through the day, and see the sun's path, colour strips around sunrise and sunset, and the full timelines. See **[web/README.md](web/README.md)** to run it locally; the repository's GitHub Pages site hosts it once Pages is enabled.
+
 ## Your own sunsets
 
 Skyglow gets better when you tell it what you really saw.
@@ -83,7 +87,8 @@ Details in **[docs/OBSERVATIONS.md](docs/OBSERVATIONS.md)**.
 | `packs/` | Small JSON files of tunable numbers, per region | working |
 | `examples/` | Example places and a sample observation file | working |
 | `docs/` | Explanations in plain language, physics notes, decision log | growing |
-| `web/` | Phone-friendly web app (Vue + TypeScript) | planned |
+| `wasm/` | Bridge that lets the web app call the engine | working |
+| `web/` | Phone-friendly, offline web app (Vue + TypeScript) | working |
 | `lab/` | Python tools to learn from your photos | planned |
 
 More: [ARCHITECTURE.md](ARCHITECTURE.md) (how the pieces fit), [docs/PHYSICS.md](docs/PHYSICS.md) (why skies get their colours), [docs/TESTING.md](docs/TESTING.md) (how it is tested), [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -96,8 +101,8 @@ More: [ARCHITECTURE.md](ARCHITECTURE.md) (how the pieces fit), [docs/PHYSICS.md]
 
 ## Roadmap
 
-1. **v0 (now):** sun and twilight geometry, cloud-shadow windows, command line, parameter packs, observation replay.
-2. **v1:** Vue web app you can open on a phone, with a time scrubber and a rough colour strip driven by manual cloud and haze sliders.
+1. **v0 (done):** sun and twilight geometry, cloud-shadow windows, command line, parameter packs, observation replay.
+2. **v1 (now):** Vue web app you can open on a phone, offline, with a time scrubber, sun path and colour strips. Next: manual cloud and haze sliders.
 3. **v2:** Live cloud-layer, aerosol and moisture data (cloud cover by height, aerosol optical depth, humidity, column water vapour).
 4. **v3:** Photo lab: read photo times and GPS, measure sky colours, compare with forecasts, publish better regional packs.
 5. **v4:** Sun and sunspot planning, twilight and low-horizon astrophotography.

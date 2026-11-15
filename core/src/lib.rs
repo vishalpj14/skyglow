@@ -14,6 +14,8 @@
 //!                   live in JSON "packs" instead of the code.
 //! 5. [`place`]    - your viewpoint: height above sea level, skyline, time zone.
 //! 6. [`timeline`] - ties everything together into one evening timeline.
+//! 7. [`sky`]      - the sky at a single instant: sun position, which cloud
+//!                   layers are lit, and where Earth's shadow edge sits.
 //!
 //! Design rules: no global state, no I/O in the library (only the CLI reads
 //! files), and every calculation can show its intermediate values
@@ -22,6 +24,7 @@
 pub mod cloud;
 pub mod params;
 pub mod place;
+pub mod sky;
 pub mod sun;
 pub mod time;
 pub mod timeline;

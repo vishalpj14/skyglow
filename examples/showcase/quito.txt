@@ -10,7 +10,7 @@ Skyglow  Quito  0.1807°S  78.4678°W   2026-12-21   sunrise   pack: default
   Viewpoint: 2850 m above sea level, with a mountain skyline
 
   Solar noon   12:12:03
-  Sunrise       06:01:10   (look toward azimuth 113°)
+  Sunrise      06:01:10   (look toward azimuth 113°)
   Sunrise at sea level, flat horizon: 06:07:59
   Flat horizon from your height:     06:01:10   (horizon dips 1.56°, 7 min earlier)
   The skyline does not block the sun in its rising direction today.
@@ -39,7 +39,7 @@ Skyglow  Quito  0.1807°S  78.4678°W   2026-12-21   sunset   pack: default
   Viewpoint: 2850 m above sea level, with a mountain skyline
 
   Solar noon   12:12:03
-  Sunset        18:22:57   (look toward azimuth 247°)
+  Sunset       18:22:57   (look toward azimuth 247°)
   Sunset at sea level, flat horizon: 18:16:08
   Flat horizon from your height:     18:22:57   (horizon dips 1.56°, 7 min later)
   The skyline does not block the sun in its setting direction today.
@@ -71,7 +71,7 @@ Skyglow  Quito  0.1807°S  78.4678°W   2026-06-21   sunrise   pack: default
   Viewpoint: 2850 m above sea level, with a mountain skyline
 
   Solar noon   12:15:44
-  Sunrise       06:05:33   (look toward azimuth 67°)
+  Sunrise      06:05:33   (look toward azimuth 67°)
   Sunrise at sea level, flat horizon: 06:12:22
   Flat horizon from your height:     06:05:33   (horizon dips 1.56°, 7 min earlier)
   The skyline does not block the sun in its rising direction today.
@@ -100,7 +100,7 @@ Skyglow  Quito  0.1807°S  78.4678°W   2026-06-21   sunset   pack: default
   Viewpoint: 2850 m above sea level, with a mountain skyline
 
   Solar noon   12:15:44
-  Sunset        18:25:56   (look toward azimuth 293°)
+  Sunset       18:25:56   (look toward azimuth 293°)
   Sunset at sea level, flat horizon: 18:19:07
   Flat horizon from your height:     18:25:56   (horizon dips 1.56°, 7 min later)
   The skyline does not block the sun in its setting direction today.
