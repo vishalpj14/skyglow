@@ -30,4 +30,6 @@ Standing higher lets you see a little further over the curve of the Earth, so yo
 
 ## What it cannot know yet
 
-The timing is exact. What skyglow cannot know yet is whether clouds are actually there tonight, how hazy the air is, or how humid. Those decide whether the evening is spectacular or grey. They are the next big step, along with learning better colour guesses from real photos.
+The timing is exact. What decides whether the evening is spectacular or grey is the air: whether clouds are actually there tonight, how hazy it is, how humid.
+
+When you are online, the **Conditions** card shows a weather forecast for exactly that: cloud cover at three heights, humidity and haze. The **Glow forecast** card turns it into a rough score from 0 to 10 for each cloud height, finds the best moment around sunrise and sunset, and shows every reason behind the number. It is built from public rules of thumb for now; learning from real photos is the next big step.

@@ -23,6 +23,8 @@ cargo run -p skyglow-core -- --place quito 2026-11-15
 
 Each place file holds the coordinates, **height above sea level**, the local time zone (with its name, and daylight saving where it exists), and for some places a rough **mountain skyline**. The report prints the local time zone and offers a hint when a place uses daylight saving. To see the daylight-saving clock add `--tz`, for example `--place sydney 2026-12-21 --tz 11`. See [docs/PLACES.md](../docs/PLACES.md) for the file format.
 
+`examples/conditions/sample-evening.json` is a sample of cloud cover, moisture and haze readings for one Kochi evening. The numbers are **made up** to show the file format; try it with `--place kochi 2026-11-15 --at 18:08 --conditions examples/conditions/sample-evening.json`. See [docs/CONDITIONS.md](../docs/CONDITIONS.md).
+
 ## The showcase: every city, straight from the program
 
 [`make-showcase.ps1`](make-showcase.ps1) runs the real command-line tool for every place on the December and June solstices and saves exactly what it printed, with nothing edited by hand:
@@ -101,7 +103,7 @@ cargo run -p skyglow-core -- --place quito 2026-11-15
 cargo run -p skyglow-core -- --place yosemite 2026-11-15
 ```
 
-To replay your own notes against the model, see [docs/OBSERVATIONS.md](../docs/OBSERVATIONS.md).
+`examples/observations/kochi-sample.json` is a made-up observation that carries the sample conditions, to show the format: `--observe examples/observations/kochi-sample.json`. To replay your own notes against the model, see [docs/OBSERVATIONS.md](../docs/OBSERVATIONS.md).
 
 ## Files here
 

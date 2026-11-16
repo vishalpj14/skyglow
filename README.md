@@ -59,6 +59,9 @@ cargo run -p skyglow-core -- 9.93 76.27 2026-11-15 --tz 5.5 --at 06:10
 
 # 5. See every step of the sun calculation
 cargo run -p skyglow-core -- 9.93 76.27 2026-11-15 --tz 5.5 --explain
+
+# 6. Show cloud cover, moisture and haze readings next to a time (shown only, not used yet)
+cargo run -p skyglow-core -- --place kochi 2026-11-15 --at 18:08 --conditions examples/conditions/sample-evening.json
 ```
 
 Southern and western coordinates are negative (Sydney is `-33.87 151.21`). Put options after the coordinates. Run `cargo run -p skyglow-core -- --help` for everything.
@@ -97,7 +100,9 @@ More: [ARCHITECTURE.md](ARCHITECTURE.md) (how the pieces fit), [docs/PHYSICS.md]
 
 **Can:** sun position and sunset time anywhere, evening phases, when Earth's shadow reaches clouds of a given height, how deep sunlight dives on its way to a cloud (which decides how red or pink it looks).
 
-**Can't yet:** read live weather. It doesn't know whether there are clouds tonight, how much dust or humidity is in the air, or what the sky will actually look like. Those are the next steps, and the colour labels are rough guesses calibrated on very little data.
+**New:** it reads a weather forecast's cloud cover, humidity, water vapour and haze (the web app looks them up from the free Open-Meteo service and keeps them for offline; the command line reads them from a file, [docs/CONDITIONS.md](docs/CONDITIONS.md)), and turns them into a **glow score** from 0 to 10 per cloud layer, with the best moment around sunrise and sunset and every reason shown ([docs/GLOW.md](docs/GLOW.md)).
+
+**Can't yet:** promise what the sky will look like. The glow score is a rough guide built from public rules of thumb, not yet calibrated against real photos, and it only knows the cloud forecast for your area, not along the sunbeam's path toward the sun. Those are the next steps, and the colour labels are rough guesses calibrated on very little data.
 
 ## Roadmap
 

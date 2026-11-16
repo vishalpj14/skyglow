@@ -119,6 +119,86 @@ export interface SkyState {
   layers: LayerState[];
 }
 
+/** What the air is like at one moment (core/src/conditions.rs). A missing field means "not known". */
+export interface Conditions {
+  /** Share of the sky covered by low cloud (below about 3 km), 0 to 100. */
+  cloud_low_pct?: number;
+  /** Middle cloud (about 3 to 8 km), 0 to 100. */
+  cloud_mid_pct?: number;
+  /** High cloud (above about 8 km), 0 to 100. */
+  cloud_high_pct?: number;
+  /** Relative humidity near the ground, 0 to 100. */
+  humidity_pct?: number;
+  /** Water vapour in the whole column of air, mm. */
+  water_vapour_mm?: number;
+  /** Aerosol optical depth at 550 nm: haze, dust and smoke. */
+  aerosol_optical_depth?: number;
+}
+
+export type ConditionsSample = Conditions & { jd: number };
+
+export interface ConditionsSeries {
+  /** Where the numbers came from, in words. */
+  source: string;
+  samples: ConditionsSample[];
+}
+
+/** How a reading was worked out from the series. */
+export type ConditionsBasis =
+  | { kind: "between"; before_jd: number; after_jd: number }
+  | { kind: "nearest"; sample_jd: number };
+
+export interface ConditionsReading {
+  conditions: Conditions;
+  basis: ConditionsBasis;
+}
+
+/** A forecast cloud level (core/src/glow.rs). */
+export type Level = "low" | "mid" | "high";
+
+/** Every factor behind a glow score, each 0 to 1 (core/src/glow.rs). */
+export interface GlowFactors {
+  light: number;
+  sun: number;
+  colour: number;
+  cover: number | null;
+  path: number;
+  view: number;
+  haze: number;
+  humidity: number;
+}
+
+export interface LayerGlow {
+  name: string;
+  height_km: number;
+  level: Level;
+  beam_low_km: number | null;
+  cover_pct: number | null;
+  factors: GlowFactors;
+  /** Geometry only, 0 to 10: the score if cloud were there and the air clear. */
+  potential: number;
+  /** 0 to 10, or null without conditions. */
+  score: number | null;
+  word: string | null;
+  blocked_by: Level[];
+  seen_through: Level[];
+  unknown: string[];
+}
+
+export interface Glow {
+  jd: number;
+  has_conditions: boolean;
+  layers: LayerGlow[];
+}
+
+export interface GlowMoment {
+  jd: number;
+  layer: string;
+  height_km: number;
+  score: number;
+  word: string;
+}
+
 export interface LocalDate {
   year: number;
   month: number;

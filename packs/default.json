@@ -61,5 +61,25 @@
     { "min_height_km": 3.0, "label": "orange", "swatch": "#f08a3c" },
     { "min_height_km": 1.0, "label": "orange-red to pink", "swatch": "#e0566b" },
     { "min_height_km": 0.0, "label": "deep red-pink, fading fast", "swatch": "#a8325a" }
-  ]
+  ],
+  "glow": {
+    "note": "UNCALIBRATED first guesses from public sources and photographers' rules of thumb, not fitted to observations. Where each number comes from: docs/GLOW.md.",
+    "low_top_km": 3.0,
+    "high_base_km": 8.0,
+    "opacity": { "low": 0.8, "mid": 0.6, "high": 0.3 },
+    "cover": [[0, 0], [10, 0.35], [30, 0.8], [50, 1], [80, 1], [100, 0.8]],
+    "colour": [[0, 0.35], [1, 0.85], [3, 1], [6, 0.85], [12, 0.6]],
+    "toward_sun": [[0, 0.15], [3, 0.35], [10, 0.55], [25, 0.7]],
+    "sun_up": [[0, 0.75], [3, 0.5], [6, 0.25], [10, 0.05], [15, 0]],
+    "low_beam": [[0, 1], [2, 0.8], [5, 0.4], [10, 0.15]],
+    "aerosol": [[0, 1], [0.1, 1], [0.25, 0.9], [0.5, 0.7], [1, 0.4], [2, 0.2]],
+    "humidity": [[0, 1], [70, 1], [85, 0.85], [95, 0.7], [100, 0.6]],
+    "words": [
+      { "min_score": 0, "word": "none" },
+      { "min_score": 0.5, "word": "faint" },
+      { "min_score": 2, "word": "modest" },
+      { "min_score": 4, "word": "good" },
+      { "min_score": 6.5, "word": "vivid" }
+    ]
+  }
 }

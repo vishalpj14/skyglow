@@ -16,12 +16,24 @@
 //! 6. [`timeline`] - ties everything together into one evening timeline.
 //! 7. [`sky`]      - the sky at a single instant: sun position, which cloud
 //!                   layers are lit, and where Earth's shadow edge sits.
+//! 8. [`conditions`] - what the air is like (cloud cover, moisture, haze), as
+//!                   plain numbers handed in from outside. Reported, not yet
+//!                   used in predictions.
+//! 9. [`openmeteo`] - turns the text of an Open-Meteo weather answer into
+//!                   `conditions`. It reads text it is given; it never goes
+//!                   online itself.
+//! 10. [`glow`]    - the glow score: sky geometry plus conditions (is the cloud
+//!                   there, is the sunbeam blocked, haze, damp air) as a rough
+//!                   0-10 score per layer, with every factor shown.
 //!
 //! Design rules: no global state, no I/O in the library (only the CLI reads
 //! files), and every calculation can show its intermediate values
 //! ("explain mode") so nothing is a black box.
 
 pub mod cloud;
+pub mod conditions;
+pub mod glow;
+pub mod openmeteo;
 pub mod params;
 pub mod place;
 pub mod sky;

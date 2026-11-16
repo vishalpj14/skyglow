@@ -13,6 +13,8 @@ A phone-friendly web app that runs the real Skyglow engine (the Rust code in `co
   - the **time scrubber**: drag through the whole day and read the sky at any minute, in the same words as the command line's `--at`;
   - the **sun's height through the day**, with the light stages as coloured bands (and your skyline, if you set one);
   - **colour strips** around sunrise and sunset: minute by minute, the sky stage and whether each cloud height is lit, and with what light;
+  - **glow forecast**: a rough 0-10 score per cloud height from the forecast and the geometry, the best moment around sunrise and sunset (tap **Go** to jump there), and under **Why** every factor behind each score. With a forecast, the colour strips also fade each cloud row into the sky where the weather says it will not show (see [docs/GLOW.md](../docs/GLOW.md));
+  - **conditions**: the weather forecast's cloud cover (low, middle, high), humidity, water vapour and haze at the scrubber's time, from Open-Meteo. It says which forecast hours it was worked out from and how old it is, is saved for offline, and has a Refresh button. **Save as file** downloads it (UTC times, no coordinates) to keep with notes of that evening; see [docs/OBSERVATIONS.md](../docs/OBSERVATIONS.md). For information only: it does not change the timings or colours yet (see [docs/CONDITIONS.md](../docs/CONDITIONS.md));
   - **sunrise and sunset tables**: the same numbers as the command line's report.
 
 Click any chart or time to move the scrubber there.
@@ -34,13 +36,15 @@ Everything runs in your browser. Only these send anything, and only while you ar
 | Pick on a map | the map area you look at, to fetch map pictures | OpenStreetMap tile servers |
 | Online extras (on unless switched off) | the coordinates of places you pick, rounded to about 100 m | Open-Meteo (time zone, ground height) and OpenStreetMap Nominatim (name) |
 
-Online-extras answers are cached in the browser, so the same spot is not looked up twice. Each request gives up after 8 seconds, so a slow service never blocks the app. The footer shows whether you are online or offline.
+| Conditions (part of online extras) | the coordinates of the place on screen, rounded to about 1 km, and three dates | Open-Meteo (weather forecast, and the CAMS aerosol forecast) |
+
+Online-extras answers are cached in the browser, so the same spot is not looked up twice. Forecasts are kept too (the twelve most recent place-and-date pairs), reused for an hour, and shown with their age when you are offline. Each request gives up after 8 seconds, so a slow service never blocks the app. The footer shows whether you are online or offline.
 
 Saved places and your last settings are kept in this browser's storage only. "Forget this saved place" removes one.
 
 ## Honesty
 
-The sun's position and Earth's shadow are exact geometry. The **colours** in the strips and the stage names come from the pack and are rough, **uncalibrated** guesses. The app does not yet know whether clouds are actually there tonight; each row of a colour strip means "if a cloud were at this height".
+The sun's position and Earth's shadow are exact geometry. The **colours** in the strips and the stage names come from the pack and are rough, **uncalibrated** guesses. Without a forecast, each row of a colour strip means "if a cloud were at this height". The Conditions card shows a weather model's forecast for the area, not a measurement. The glow score built on it uses public rules of thumb and is not calibrated yet.
 
 ## Build it yourself
 
@@ -69,7 +73,9 @@ npm run build      # type-checks and builds the offline-ready site into dist/
 | `src/lib/engine.ts` | The only file that talks to the engine. Typed helpers around the WebAssembly bridge (`wasm/`). |
 | `src/lib/types.ts` | TypeScript shapes of the engine's answers. Field names match the Rust structs. |
 | `src/lib/clock.ts`, `describe.ts`, `strip.ts`, `places.ts`, `packs.ts`, `geo.ts` | Small pure helpers: clocks, sentences, strip colours, bundled places and packs, GPS and online search. |
-| `src/components/` | The screens: header, place panel, skyline editor, map, sun path, colour strip, timeline table, readout, doc pages, footer, notices. |
+| `src/lib/conditions.ts`, `useConditions.ts` | Live conditions: builds the two Open-Meteo addresses, fetches them, keeps answers for offline, and shares the forecast between the cards and strips. Reading the answers is the engine's job. |
+| `src/lib/glowText.ts` | The glow score's factors in plain words (the numbers come from the engine). |
+| `src/components/` | The screens: header, place panel, skyline editor, map, sun path, colour strip, timeline table, readout, glow card, conditions card, doc pages, footer, notices. |
 | `src/content/*.md`, `src/lib/docs.ts` | The in-app guides: their plain-language text, headline, colour and “Go deeper” links. |
 | `src/lib/route.ts`, `transition.ts` | The tiny `#/docs/<page>` router and the sunrise page transition. |
 | `vite.config.ts` | Build settings and the offline service worker. |

@@ -8,9 +8,11 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
+use skyglow_core::conditions::ConditionsSeries;
 use skyglow_core::params::Params;
 use skyglow_core::place::Place;
 use skyglow_core::sun;
+use skyglow_core::time;
 use skyglow_core::timeline::build_timeline_for_place;
 
 /// Path of a file or folder relative to the repository root.
@@ -127,6 +129,42 @@ fn every_pack_in_the_packs_folder_loads() {
         }
     }
     assert!(count >= 2, "expected at least default.json and kerala.json, found {count}");
+}
+
+#[test]
+fn every_example_conditions_file_loads_and_says_it_is_not_real() {
+    let dir = repo_path("examples/conditions");
+    let mut count = 0;
+    for entry in std::fs::read_dir(&dir).expect("examples/conditions should exist") {
+        let path = entry.expect("readable entry").path();
+        if path.extension().and_then(|e| e.to_str()) == Some("json") {
+            let text = std::fs::read_to_string(&path).expect("readable conditions file");
+            let series = ConditionsSeries::from_json(&text)
+                .unwrap_or_else(|e| panic!("{}: {e}", path.display()));
+            // Shipped examples are invented; they must never pass for a forecast.
+            assert!(
+                series.source.contains("made-up"),
+                "{}: source should say the numbers are made-up",
+                path.display()
+            );
+            count += 1;
+        }
+    }
+    assert!(count >= 1, "expected at least one example conditions file");
+}
+
+#[test]
+fn the_sample_evening_reads_halfway_between_its_hourly_readings() {
+    // The sample has high cloud 40% at 11:30 UTC and 60% at 12:30 UTC, so at
+    // 12:00 UTC (17:30 in Kochi) it should read (40 + 60) / 2 = 50%.
+    let text = std::fs::read_to_string(repo_path("examples/conditions/sample-evening.json")).unwrap();
+    let series = ConditionsSeries::from_json(&text).unwrap();
+    let noon_utc = time::julian_day(2026, 11, 15, 12.0);
+    let c = series.at(noon_utc).expect("inside the sample").conditions;
+    assert!((c.cloud_high_pct.unwrap() - 50.0).abs() < 1e-6);
+    // The last reading has no aerosol value, so 13:00 UTC has none either.
+    let later = series.at(time::julian_day(2026, 11, 15, 13.0)).unwrap().conditions;
+    assert_eq!(later.aerosol_optical_depth, None);
 }
 
 #[test]

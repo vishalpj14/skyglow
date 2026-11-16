@@ -95,6 +95,8 @@ The sun position and the shadow geometry are exact. Everything about what the sk
 - **Moisture** in the air, which affects haze and how far clean light travels.
 - **The exact colour labels.** The guesses about which grazing height looks pink or orange come from a tiny number of observations and need more.
 
+A first step is in place: skyglow reads a weather forecast's cloud cover, humidity, water vapour and haze (the web app looks them up from the free Open-Meteo service; the command line reads them from a file, see [CONDITIONS.md](CONDITIONS.md)). It turns them into a rough **glow score** from 0 to 10 per cloud layer: is there cloud at that height, does other cloud block the sunbeam on its way (only cloud higher than the beam's lowest point can), can you see the layer past lower cloud, and how much haze and damp air dull the colour. Every score comes with all its reasons. The numbers behind it come from public rules of thumb and are not calibrated yet. See [GLOW.md](GLOW.md).
+
 Planned work is to fill these in from live weather data and from photos taken by real people. This is the main reason the project is open source: more observations make better predictions.
 
 ## 7. A worked example

@@ -1,0 +1,8 @@
+{
+  "source": "made-up sample numbers, not a real forecast",
+  "samples": [
+    { "utc": "2026-11-15T11:30", "cloud_low_pct": 20, "cloud_mid_pct": 5, "cloud_high_pct": 40, "humidity_pct": 72, "water_vapour_mm": 44, "aerosol_optical_depth": 0.35 },
+    { "utc": "2026-11-15T12:30", "cloud_low_pct": 10, "cloud_mid_pct": 5, "cloud_high_pct": 60, "humidity_pct": 78, "water_vapour_mm": 46, "aerosol_optical_depth": 0.33 },
+    { "utc": "2026-11-15T13:30", "cloud_low_pct": 10, "cloud_mid_pct": 0, "cloud_high_pct": 70, "humidity_pct": 82, "water_vapour_mm": 46 }
+  ]
+}

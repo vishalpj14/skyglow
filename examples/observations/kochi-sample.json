@@ -1,0 +1,11 @@
+{
+  "place": "kochi",
+  "date": "2026-11-15",
+  "notes": "A made-up example to show the file format; not a real evening. The conditions are the made-up sample readings.",
+  "conditions": { "file": "../conditions/sample-evening.json" },
+  "events": [
+    { "time": "17:55", "source": "photo", "note": "Thin high cloud turning gold." },
+    { "time": "18:08", "source": "photo", "note": "High cloud orange to pink overhead; low cloud already grey." },
+    { "time": "18:15", "source": "memory", "note": "Last pink on the high cloud toward the west." }
+  ]
+}

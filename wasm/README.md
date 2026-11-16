@@ -14,6 +14,12 @@ It speaks **JSON text** both ways:
 | `skyAt(place, pack, jd)` | The sky at one instant, like `--at` |
 | `skySeries(place, pack, jdStart, jdEnd, stepMinutes)` | The sky at many instants (sun path, colour strip); at most 3000 points per call |
 | `packInfo(pack)` | The pack, checked and decoded |
+| `conditionsFromOpenMeteo(answers, source)` | Merge the text of Open-Meteo answers (a JSON list of texts) into a conditions series. The page fetches; the engine only reads |
+| `conditionsAt(series, jd)` | The conditions at one instant from a series, or `null` if nothing is close enough |
+| `openMeteoForecastHourly()`, `openMeteoAirQualityHourly()` | The `hourly=` lists to ask Open-Meteo for |
+| `glowAt(place, pack, series, jd)` | The glow score of every layer at one instant, with all factors. An empty series means "no forecast": only the potential |
+| `glowSeries(place, pack, series, jdStart, jdEnd, stepMinutes)` | The glow at many instants, on the same grid as `skySeries` |
+| `bestGlow(place, pack, series, jdStart, jdEnd, stepMinutes)` | The best glow moment in a window, or `null` |
 | `defaultPack()` | Text of the built-in pack |
 | `jdFromLocal`, `formatClock`, `solarNoon` | Clock helpers |
 

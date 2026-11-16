@@ -13,9 +13,10 @@ Only a few conveniences use the internet, and only while you are online:
 - **Searching for a place** sends the text you type, so you can find any town in the world.
 - **The map** loads map pictures for the area you are looking at.
 - **Online extras** fill in a picked place's time zone, ground height and name. They send only the place's rough coordinates (to about 100 m), never who you are.
+- **Conditions**, also part of online extras, look up the weather forecast for the place and date on screen. They send even rougher coordinates (to about 1 km) and the date. The answer is kept on your device so it is still there offline.
 
 You can switch online extras off at any time: tap the **Online** pill at the top of the page.
 
 ## Who those services are
 
-Map pictures, place names and search come from **OpenStreetMap**, a free map made by volunteers. Time zones and ground heights come from **Open-Meteo**, a free weather and terrain service. skyglow has no accounts, no tracking and no adverts.
+Map pictures, place names and search come from **OpenStreetMap**, a free map made by volunteers. Time zones, ground heights and weather forecasts come from **Open-Meteo**, a free weather and terrain service; its haze forecast is from the European Copernicus programme. skyglow has no accounts, no tracking and no adverts.

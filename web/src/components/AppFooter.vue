@@ -37,7 +37,8 @@ const logo = ref<InstanceType<typeof LogoMark>>();
         <span>
           Data &copy; <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap</a> &middot;
           <a href="https://photon.komoot.io/" rel="noopener">Photon</a> &middot;
-          <a href="https://open-meteo.com/" rel="noopener">Open-Meteo</a>
+          <a href="https://open-meteo.com/" rel="noopener">Open-Meteo</a> &middot;
+          <a href="https://atmosphere.copernicus.eu/" rel="noopener">Copernicus CAMS</a>
         </span>
       </div>
     </div>

@@ -10,6 +10,8 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::glow::GlowParams;
+
 /// Pack schema version this build understands. Packs with another number are
 /// rejected instead of being half-understood.
 pub const SUPPORTED_SCHEMA: u32 = 1;
@@ -78,6 +80,21 @@ pub struct Params {
     /// Optional colour hints keyed by grazing height (see `cloud::grazing_height_km`).
     #[serde(default)]
     pub grazing_colours: Vec<GrazingColour>,
+    /// The glow-score numbers (see `glow` and `docs/GLOW.md`). Optional in a
+    /// pack file: a pack without them uses the built-in default pack's.
+    #[serde(default = "default_glow")]
+    pub glow: GlowParams,
+}
+
+/// The `glow` section of the built-in default pack, for packs that leave it out.
+fn default_glow() -> GlowParams {
+    #[derive(Deserialize)]
+    struct OnlyGlow {
+        glow: GlowParams,
+    }
+    serde_json::from_str::<OnlyGlow>(DEFAULT_PACK_JSON)
+        .expect("the built-in default pack must have a valid glow section")
+        .glow
 }
 
 impl Params {
@@ -159,6 +176,7 @@ impl Params {
                 ));
             }
         }
+        self.glow.validate()?;
         for pair in self.stages.windows(2) {
             if pair[1].from_deg > pair[0].to_deg + 1e-9 {
                 return Err(format!(
@@ -214,6 +232,15 @@ mod tests {
         assert!(p.validate().is_err());
         p.stages[0].swatch = "#12345g".to_string();
         assert!(p.validate().is_err());
+    }
+
+    #[test]
+    fn a_pack_without_glow_numbers_borrows_the_defaults() {
+        let kerala = Params::from_json(include_str!("../../packs/kerala.json")).unwrap();
+        assert_eq!(kerala.glow, Params::builtin().glow);
+        // A pack's own glow section wins, and is checked.
+        let bad = DEFAULT_PACK_JSON.replace("\"low_top_km\": 3.0", "\"low_top_km\": 30.0");
+        assert!(Params::from_json(&bad).unwrap_err().contains("low_top_km"));
     }
 
     #[test]

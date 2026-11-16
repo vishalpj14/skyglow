@@ -22,7 +22,11 @@ A pack is a small JSON file of **numbers** that tune Skyglow's estimates. Packs 
 
 Stages and `grazing_colours` entries may also carry an optional `swatch`: a display colour as `#rrggbb`, used only to draw the web app's colour strip and stage bands. Swatches are uncalibrated guesses, like the labels. A swatch that is not `#rrggbb` is rejected.
 
-Unknown extra fields are ignored, so packs can carry notes for future versions.
+| `glow` | optional object | The glow-score numbers: forecast level heights, how much each level's cloud stops, and curves for cover, colour, haze and humidity. A pack without it uses `default.json`'s. Every field and where its numbers come from: [docs/GLOW.md](../docs/GLOW.md). |
+
+Inside `glow`, a **curve** is a list of `[x, y]` points from left to right, joined by straight lines; outside the first and last point the end value holds; every `y` is from 0 to 1. Fields inside `glow` must be spelt exactly (a typo is an error, not ignored).
+
+Unknown extra fields at the top level are ignored, so packs can carry notes for future versions.
 
 ## Using a pack
 

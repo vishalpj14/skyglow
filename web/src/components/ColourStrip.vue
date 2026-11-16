@@ -3,11 +3,11 @@
 // the sky stage is, and whether each cloud layer is lit, and with what light.
 // Colours are the pack's UNCALIBRATED display guesses.
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
-import type { Pack, SkyState } from "../lib/types";
+import type { Glow, Pack, SkyState } from "../lib/types";
 import { buildStrip, type StripColumn } from "../lib/strip";
 import { hhmm, localHours } from "../lib/clock";
 
-const props = defineProps<{ title: string; series: SkyState[]; pack: Pack; tz: number; cursorJd: number }>();
+const props = defineProps<{ title: string; series: SkyState[]; pack: Pack; tz: number; cursorJd: number; glow?: Glow[] }>();
 const emit = defineEmits<{ seek: [jd: number] }>();
 
 const wrap = ref<HTMLDivElement>();
@@ -26,7 +26,8 @@ const rowH = 22;
 const gap = 2;
 const axisH = 20;
 
-const cols = computed<StripColumn[]>(() => buildStrip(props.series, props.pack));
+const withWeather = computed(() => !!props.glow?.some((g) => g.has_conditions));
+const cols = computed<StripColumn[]>(() => buildStrip(props.series, props.pack, props.glow));
 const rows = computed(() => [
   "Sky",
   ...(props.series[0]?.layers ?? []).map((l) => `${l.name} ${l.height_km} km`),
@@ -106,7 +107,10 @@ const inWindow = computed(() => props.cursorJd >= start.value && props.cursorJd 
         </template>
       </div>
     </div>
-    <p class="muted note">Each row is one cloud height from the pack, if a cloud were there. Colours are rough, uncalibrated guesses from the pack.</p>
+    <p v-if="withWeather" class="muted note">
+      Each row is one cloud height from the pack. <strong>With the forecast:</strong> a row fades into the sky where little cloud is forecast at that height, or where other cloud or haze is likely to block it. Colours and fading are rough, uncalibrated guesses.
+    </p>
+    <p v-else class="muted note">Each row is one cloud height from the pack, if a cloud were there. Colours are rough, uncalibrated guesses from the pack.</p>
   </section>
 </template>
 

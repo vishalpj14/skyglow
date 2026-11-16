@@ -90,7 +90,7 @@ watch(menuOpen, async (open) => {
             <input v-model="onlineExtras" type="checkbox" />
             <span>
               <strong>Online extras</strong><br />
-              Fill in the time zone, ground height and name of places you pick, using only their rough coordinates.
+              Fill in the time zone, ground height and name of places you pick, and look up their weather forecast, using only their rough coordinates.
             </span>
           </label>
           <a href="#/docs/privacy" @click="statusOpen = false">What goes online, and when</a>

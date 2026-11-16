@@ -16,6 +16,9 @@
 //! `#[wasm_bindgen]` wrappers at the bottom only convert errors for
 //! JavaScript.
 
+use skyglow_core::conditions::ConditionsSeries;
+use skyglow_core::glow;
+use skyglow_core::openmeteo;
 use skyglow_core::params::{Params, DEFAULT_PACK_JSON};
 use skyglow_core::place::Place;
 use skyglow_core::sky::{self, SkyState};
@@ -128,6 +131,85 @@ pub fn sky_series_json(
     to_json(&sky_series(&place, &params, jd_start, jd_end, step_minutes)?)
 }
 
+/// Merge the text of one or more Open-Meteo answers into a conditions series.
+/// `responses_json` is a JSON list of those texts, e.g. `["{...}", "{...}"]`.
+/// The page does the fetching; the core does the reading.
+pub fn conditions_from_open_meteo_json(responses_json: &str, source: &str) -> Result<String, String> {
+    let texts: Vec<String> = serde_json::from_str(responses_json)
+        .map_err(|e| format!("expected a JSON list of answer texts: {e}"))?;
+    let refs: Vec<&str> = texts.iter().map(String::as_str).collect();
+    to_json(&openmeteo::series_from_responses(&refs, source)?)
+}
+
+/// The conditions at one instant from a series (as produced above, or a
+/// hand-written conditions file). `"null"` when the series has nothing close
+/// enough to that time.
+pub fn conditions_at_json(series_json: &str, jd: f64) -> Result<String, String> {
+    let series = ConditionsSeries::from_json(series_json)?;
+    to_json(&series.at(jd))
+}
+
+/// A conditions series from its JSON text; empty text means "no conditions".
+fn load_series(series_json: &str) -> Result<Option<ConditionsSeries>, String> {
+    if series_json.trim().is_empty() {
+        Ok(None)
+    } else {
+        ConditionsSeries::from_json(series_json).map(Some)
+    }
+}
+
+/// The glow of every layer at one instant (see `core/src/glow.rs`).
+pub fn glow_at_json(place_json: &str, pack_json: &str, series_json: &str, jd: f64) -> Result<String, String> {
+    let place = load_place(place_json)?;
+    let params = load_pack(pack_json)?;
+    let series = load_series(series_json)?;
+    if !jd.is_finite() {
+        return Err("time must be a finite Julian Day".to_string());
+    }
+    to_json(&glow::glow_at(&params, &place, series.as_ref(), jd))
+}
+
+/// The glow at evenly spaced instants, like `sky_series` (same limits).
+pub fn glow_series_json(
+    place_json: &str,
+    pack_json: &str,
+    series_json: &str,
+    jd_start: f64,
+    jd_end: f64,
+    step_minutes: f64,
+) -> Result<String, String> {
+    let place = load_place(place_json)?;
+    let params = load_pack(pack_json)?;
+    let series = load_series(series_json)?;
+    // Reuse sky_series for its checks and spacing.
+    let skies = sky_series(&place, &params, jd_start, jd_end, step_minutes)?;
+    let out: Vec<glow::Glow> = skies
+        .iter()
+        .map(|st| {
+            let reading = series.as_ref().and_then(|s| s.at(st.jd));
+            glow::glow(&params, st, reading.as_ref().map(|r| &r.conditions))
+        })
+        .collect();
+    to_json(&out)
+}
+
+/// The best glow moment in a window; JSON `null` when no score is known.
+pub fn best_glow_json(
+    place_json: &str,
+    pack_json: &str,
+    series_json: &str,
+    jd_start: f64,
+    jd_end: f64,
+    step_minutes: f64,
+) -> Result<String, String> {
+    let place = load_place(place_json)?;
+    let params = load_pack(pack_json)?;
+    match load_series(series_json)? {
+        Some(series) => to_json(&glow::best_glow(&params, &place, &series, jd_start, jd_end, step_minutes)?),
+        None => Ok("null".to_string()),
+    }
+}
+
 // ---------------------------------------------------------------------------
 // JavaScript-facing wrappers. Errors become JavaScript exceptions.
 // ---------------------------------------------------------------------------
@@ -174,6 +256,57 @@ pub fn sky_series_js(
     step_minutes: f64,
 ) -> Result<String, JsError> {
     js(sky_series_json(place_json, pack_json, jd_start, jd_end, step_minutes))
+}
+
+#[wasm_bindgen(js_name = conditionsFromOpenMeteo)]
+pub fn conditions_from_open_meteo(responses_json: &str, source: &str) -> Result<String, JsError> {
+    js(conditions_from_open_meteo_json(responses_json, source))
+}
+
+#[wasm_bindgen(js_name = conditionsAt)]
+pub fn conditions_at(series_json: &str, jd: f64) -> Result<String, JsError> {
+    js(conditions_at_json(series_json, jd))
+}
+
+#[wasm_bindgen(js_name = glowAt)]
+pub fn glow_at(place_json: &str, pack_json: &str, series_json: &str, jd: f64) -> Result<String, JsError> {
+    js(glow_at_json(place_json, pack_json, series_json, jd))
+}
+
+#[wasm_bindgen(js_name = glowSeries)]
+pub fn glow_series(
+    place_json: &str,
+    pack_json: &str,
+    series_json: &str,
+    jd_start: f64,
+    jd_end: f64,
+    step_minutes: f64,
+) -> Result<String, JsError> {
+    js(glow_series_json(place_json, pack_json, series_json, jd_start, jd_end, step_minutes))
+}
+
+#[wasm_bindgen(js_name = bestGlow)]
+pub fn best_glow(
+    place_json: &str,
+    pack_json: &str,
+    series_json: &str,
+    jd_start: f64,
+    jd_end: f64,
+    step_minutes: f64,
+) -> Result<String, JsError> {
+    js(best_glow_json(place_json, pack_json, series_json, jd_start, jd_end, step_minutes))
+}
+
+/// The `hourly=` list to ask Open-Meteo's forecast service for.
+#[wasm_bindgen(js_name = openMeteoForecastHourly)]
+pub fn open_meteo_forecast_hourly() -> String {
+    openmeteo::FORECAST_HOURLY.to_string()
+}
+
+/// The `hourly=` list to ask Open-Meteo's air-quality service for.
+#[wasm_bindgen(js_name = openMeteoAirQualityHourly)]
+pub fn open_meteo_air_quality_hourly() -> String {
+    openmeteo::AIR_QUALITY_HOURLY.to_string()
 }
 
 /// Julian Day (UT) for a local date and clock time (`hours`, e.g. 18.5).
@@ -254,6 +387,55 @@ mod tests {
         assert!(timeline_json(KOCHI, "", 2026, 11, 15, 5.5, "noon").is_err());
         assert!(timeline_json(KOCHI, "{\"schema\":9}", 2026, 11, 15, 5.5, "sunset").is_err());
         assert!(sky_at_json(KOCHI, "", f64::NAN).is_err());
+    }
+
+    #[test]
+    fn open_meteo_answers_go_in_and_readings_come_out() {
+        // Unix 946728000 is 2000-01-01 12:00 UTC, Julian Day 2451545.0 (J2000).
+        let forecast = r#"{"hourly":{"time":[946728000,946731600],"cloud_cover_high":[40,60]}}"#;
+        let air = r#"{"hourly":{"time":[946728000,946731600],"aerosol_optical_depth":[0.2,0.4]}}"#;
+        let list = serde_json::to_string(&[forecast, air]).unwrap();
+        let series = conditions_from_open_meteo_json(&list, "test").unwrap();
+        // Half an hour in: (40 + 60) / 2 = 50 and (0.2 + 0.4) / 2 = 0.3.
+        let r: Value =
+            serde_json::from_str(&conditions_at_json(&series, 2_451_545.0 + 0.5 / 24.0).unwrap()).unwrap();
+        assert!((r["conditions"]["cloud_high_pct"].as_f64().unwrap() - 50.0).abs() < 1e-6);
+        assert!((r["conditions"]["aerosol_optical_depth"].as_f64().unwrap() - 0.3).abs() < 1e-6);
+        assert_eq!(r["basis"]["kind"], "between");
+        assert!(r["conditions"].get("humidity_pct").is_none(), "unknown values are left out");
+        // A day later the series has nothing to say: JSON null, not an error.
+        assert_eq!(conditions_at_json(&series, 2_451_546.0).unwrap(), "null");
+        assert!(conditions_from_open_meteo_json("not a list", "test").is_err());
+        assert!(conditions_from_open_meteo_json(r#"["{\"error\":true,\"reason\":\"nope\"}"]"#, "test")
+            .unwrap_err()
+            .contains("nope"));
+    }
+
+    #[test]
+    fn glow_goes_through_the_bridge() {
+        // 18:08 IST on 15 Nov: sun about 2.8 deg down, the 9 km layer lit
+        // overhead. A clear sky in the conditions means a score of 0 for every
+        // layer; with no conditions there is only the potential.
+        let jd = jd_from_local(2026, 11, 15, 18.0 + 8.0 / 60.0, 5.5);
+        let clear = r#"{"samples":[{"jd":2461360.0,"cloud_low_pct":0,"cloud_mid_pct":0,"cloud_high_pct":0},
+                                    {"jd":2461360.25,"cloud_low_pct":0,"cloud_mid_pct":0,"cloud_high_pct":0}]}"#;
+        let v: Value = serde_json::from_str(&glow_at_json(KOCHI, "", clear, jd).unwrap()).unwrap();
+        assert_eq!(v["has_conditions"], true);
+        for l in v["layers"].as_array().unwrap() {
+            assert_eq!(l["score"], 0.0, "{l}");
+        }
+        let v: Value = serde_json::from_str(&glow_at_json(KOCHI, "", "", jd).unwrap()).unwrap();
+        assert_eq!(v["has_conditions"], false);
+        assert!(v["layers"][2]["potential"].as_f64().unwrap() > 0.0, "the high layer could glow");
+        assert!(v["layers"][2]["score"].is_null());
+
+        let s: Value = serde_json::from_str(&glow_series_json(KOCHI, "", clear, jd, jd + 1.0 / 24.0, 10.0).unwrap()).unwrap();
+        assert_eq!(s.as_array().unwrap().len(), 7);
+        // No cloud anywhere: the best moment scores 0.
+        let b: Value = serde_json::from_str(&best_glow_json(KOCHI, "", clear, jd, jd + 0.02, 1.0).unwrap()).unwrap();
+        assert_eq!(b["score"], 0.0);
+        assert_eq!(best_glow_json(KOCHI, "", "", jd, jd + 0.02, 1.0).unwrap(), "null");
+        assert!(glow_at_json(KOCHI, "", "{", jd).is_err());
     }
 
     #[test]

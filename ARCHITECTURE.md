@@ -44,10 +44,13 @@ Skyglow answers one question: *given a place and a time, what will the evening s
 - `params`: loads and validates packs.
 - `timeline`: assembles the evening timeline for a place and date.
 - `sky`: the sky at one instant, `sky_state(params, place, jd)`: sun position, rising or setting, skyline, which cloud layers are lit and where the shadow edge is. The CLI's `--at` and the web time scrubber both use it.
+- `conditions`: what the air is like, as plain numbers handed in from outside: `Conditions` (one reading) and `ConditionsSeries` (timed readings, with honest rules for the gaps between them). Shown by the CLI's `--conditions` and the web app's Conditions card; not used in predictions yet. See [docs/CONDITIONS.md](docs/CONDITIONS.md).
+- `openmeteo`: reads the text of Open-Meteo forecast and air-quality answers into a `ConditionsSeries`. Text in, struct out: it never goes online.
+- `glow`: the glow score. Takes a `SkyState` and `Conditions` and returns a 0-10 score per layer with every factor (light, sun, colour, cover, path, view, haze, humidity); `best_glow` finds the best moment in a window. Curves in the pack's `glow` section. See [docs/GLOW.md](docs/GLOW.md).
 
-## Live inputs (planned, v2)
+## Live inputs (fetched, shown, and used by the glow score)
 
-Each is optional; the engine falls back to pack defaults without them.
+Each is optional; the engine falls back to pack defaults without them. The core never fetches: the web app fetches from Open-Meteo (`web/src/lib/conditions.ts`) and the command line reads saved answers (`--open-meteo`); both hand the text to `openmeteo`.
 
 | Input | Source idea | Used for |
 |---|---|---|

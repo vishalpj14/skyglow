@@ -3,7 +3,7 @@
 // timelines, the sun's path, colour strips, and drag the time scrubber to
 // read the sky at any minute. All numbers come from the Rust core.
 import { computed, onBeforeUnmount, ref, watch } from "vue";
-import type { LocalDate, Pack, Place, SkyState, Timeline } from "./lib/types";
+import type { Glow, LocalDate, Pack, Place, SkyState, Timeline } from "./lib/types";
 import type { NamedPlace } from "./lib/places";
 import * as engine from "./lib/engine";
 import { browserTzHours, compareZones, deviceZoneName, formatDate, hhmm, offsetForZone, parseDate, resolveClock, todayAt, utcLabel, type ClockChoice } from "./lib/clock";
@@ -15,6 +15,9 @@ import SunPath from "./components/SunPath.vue";
 import ColourStrip from "./components/ColourStrip.vue";
 import TimelineTable from "./components/TimelineTable.vue";
 import SkyReadout from "./components/SkyReadout.vue";
+import ConditionsCard from "./components/ConditionsCard.vue";
+import GlowCard from "./components/GlowCard.vue";
+import { useConditions } from "./lib/useConditions";
 import UpdatePrompt from "./components/UpdatePrompt.vue";
 import AppFooter from "./components/AppFooter.vue";
 import AppHeader from "./components/AppHeader.vue";
@@ -136,6 +139,17 @@ function windowAround(t: Timeline | undefined, before: number, after: number): S
 }
 const sunriseStrip = computed(() => windowAround(timelines.value[0], 60, 40));
 const sunsetStrip = computed(() => windowAround(timelines.value[1], 40, 60));
+
+// ---- the forecast and the glow score -----------------------------------------
+const conditions = useConditions(place, date);
+/** The glow on the same minute grid as a strip, when there is a forecast. */
+function glowFor(strip: SkyState[]): Glow[] | undefined {
+  const text = conditions.seriesText.value;
+  if (!text || !strip.length) return undefined;
+  return safe(() => engine.glowSeries(place.value, packText.value, text, strip[0].jd, strip[strip.length - 1].jd, 1), undefined);
+}
+const sunriseGlow = computed(() => glowFor(sunriseStrip.value));
+const sunsetGlow = computed(() => glowFor(sunsetStrip.value));
 
 // ---- the time scrubber -----------------------------------------------------
 const minute = ref(0);
@@ -319,11 +333,15 @@ onBeforeUnmount(() => window.clearInterval(timer));
         <SkyReadout v-if="skyNow" :s="skyNow" :pack="pack" />
       </section>
 
+      <GlowCard :place="place" :pack-text="packText" :state="conditions" :timelines="timelines" :cursor-jd="cursorJd" :tz="tz" @seek="userSeek" />
+
+      <ConditionsCard :state="conditions" :date="date" :cursor-jd="cursorJd" :tz="tz" />
+
       <SunPath :series="daySeries" :pack="pack" :tz="tz" :cursor-jd="cursorJd" :day-start-jd="dayStart" @seek="userSeek" />
 
       <div class="pair">
-        <ColourStrip title="Around sunrise" :series="sunriseStrip" :pack="pack" :tz="tz" :cursor-jd="cursorJd" @seek="userSeek" />
-        <ColourStrip title="Around sunset" :series="sunsetStrip" :pack="pack" :tz="tz" :cursor-jd="cursorJd" @seek="userSeek" />
+        <ColourStrip title="Around sunrise" :series="sunriseStrip" :glow="sunriseGlow" :pack="pack" :tz="tz" :cursor-jd="cursorJd" @seek="userSeek" />
+        <ColourStrip title="Around sunset" :series="sunsetStrip" :glow="sunsetGlow" :pack="pack" :tz="tz" :cursor-jd="cursorJd" @seek="userSeek" />
       </div>
 
       <div class="pair">

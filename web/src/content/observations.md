@@ -10,6 +10,14 @@ A few lines are enough. For example:
 
 Times from your photos are the most accurate. Add roughly how high the clouds looked (low, middle, high) if you can.
 
+## Save the weather too
+
+The colours depend on the air as much as on the sun: haze, humidity, and which clouds were there. To learn from your evening, skyglow needs to know what the air was like.
+
+Pick the place and date of your evening, then press **Save as file** on the **Conditions** card. It downloads that day's forecast (cloud cover at three heights, humidity, water vapour and haze). Keep it next to your notes and photos.
+
+**Do it soon.** The forecast service only keeps about the last three months, so an evening from last week is easy, and one from last year may be gone.
+
 ## Compare with the model
 
 Set skyglow to the same place and date, and drag the **time scrubber** to each time you noted. The readout tells you what the geometry says the sky should be doing at that minute. Where it matches, the guesses are good. Where it does not, that is exactly the data that improves them.

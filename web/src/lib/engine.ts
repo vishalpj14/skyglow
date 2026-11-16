@@ -5,7 +5,7 @@
 // text through untouched, and parse what comes back.
 
 import init, * as wasm from "../wasm-pkg/skyglow_wasm.js";
-import type { EventName, LocalDate, Pack, Place, SkyState, Timeline } from "./types";
+import type { ConditionsReading, ConditionsSeries, EventName, Glow, GlowMoment, LocalDate, Pack, Place, SkyState, Timeline } from "./types";
 
 let ready: Promise<void> | null = null;
 
@@ -52,6 +52,43 @@ export function skySeries(
   stepMinutes: number,
 ): SkyState[] {
   return JSON.parse(wasm.skySeries(placeJson(place), packText, jdStart, jdEnd, stepMinutes));
+}
+
+/**
+ * Merge the text of Open-Meteo answers (forecast, air quality, or both) into
+ * one conditions series. Throws with the core's message if an answer is bad.
+ */
+export function conditionsFromOpenMeteo(answers: string[], source: string): ConditionsSeries {
+  return JSON.parse(wasm.conditionsFromOpenMeteo(JSON.stringify(answers), source));
+}
+
+/**
+ * The conditions at one instant, or null when the series has nothing close
+ * enough. Takes the series as JSON text so a caller asking minute after
+ * minute stringifies it once.
+ */
+export function conditionsAt(seriesText: string, jd: number): ConditionsReading | null {
+  return JSON.parse(wasm.conditionsAt(seriesText, jd));
+}
+
+/** The glow of every layer at one instant. `seriesText` "" means no conditions (potential only). */
+export function glowAt(place: Place, packText: string, seriesText: string, jd: number): Glow {
+  return JSON.parse(wasm.glowAt(placeJson(place), packText, seriesText, jd));
+}
+
+/** The glow at evenly spaced instants; same grid as `skySeries` for the same arguments. */
+export function glowSeries(place: Place, packText: string, seriesText: string, jdStart: number, jdEnd: number, stepMinutes: number): Glow[] {
+  return JSON.parse(wasm.glowSeries(placeJson(place), packText, seriesText, jdStart, jdEnd, stepMinutes));
+}
+
+/** The best glow moment in a window, or null when no score is known there. */
+export function bestGlow(place: Place, packText: string, seriesText: string, jdStart: number, jdEnd: number, stepMinutes: number): GlowMoment | null {
+  return JSON.parse(wasm.bestGlow(placeJson(place), packText, seriesText, jdStart, jdEnd, stepMinutes));
+}
+
+/** The `hourly=` lists to ask Open-Meteo for; the core owns them so asking and reading stay in step. */
+export function openMeteoHourly(): { forecast: string; airQuality: string } {
+  return { forecast: wasm.openMeteoForecastHourly(), airQuality: wasm.openMeteoAirQualityHourly() };
 }
 
 export function jdFromLocal(date: LocalDate, hours: number, tz: number): number {

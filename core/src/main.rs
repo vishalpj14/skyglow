@@ -8,6 +8,9 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::path::Path;
 
+use skyglow_core::conditions::{Basis, ConditionsSeries};
+use skyglow_core::glow;
+use skyglow_core::openmeteo;
 use skyglow_core::params::Params;
 use skyglow_core::place::Place;
 use skyglow_core::sky::{self, LayerLight};
@@ -40,9 +43,18 @@ OPTIONS:
     --places <path>  Where places live: a folder of <name>.json files, or one JSON
                      file holding many places. Default search order:
                      test/places/<name>.json, test/places.json, examples/places/<name>.json
-    --observe <file> Replay an observation file against the model
-                     (see docs/OBSERVATIONS.md)
-    --explain        Also print every intermediate value of the sun calculation
+    --observe <file> Replay an observation file against the model, with the
+                     conditions stored in it, if any (see docs/OBSERVATIONS.md)
+    --conditions <file>
+                     Cloud cover, moisture and haze readings to show next to each
+                     --at time. Reported only: they do not change the prediction
+                     yet (see docs/CONDITIONS.md)
+    --open-meteo <file>
+                     The same, from an answer you saved from the Open-Meteo weather
+                     service (can be repeated: forecast and air quality are merged).
+                     skyglow itself never goes online; docs/CONDITIONS.md has the
+                     addresses to fetch
+    --explain       Also print every intermediate value of the sun calculation
     -h, --help       Show this help
 
 EXAMPLES:
@@ -51,6 +63,7 @@ EXAMPLES:
     skyglow --place singapore 2026-11-15
     skyglow --place quito 2026-11-15 --event sunrise
     skyglow --place kochi 2026-11-15 --tz 5.5 --at 06:10 --at 06:20
+    skyglow --place kochi 2026-11-15 --at 18:08 --conditions examples/conditions/sample-evening.json
     skyglow --observe test/observations/my-sunset.json";
 
 /// One timed note inside an observation file.
@@ -77,6 +90,9 @@ struct Observation {
     event: Option<String>,
     #[serde(default)]
     notes: String,
+    /// The air that evening: inline readings, a conditions file, or saved
+    /// Open-Meteo answers. See `docs/OBSERVATIONS.md` and [`observation_conditions`].
+    conditions: Option<serde_json::Value>,
     events: Vec<ObservationEvent>,
 }
 
@@ -92,6 +108,9 @@ struct Options {
     places_file: Option<String>,
     observe: Option<String>,
     event: Option<String>,
+    conditions: Option<String>,
+    /// Saved Open-Meteo answers (forecast and/or air quality), to be merged.
+    open_meteo: Vec<String>,
 }
 
 fn main() {
@@ -119,6 +138,8 @@ fn parse_args() -> Result<Option<Options>, String> {
         places_file: None,
         observe: None,
         event: None,
+        conditions: None,
+        open_meteo: Vec::new(),
     };
     let mut i = 0;
     while i < args.len() {
@@ -150,6 +171,12 @@ fn parse_args() -> Result<Option<Options>, String> {
             }
             "--observe" => {
                 o.observe = Some(take_value(&args, &mut i, "--observe needs a file path")?)
+            }
+            "--conditions" => {
+                o.conditions = Some(take_value(&args, &mut i, "--conditions needs a file path")?)
+            }
+            "--open-meteo" => {
+                o.open_meteo.push(take_value(&args, &mut i, "--open-meteo needs a file path")?)
             }
             other if other.starts_with("--") => return Err(format!("unknown option {other}")),
             _ => o.positional.push(args[i].clone()),
@@ -183,6 +210,65 @@ fn load_params(path: Option<&String>) -> Result<Params, String> {
             Params::from_json(&text)
         }
         None => Ok(Params::builtin()),
+    }
+}
+
+/// Read the conditions the user pointed at, if any (see `docs/CONDITIONS.md`):
+/// a skyglow conditions file (`--conditions`), or one or more saved
+/// Open-Meteo answers (`--open-meteo`), merged.
+fn load_conditions(opts: &Options) -> Result<Option<ConditionsSeries>, String> {
+    let read = |p: &String| {
+        std::fs::read_to_string(p).map_err(|e| format!("cannot read conditions '{p}': {e}"))
+    };
+    match (&opts.conditions, opts.open_meteo.is_empty()) {
+        (Some(_), false) => Err("use --conditions or --open-meteo, not both".to_string()),
+        (Some(p), true) => ConditionsSeries::from_json(&read(p)?)
+            .map(Some)
+            .map_err(|e| format!("conditions file '{p}': {e}")),
+        (None, false) => {
+            let texts: Vec<String> = opts.open_meteo.iter().map(read).collect::<Result<_, _>>()?;
+            let refs: Vec<&str> = texts.iter().map(String::as_str).collect();
+            openmeteo::series_from_responses(&refs, "Open-Meteo, from saved answers")
+                .map(Some)
+                .map_err(|e| format!("{e} (files in the order given: {})", opts.open_meteo.join(", ")))
+        }
+        (None, true) => Ok(None),
+    }
+}
+
+/// The conditions stored with an observation, in one of three forms:
+///
+/// * `{ "source": ..., "samples": [...] }`: readings written right in the file;
+/// * `{ "file": "name.json" }`: a skyglow conditions file;
+/// * `{ "open_meteo": ["weather.json", "air.json"] }`: saved Open-Meteo answers.
+///
+/// File names are relative to the observation file's own folder, so an
+/// evening's files can sit together and move together.
+fn observation_conditions(block: &serde_json::Value, obs_path: &Path) -> Result<ConditionsSeries, String> {
+    const FORMS: &str = "expected {\"samples\": [...]}, {\"file\": \"name.json\"} or {\"open_meteo\": [\"weather.json\", \"air.json\"]}";
+    let map = block.as_object().ok_or_else(|| FORMS.to_string())?;
+    let folder = obs_path.parent().unwrap_or(Path::new("."));
+    let read = |name: &str| {
+        let p = folder.join(name);
+        std::fs::read_to_string(&p).map_err(|e| format!("cannot read '{}': {e}", p.display()))
+    };
+    let only = |key: &str| map.len() == 1 && map.contains_key(key);
+
+    if map.contains_key("samples") {
+        ConditionsSeries::from_json(&block.to_string())
+    } else if only("file") {
+        let name = map["file"].as_str().ok_or("\"file\" must be a file name")?;
+        ConditionsSeries::from_json(&read(name)?).map_err(|e| format!("'{name}': {e}"))
+    } else if only("open_meteo") {
+        let names: Vec<&str> = map["open_meteo"]
+            .as_array()
+            .and_then(|list| list.iter().map(|v| v.as_str()).collect())
+            .ok_or("\"open_meteo\" must be a list of file names")?;
+        let texts: Vec<String> = names.iter().map(|n| read(n)).collect::<Result<_, _>>()?;
+        let refs: Vec<&str> = texts.iter().map(String::as_str).collect();
+        openmeteo::series_from_responses(&refs, "Open-Meteo, saved with this observation")
+    } else {
+        Err(FORMS.to_string())
     }
 }
 
@@ -366,6 +452,7 @@ fn run() -> Result<(), String> {
         None => time::today_local(tz),
     };
     let params = load_params(opts.pack.as_ref())?;
+    let conditions = load_conditions(&opts)?;
 
     let events = choose_events(
         opts.event.as_deref(),
@@ -379,10 +466,16 @@ fn run() -> Result<(), String> {
         }
         let timeline = build_timeline_event(&params, &place, date, tz, *event);
         print_report(&timeline, &params, &place, tz);
+        if let Some(series) = &conditions {
+            print_best_glow(&params, &place, series, &timeline);
+        }
         timelines.push(timeline);
     }
     for hours in &opts.at {
-        print_at(&params, &place, date, tz, *hours);
+        print_at(&params, &place, date, tz, *hours, conditions.as_ref());
+    }
+    if conditions.is_some() && opts.at.is_empty() {
+        println!("\n(conditions are shown next to --at times; add one, for example --at 18:08)");
     }
     if opts.explain {
         match timelines.first().and_then(|t| t.event_jd.map(|jd| (t.event, jd))) {
@@ -417,6 +510,17 @@ fn run_observation(path: &str, opts: &Options) -> Result<(), String> {
     let tz = obs.tz.or(opts.tz).or(place.tz).unwrap_or(0.0);
     let date = time::parse_date(&obs.date)?;
     let params = load_params(obs.pack.as_ref().or(opts.pack.as_ref()))?;
+    // Conditions given on the command line replace the observation's own.
+    let from_command_line = load_conditions(opts)?;
+    let replaced = from_command_line.is_some() && obs.conditions.is_some();
+    let conditions = match (from_command_line, &obs.conditions) {
+        (Some(c), _) => Some(c),
+        (None, Some(block)) => Some(
+            observation_conditions(block, Path::new(path))
+                .map_err(|e| format!("observation file '{path}', conditions: {e}"))?,
+        ),
+        (None, None) => None,
+    };
 
     let hours_list: Vec<f64> = obs
         .events
@@ -434,10 +538,17 @@ fn run_observation(path: &str, opts: &Options) -> Result<(), String> {
         }
         let timeline = build_timeline_event(&params, &place, date, tz, *event);
         print_report(&timeline, &params, &place, tz);
+        if let Some(series) = &conditions {
+            print_best_glow(&params, &place, series, &timeline);
+        }
     }
     if !obs.notes.is_empty() {
         println!();
         println!("Notes: {}", obs.notes);
+    }
+    if replaced {
+        println!();
+        println!("(Conditions from the command line are used instead of the ones in the observation file.)");
     }
     for ev in &obs.events {
         let hours = time::parse_clock(&ev.time)?;
@@ -448,7 +559,7 @@ fn run_observation(path: &str, opts: &Options) -> Result<(), String> {
             format!(" [{}]", ev.source)
         };
         println!(">>> Observed {}{}: {}", ev.time, source, ev.note);
-        print_at(&params, &place, date, tz, hours);
+        print_at(&params, &place, date, tz, hours, conditions.as_ref());
     }
     Ok(())
 }
@@ -620,8 +731,108 @@ fn print_report(t: &Timeline, params: &Params, place: &Place, tz: f64) {
 /// Report the sun and Earth-shadow state at one local clock time.
 ///
 /// All the physics is in [`sky::sky_state`]; this function only prints it.
-fn print_at(params: &Params, place: &Place, date: (i32, u32, u32), tz: f64, hours: f64) {
+fn print_at(
+    params: &Params,
+    place: &Place,
+    date: (i32, u32, u32),
+    tz: f64,
+    hours: f64,
+    conditions: Option<&ConditionsSeries>,
+) {
     let jd = time::jd_from_local(date, hours, tz);
+    print_sky_at(params, place, jd, tz);
+    if let Some(series) = conditions {
+        print_conditions(series, jd, tz);
+        print_glow(params, place, series, jd);
+    }
+}
+
+/// The glow score per layer, with every factor, when conditions are known.
+fn print_glow(params: &Params, place: &Place, series: &ConditionsSeries, jd: f64) {
+    let g = glow::glow_at(params, place, Some(series), jd);
+    if !g.has_conditions {
+        return;
+    }
+    println!("  Glow score, 0-10 (a rough guide, not calibrated yet):");
+    for l in &g.layers {
+        let f = &l.factors;
+        let score = match (l.score, &l.word) {
+            (Some(s), Some(w)) => format!("{s:>4.1}  {w:<7}"),
+            _ => "   ?  unknown".to_string(),
+        };
+        let cover = f.cover.map_or("?".to_string(), |c| format!("{c:.2}"));
+        println!(
+            "    {:<5} {:>5.1} km  {}  = 10 x light {:.2} x sun {:.2} x colour {:.2} x cover {} x path {:.2} x view {:.2} x haze {:.2} x humidity {:.2}",
+            l.name, l.height_km, score, f.light, f.sun, f.colour, cover, f.path, f.view, f.haze, f.humidity
+        );
+        if f.path < 1.0 {
+            let names: Vec<&str> = l.blocked_by.iter().map(|lv| lv.word()).collect();
+            println!("                       sunbeam passes through {} cloud", names.join(" and "));
+        }
+        if !l.unknown.is_empty() {
+            println!("                       not known, so not counted: {}", l.unknown.join(", "));
+        }
+    }
+}
+
+/// The best glow moment around an event (the same windows as the web app's
+/// colour strips), when conditions are known.
+fn print_best_glow(params: &Params, place: &Place, series: &ConditionsSeries, t: &Timeline) {
+    let Some(jd) = t.event_jd.or(t.sea_event_jd) else { return };
+    let (before, after) = if t.event == Event::Sunrise { (60.0, 40.0) } else { (40.0, 60.0) };
+    // Step on whole clock minutes, so the time printed is the minute checked.
+    let on_minute = |x: f64| (x * 1440.0).round() / 1440.0;
+    match glow::best_glow(params, place, series, on_minute(jd - before / 1440.0), on_minute(jd + after / 1440.0), 1.0) {
+        Ok(Some(best)) if best.score > 0.0 => println!(
+            "Best glow (rough guide): {} cloud ({:.1} km) around {}, {:.1}/10, {}.",
+            best.layer,
+            best.height_km,
+            &time::format_clock(best.jd, t.tz_hours)[..5],
+            best.score,
+            best.word
+        ),
+        Ok(Some(_)) => println!("Best glow (rough guide): none expected; the forecast has no cloud to light."),
+        Ok(None) => println!("Best glow: the conditions do not reach this {}.", t.event.word()),
+        Err(e) => println!("Best glow: could not work it out ({e})."),
+    }
+}
+
+/// The readings from a `--conditions` file at one instant, with how they were
+/// worked out. Numbers only: no judgement about what they do to the sky yet.
+fn print_conditions(series: &ConditionsSeries, jd: f64, tz: f64) {
+    let hhmm = |j: f64| time::format_clock(j, tz)[..5].to_string();
+    let Some(reading) = series.at(jd) else {
+        println!("  Conditions: no reading close enough to this time");
+        return;
+    };
+    let how = match reading.basis {
+        Basis::Between { before_jd, after_jd } => {
+            format!("between the {} and {} readings", hhmm(before_jd), hhmm(after_jd))
+        }
+        Basis::Nearest { sample_jd } => format!("from the {} reading", hhmm(sample_jd)),
+    };
+    let source = if series.source.is_empty() { "source not given" } else { series.source.as_str() };
+    println!("  Conditions, {how} ({source}):");
+    let c = reading.conditions;
+    let cover: Vec<String> = [("low", c.cloud_low_pct), ("mid", c.cloud_mid_pct), ("high", c.cloud_high_pct)]
+        .iter()
+        .filter_map(|(name, v)| v.map(|v| format!("{name} {v:.0}%")))
+        .collect();
+    if !cover.is_empty() {
+        println!("    cloud cover    {}", cover.join(", "));
+    }
+    if let Some(v) = c.humidity_pct {
+        println!("    humidity       {v:.0}% near the ground");
+    }
+    if let Some(v) = c.water_vapour_mm {
+        println!("    water vapour   {v:.0} mm in the air above");
+    }
+    if let Some(v) = c.aerosol_optical_depth {
+        println!("    haze           aerosol optical depth {v:.2}");
+    }
+}
+
+fn print_sky_at(params: &Params, place: &Place, jd: f64, tz: f64) {
     let st = sky::sky_state(params, place, jd);
     println!();
     println!("At {}:", time::format_clock(jd, tz));

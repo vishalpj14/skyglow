@@ -39,8 +39,20 @@ Near the equator the sun drops about a quarter of a degree a minute, so a 10 km 
 
 - **High clouds overhead and a clear gap toward the sun**, so the light can reach them.
 - **Low cloud on the sun's side** spoils it: it blocks the light before it reaches anything.
-- **A little haze** deepens the colour; **a lot** turns everything grey.
+- **Clean air** gives the most vivid colour; **haze and damp air** wash it out, most of all late in the show when the beam skims low.
+
+## The glow score
+
+When skyglow has the weather forecast, it puts all of this together as a **glow score** from 0 to 10 for each cloud height. It multiplies a few simple questions, each answered with a number between 0 and 1:
+
+- Is the cloud **lit** by the sun, and how rich is the colour of that light?
+- Is there **cloud at that height** at all? Some broken cloud is best; none means nothing to light.
+- Is other cloud **in the sunbeam's way**? Only cloud higher than the beam's lowest point can block it, which is why low cloud spoils the *end* of a sunset more than the start.
+- Can you **see it** past lower cloud overhead?
+- How much **haze** and **damp air** is there?
+
+The **Glow forecast** card shows the best moment around sunrise and sunset and, under **Why**, every one of these numbers. The colour strips fade each cloud row into the sky where the forecast says it will not show.
 
 ## Honest note
 
-The geometry is exact. The colour names are rough guesses for now, and they will get better as people log real sunsets.
+The geometry is exact. The colour names and the glow score are rough guesses built from public rules of thumb, and they will get better as people log real sunsets.

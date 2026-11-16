@@ -55,8 +55,11 @@ The sun descends at roughly `15 degrees/hour x cos(latitude)` near the horizon. 
 | Stage boundaries (golden, afterglow, ...) | estimated, in packs |
 | Atmospheric refraction beyond the sunset constant | not yet |
 | Real cloud heights from forecasts | planned (v2) |
-| Aerosol effects on saturation | planned (v2) |
-| Moisture: humidity and column water vapour (haze, tropical wet-season air) | planned (v2) |
+| Cloud cover, moisture and aerosol readings | fetched from a forecast and shown ([CONDITIONS.md](CONDITIONS.md)) |
+| Cloud there or not, low cloud blocking the sunbeam, lower cloud hiding the view | glow score ([GLOW.md](GLOW.md)), rough rules, uncalibrated |
+| Aerosol effects: haze dulls colour, most for low beams | glow score, following published notes, uncalibrated |
+| Moisture: humidity adds haze | glow score, uncalibrated; column water vapour shown but not used |
+| Cloud along the sunbeam's path toward the sun (not just overhead) | not yet: uses local forecast cover as a stand-in |
 | Grazing height as the colour variable | modelled (geometry), colour labels uncalibrated |
 | True sky colour (radiative transfer) | planned, via lookup tables from the lab |
 

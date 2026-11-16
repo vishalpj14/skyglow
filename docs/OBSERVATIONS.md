@@ -75,6 +75,7 @@ One JSON file per evening.
 | `events[].time` | Local clock time `HH:MM` or `HH:MM:SS`. |
 | `events[].source` | Optional: `photo` (EXIF time, most reliable) or `memory` (approximate). |
 | `events[].note` | What you saw at that moment. |
+| `conditions` | Optional: what the air was like that evening (see below). |
 
 Replay one against the model:
 
@@ -82,11 +83,47 @@ Replay one against the model:
 cargo run -p skyglow-core -- --observe test/observations/my-sunset.json
 ```
 
-For every event the tool prints how far below the horizon the sun was, how high an overhead cloud must be to still be lit, and for each cloud layer whether it was lit, how deep the sunlight dived (the grazing height) and the rough colour the pack expects. Compare that with your note.
+For every event the tool prints how far below the horizon the sun was, how high an overhead cloud must be to still be lit, and for each cloud layer whether it was lit, how deep the sunlight dived (the grazing height) and the rough colour the pack expects. If the file has `conditions`, it also prints the cloud cover, humidity, water vapour and haze at that moment. Compare that with your note.
+
+A ready-made example (made-up, with made-up conditions) is in `examples/observations/kochi-sample.json`:
+
+```powershell
+cargo run -p skyglow-core -- --observe examples/observations/kochi-sample.json
+```
+
+## Conditions: save the air with the evening
+
+The colour of an evening depends on the air (haze, humidity, which clouds were there) as much as on the sun. These numbers, stored with each observation, are what the colour model will be fitted against. Give them in one of three ways:
+
+```json
+"conditions": { "file": "2026-11-04-conditions.json" }
+```
+
+```json
+"conditions": { "open_meteo": ["2026-11-04-weather.json", "2026-11-04-air.json"] }
+```
+
+```json
+"conditions": { "source": "my guess from the window", "samples": [
+  { "utc": "2026-11-04T12:30", "cloud_low_pct": 40, "cloud_high_pct": 70 }
+] }
+```
+
+| Form | What it is |
+|---|---|
+| `file` | A skyglow conditions file. The web app makes one: pick the evening's place and date, then **Save as file** on the Conditions card. |
+| `open_meteo` | One or two answers you saved from Open-Meteo yourself (the addresses are in [CONDITIONS.md](CONDITIONS.md)). |
+| `samples` | Readings written right here, in the conditions file format ([CONDITIONS.md](CONDITIONS.md)). Times are UTC. |
+
+File names are relative to the observation file's own folder, so keep an evening's files together, for example `test/observations/2026-11-04.json` next to `test/observations/2026-11-04-conditions.json`. `--conditions` or `--open-meteo` on the command line replace the file's own conditions for that run, and the output says so.
+
+**Save the forecast soon after the evening.** Open-Meteo's forecast service only keeps about the last three months. Older evenings may need other sources (weather archives, aerosol reanalyses), which skyglow does not read yet.
+
+The saved file holds no coordinates, only times and numbers, but a forecast does describe the weather near where you were. Keep private evenings in `test/`.
 
 ## Tips for useful observations
 
 - **Prefer photo EXIF times** over memory. A few minutes of memory error moves the answer a lot.
 - **Note where in the sky** the cloud edge or colour was, as an angle above the horizon (a fist at arm's length is about 10 degrees). Height and distance trade off, so this resolves them.
 - **Note the cloud type** (cirrus, cirrocumulus, altocumulus, cumulonimbus anvil) and how much of the sky was covered at each level.
-- **Note the air:** hazy, dusty, smoky, just rained, humid.
+- **Note the air:** hazy, dusty, smoky, just rained, humid. Then save the forecast as `conditions` (above), so your words and the numbers can be compared.
