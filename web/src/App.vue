@@ -153,10 +153,10 @@ function seekEvent(i: number, offsetMin = 0) {
 }
 // Switching only the clock keeps the same instant on screen.
 watch(tz, (now, before) => {
+  if (live.value) return syncLive();
   minute.value = Math.min(1439, Math.max(0, Math.round(minute.value + (now - before) * 60)));
 });
 
-const isToday = computed(() => formatDate(todayAt(tz.value)) === formatDate(date.value));
 // The logo's hover animation follows the scrubber: a sunset in the evening,
 // a sunrise in the morning, in this pack's colours.
 watch(
@@ -167,13 +167,55 @@ watch(
   { immediate: true },
 );
 
+// ---- live: the scrubber follows the clock -----------------------------------
+// On by default. Any manual move (slider, buttons, charts, date) pauses it;
+// the Live button syncs back to now and keeps following.
+const live = ref(true);
+
 /** Julian Day of this instant: Unix time in days plus the Julian Day of 1970-01-01. */
-function seekNow() {
-  seek(Date.now() / 86_400_000 + 2_440_587.5);
+const nowJd = () => Date.now() / 86_400_000 + 2_440_587.5;
+
+/** Jump to the current moment: today's date on the clock shown, and the current minute. */
+function syncLive() {
+  const today = formatDate(todayAt(tz.value));
+  if (dateText.value !== today) dateText.value = today;
+  // Round down like a clock does: 18:54:40 is still 18:54. (The tiny slack
+  // absorbs Julian-Day rounding right on a minute boundary.)
+  const m = Math.floor((nowJd() - dayStart.value) * 1440 + 1e-6);
+  minute.value = Math.min(1439, Math.max(0, m));
 }
-// Open on the time the device's clock shows right now. Picking another place
-// or date keeps the same clock time; the buttons jump to sunrise or sunset.
-seekNow();
+function goLive() {
+  if (playing.value) togglePlay();
+  live.value = true;
+  syncLive();
+}
+/** Anything the user does to the time takes it off live. */
+function manual() {
+  live.value = false;
+}
+function userSeek(jd: number) {
+  manual();
+  seek(jd);
+}
+function userSeekEvent(i: number) {
+  manual();
+  seekEvent(i);
+}
+
+let liveTimer: number | undefined;
+liveTimer = window.setInterval(() => {
+  if (live.value) syncLive();
+}, 1000);
+// Catch up at once when the tab or phone wakes up again.
+const onVisible = () => {
+  if (live.value && document.visibilityState === "visible") syncLive();
+};
+document.addEventListener("visibilitychange", onVisible);
+onBeforeUnmount(() => {
+  window.clearInterval(liveTimer);
+  document.removeEventListener("visibilitychange", onVisible);
+});
+syncLive();
 
 watch(route, (r) => {
   if (r.name === "sky") document.title = "skyglow";
@@ -182,6 +224,7 @@ watch(route, (r) => {
 const playing = ref(false);
 let timer: number | undefined;
 function togglePlay() {
+  if (!playing.value) manual();
   playing.value = !playing.value;
   window.clearInterval(timer);
   if (playing.value) {
@@ -210,7 +253,7 @@ onBeforeUnmount(() => window.clearInterval(timer));
       <section class="card">
         <h2>Date, clock and pack</h2>
         <div class="row">
-          <label>Date<input v-model="dateText" type="date" /></label>
+          <label>Date<input v-model="dateText" type="date" @input="manual" /></label>
         </div>
         <label>
           Show times on
@@ -254,7 +297,7 @@ onBeforeUnmount(() => window.clearInterval(timer));
         <h2>Time scrubber</h2>
         <div class="scrub-row">
           <output class="time">{{ hhmm(minute / 60) }}</output>
-          <input v-model.number="minute" type="range" min="0" max="1439" step="1" aria-label="Time of day" />
+          <input v-model.number="minute" type="range" min="0" max="1439" step="1" aria-label="Time of day" @input="manual" />
         </div>
         <ul v-if="zoneRows" class="zones" aria-label="This moment on other clocks">
           <li v-for="r in zoneRows" :key="r.who" :class="{ shown: r.shown }">
@@ -264,25 +307,27 @@ onBeforeUnmount(() => window.clearInterval(timer));
           </li>
         </ul>
         <div class="row buttons">
-          <button type="button" @click="seekEvent(0)">Sunrise</button>
-          <button type="button" @click="seekEvent(1)">Sunset</button>
-          <button type="button" @click="minute = Math.max(0, minute - 1)" aria-label="One minute earlier">&minus;1 min</button>
-          <button type="button" @click="minute = Math.min(1439, minute + 1)" aria-label="One minute later">+1 min</button>
-          <button v-if="isToday" type="button" @click="seekNow">Now</button>
+          <button type="button" class="live-btn" :class="{ on: live }" :aria-pressed="live" :title="live ? 'Following the current time' : 'Jump to now and follow the clock'" @click="goLive">
+            <span class="live-dot" aria-hidden="true"></span>Live
+          </button>
+          <button type="button" @click="userSeekEvent(0)">Sunrise</button>
+          <button type="button" @click="userSeekEvent(1)">Sunset</button>
+          <button type="button" @click="manual(); minute = Math.max(0, minute - 1)" aria-label="One minute earlier">&minus;1 min</button>
+          <button type="button" @click="manual(); minute = Math.min(1439, minute + 1)" aria-label="One minute later">+1 min</button>
           <button type="button" class="primary" @click="togglePlay">{{ playing ? "Pause" : "Play" }}</button>
         </div>
         <SkyReadout v-if="skyNow" :s="skyNow" :pack="pack" />
       </section>
 
-      <SunPath :series="daySeries" :pack="pack" :tz="tz" :cursor-jd="cursorJd" :day-start-jd="dayStart" @seek="seek" />
+      <SunPath :series="daySeries" :pack="pack" :tz="tz" :cursor-jd="cursorJd" :day-start-jd="dayStart" @seek="userSeek" />
 
       <div class="pair">
-        <ColourStrip title="Around sunrise" :series="sunriseStrip" :pack="pack" :tz="tz" :cursor-jd="cursorJd" @seek="seek" />
-        <ColourStrip title="Around sunset" :series="sunsetStrip" :pack="pack" :tz="tz" :cursor-jd="cursorJd" @seek="seek" />
+        <ColourStrip title="Around sunrise" :series="sunriseStrip" :pack="pack" :tz="tz" :cursor-jd="cursorJd" @seek="userSeek" />
+        <ColourStrip title="Around sunset" :series="sunsetStrip" :pack="pack" :tz="tz" :cursor-jd="cursorJd" @seek="userSeek" />
       </div>
 
       <div class="pair">
-        <TimelineTable v-for="t in timelines" :key="t.event" :t="t" :pack="pack" @seek="seek" />
+        <TimelineTable v-for="t in timelines" :key="t.event" :t="t" :pack="pack" @seek="userSeek" />
       </div>
     </div>
   </main>
@@ -321,4 +366,10 @@ onBeforeUnmount(() => window.clearInterval(timer));
 .zones .zone { color: var(--muted); font-size: 0.75rem; }
 .buttons { margin: 8px 0 12px; }
 .buttons button { flex: 0 0 auto; }
+.live-btn { display: inline-flex; align-items: center; gap: 7px; }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.live-btn.on { border-color: #2f9e44; color: var(--text); font-weight: 600; }
+.live-btn.on .live-dot { background: #2f9e44; animation: live-pulse 1.6s ease-in-out infinite; }
+@keyframes live-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgb(47 158 68 / 0.55); } 50% { box-shadow: 0 0 0 5px rgb(47 158 68 / 0); } }
+@media (prefers-reduced-motion: reduce) { .live-btn.on .live-dot { animation: none; } }
 </style>
