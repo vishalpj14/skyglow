@@ -46,6 +46,7 @@ Skyglow answers one question: *given a place and a time, what will the evening s
 - `sky`: the sky at one instant, `sky_state(params, place, jd)`: sun position, rising or setting, skyline, which cloud layers are lit and where the shadow edge is. The CLI's `--at` and the web time scrubber both use it.
 - `conditions`: what the air is like, as plain numbers handed in from outside: `Conditions` (one reading) and `ConditionsSeries` (timed readings, with honest rules for the gaps between them). Shown by the CLI's `--conditions` and the web app's Conditions card; not used in predictions yet. See [docs/CONDITIONS.md](docs/CONDITIONS.md).
 - `openmeteo`: reads the text of Open-Meteo forecast and air-quality answers into a `ConditionsSeries`. Text in, struct out: it never goes online.
+- `sunward`: points along the sun's direction at sunset and sunrise (`plan`), where the forecast is read so the glow score can use the cloud the sunbeam crosses.
 - `glow`: the glow score. Takes a `SkyState` and `Conditions` and returns a 0-10 score per layer with every factor (light, sun, colour, cover, path, view, haze, humidity); `best_glow` finds the best moment in a window. Curves in the pack's `glow` section. See [docs/GLOW.md](docs/GLOW.md).
 
 ## Live inputs (fetched, shown, and used by the glow score)

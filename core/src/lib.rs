@@ -17,14 +17,16 @@
 //! 7. [`sky`]      - the sky at a single instant: sun position, which cloud
 //!                   layers are lit, and where Earth's shadow edge sits.
 //! 8. [`conditions`] - what the air is like (cloud cover, moisture, haze), as
-//!                   plain numbers handed in from outside. Reported, not yet
-//!                   used in predictions.
+//!                   plain numbers handed in from outside, here and along the
+//!                   sun's direction. Used by the glow score.
 //! 9. [`openmeteo`] - turns the text of an Open-Meteo weather answer into
 //!                   `conditions`. It reads text it is given; it never goes
 //!                   online itself.
 //! 10. [`glow`]    - the glow score: sky geometry plus conditions (is the cloud
 //!                   there, is the sunbeam blocked, haze, damp air) as a rough
 //!                   0-10 score per layer, with every factor shown.
+//! 11. [`sunward`] - points along the sun's direction where the forecast is
+//!                   read, so the score uses the cloud the sunbeam crosses.
 //!
 //! Design rules: no global state, no I/O in the library (only the CLI reads
 //! files), and every calculation can show its intermediate values
@@ -38,5 +40,6 @@ pub mod params;
 pub mod place;
 pub mod sky;
 pub mod sun;
+pub mod sunward;
 pub mod time;
 pub mod timeline;

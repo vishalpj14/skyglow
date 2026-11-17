@@ -5,7 +5,7 @@
 // text through untouched, and parse what comes back.
 
 import init, * as wasm from "../wasm-pkg/skyglow_wasm.js";
-import type { ConditionsReading, ConditionsSeries, EventName, Glow, GlowMoment, LocalDate, Pack, Place, SkyState, Timeline } from "./types";
+import type { ConditionsReading, ConditionsSeries, EventName, Glow, GlowMoment, LocalDate, Pack, Place, SkyState, Timeline, Weather, WeatherPlan } from "./types";
 
 let ready: Promise<void> | null = null;
 
@@ -71,19 +71,32 @@ export function conditionsAt(seriesText: string, jd: number): ConditionsReading 
   return JSON.parse(wasm.conditionsAt(seriesText, jd));
 }
 
-/** The glow of every layer at one instant. `seriesText` "" means no conditions (potential only). */
-export function glowAt(place: Place, packText: string, seriesText: string, jd: number): Glow {
-  return JSON.parse(wasm.glowAt(placeJson(place), packText, seriesText, jd));
+/** The places to ask the forecast about: this place, then points toward sunset and sunrise. */
+export function weatherPlan(place: Place, packText: string, date: LocalDate, tz: number): WeatherPlan {
+  return JSON.parse(wasm.weatherPlan(placeJson(place), packText, date.year, date.month, date.day, tz));
+}
+
+/** Read Open-Meteo answers for the places in a plan into weather. Throws with the core's message. */
+export function weatherFromOpenMeteo(plan: WeatherPlan, answers: string[], source: string): Weather {
+  return JSON.parse(wasm.weatherFromOpenMeteo(JSON.stringify(plan), JSON.stringify(answers), source));
+}
+
+/**
+ * The glow of every layer at one instant. `weatherText` is a Weather (or a
+ * plain conditions series) as JSON; "" means no conditions (potential only).
+ */
+export function glowAt(place: Place, packText: string, weatherText: string, jd: number): Glow {
+  return JSON.parse(wasm.glowAt(placeJson(place), packText, weatherText, jd));
 }
 
 /** The glow at evenly spaced instants; same grid as `skySeries` for the same arguments. */
-export function glowSeries(place: Place, packText: string, seriesText: string, jdStart: number, jdEnd: number, stepMinutes: number): Glow[] {
-  return JSON.parse(wasm.glowSeries(placeJson(place), packText, seriesText, jdStart, jdEnd, stepMinutes));
+export function glowSeries(place: Place, packText: string, weatherText: string, jdStart: number, jdEnd: number, stepMinutes: number): Glow[] {
+  return JSON.parse(wasm.glowSeries(placeJson(place), packText, weatherText, jdStart, jdEnd, stepMinutes));
 }
 
 /** The best glow moment in a window, or null when no score is known there. */
-export function bestGlow(place: Place, packText: string, seriesText: string, jdStart: number, jdEnd: number, stepMinutes: number): GlowMoment | null {
-  return JSON.parse(wasm.bestGlow(placeJson(place), packText, seriesText, jdStart, jdEnd, stepMinutes));
+export function bestGlow(place: Place, packText: string, weatherText: string, jdStart: number, jdEnd: number, stepMinutes: number): GlowMoment | null {
+  return JSON.parse(wasm.bestGlow(placeJson(place), packText, weatherText, jdStart, jdEnd, stepMinutes));
 }
 
 /** The `hourly=` lists to ask Open-Meteo for; the core owns them so asking and reading stay in step. */

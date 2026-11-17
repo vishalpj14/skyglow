@@ -8,7 +8,8 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::path::Path;
 
-use skyglow_core::conditions::{Basis, ConditionsSeries};
+use skyglow_core::conditions::{Basis, ConditionsSeries, Weather};
+use skyglow_core::sunward::{self, WeatherPlan};
 use skyglow_core::glow;
 use skyglow_core::openmeteo;
 use skyglow_core::params::Params;
@@ -52,8 +53,13 @@ OPTIONS:
     --open-meteo <file>
                      The same, from an answer you saved from the Open-Meteo weather
                      service (can be repeated: forecast and air quality are merged).
-                     skyglow itself never goes online; docs/CONDITIONS.md has the
-                     addresses to fetch
+                     Answers covering the points along the sun's direction (see
+                     --open-meteo-urls) let the glow score use the cloud the
+                     sunbeam actually crosses
+    --open-meteo-urls
+                     Print the two Open-Meteo addresses to save for this place and
+                     date (the place plus points toward sunset and sunrise), then
+                     stop. skyglow itself never goes online
     --explain       Also print every intermediate value of the sun calculation
     -h, --help       Show this help
 
@@ -64,6 +70,7 @@ EXAMPLES:
     skyglow --place quito 2026-11-15 --event sunrise
     skyglow --place kochi 2026-11-15 --tz 5.5 --at 06:10 --at 06:20
     skyglow --place kochi 2026-11-15 --at 18:08 --conditions examples/conditions/sample-evening.json
+    skyglow --place kochi 2026-11-15 --open-meteo-urls
     skyglow --observe test/observations/my-sunset.json";
 
 /// One timed note inside an observation file.
@@ -111,6 +118,8 @@ struct Options {
     conditions: Option<String>,
     /// Saved Open-Meteo answers (forecast and/or air quality), to be merged.
     open_meteo: Vec<String>,
+    /// Print the Open-Meteo addresses to save, instead of a report.
+    open_meteo_urls: bool,
 }
 
 fn main() {
@@ -140,6 +149,7 @@ fn parse_args() -> Result<Option<Options>, String> {
         event: None,
         conditions: None,
         open_meteo: Vec::new(),
+        open_meteo_urls: false,
     };
     let mut i = 0;
     while i < args.len() {
@@ -175,6 +185,7 @@ fn parse_args() -> Result<Option<Options>, String> {
             "--conditions" => {
                 o.conditions = Some(take_value(&args, &mut i, "--conditions needs a file path")?)
             }
+            "--open-meteo-urls" => o.open_meteo_urls = true,
             "--open-meteo" => {
                 o.open_meteo.push(take_value(&args, &mut i, "--open-meteo needs a file path")?)
             }
@@ -216,19 +227,19 @@ fn load_params(path: Option<&String>) -> Result<Params, String> {
 /// Read the conditions the user pointed at, if any (see `docs/CONDITIONS.md`):
 /// a skyglow conditions file (`--conditions`), or one or more saved
 /// Open-Meteo answers (`--open-meteo`), merged.
-fn load_conditions(opts: &Options) -> Result<Option<ConditionsSeries>, String> {
+fn load_conditions(opts: &Options, plan: &WeatherPlan) -> Result<Option<Weather>, String> {
     let read = |p: &String| {
         std::fs::read_to_string(p).map_err(|e| format!("cannot read conditions '{p}': {e}"))
     };
     match (&opts.conditions, opts.open_meteo.is_empty()) {
         (Some(_), false) => Err("use --conditions or --open-meteo, not both".to_string()),
         (Some(p), true) => ConditionsSeries::from_json(&read(p)?)
-            .map(Some)
+            .map(|s| Some(Weather::here_only(s)))
             .map_err(|e| format!("conditions file '{p}': {e}")),
         (None, false) => {
             let texts: Vec<String> = opts.open_meteo.iter().map(read).collect::<Result<_, _>>()?;
             let refs: Vec<&str> = texts.iter().map(String::as_str).collect();
-            openmeteo::series_from_responses(&refs, "Open-Meteo, from saved answers")
+            openmeteo::weather_from_responses(plan, &refs, "Open-Meteo, from saved answers")
                 .map(Some)
                 .map_err(|e| format!("{e} (files in the order given: {})", opts.open_meteo.join(", ")))
         }
@@ -244,7 +255,7 @@ fn load_conditions(opts: &Options) -> Result<Option<ConditionsSeries>, String> {
 ///
 /// File names are relative to the observation file's own folder, so an
 /// evening's files can sit together and move together.
-fn observation_conditions(block: &serde_json::Value, obs_path: &Path) -> Result<ConditionsSeries, String> {
+fn observation_conditions(block: &serde_json::Value, obs_path: &Path, plan: &WeatherPlan) -> Result<Weather, String> {
     const FORMS: &str = "expected {\"samples\": [...]}, {\"file\": \"name.json\"} or {\"open_meteo\": [\"weather.json\", \"air.json\"]}";
     let map = block.as_object().ok_or_else(|| FORMS.to_string())?;
     let folder = obs_path.parent().unwrap_or(Path::new("."));
@@ -255,10 +266,10 @@ fn observation_conditions(block: &serde_json::Value, obs_path: &Path) -> Result<
     let only = |key: &str| map.len() == 1 && map.contains_key(key);
 
     if map.contains_key("samples") {
-        ConditionsSeries::from_json(&block.to_string())
+        ConditionsSeries::from_json(&block.to_string()).map(Weather::here_only)
     } else if only("file") {
         let name = map["file"].as_str().ok_or("\"file\" must be a file name")?;
-        ConditionsSeries::from_json(&read(name)?).map_err(|e| format!("'{name}': {e}"))
+        ConditionsSeries::from_json(&read(name)?).map(Weather::here_only).map_err(|e| format!("'{name}': {e}"))
     } else if only("open_meteo") {
         let names: Vec<&str> = map["open_meteo"]
             .as_array()
@@ -266,7 +277,7 @@ fn observation_conditions(block: &serde_json::Value, obs_path: &Path) -> Result<
             .ok_or("\"open_meteo\" must be a list of file names")?;
         let texts: Vec<String> = names.iter().map(|n| read(n)).collect::<Result<_, _>>()?;
         let refs: Vec<&str> = texts.iter().map(String::as_str).collect();
-        openmeteo::series_from_responses(&refs, "Open-Meteo, saved with this observation")
+        openmeteo::weather_from_responses(plan, &refs, "Open-Meteo, saved with this observation")
     } else {
         Err(FORMS.to_string())
     }
@@ -452,7 +463,12 @@ fn run() -> Result<(), String> {
         None => time::today_local(tz),
     };
     let params = load_params(opts.pack.as_ref())?;
-    let conditions = load_conditions(&opts)?;
+    let plan = sunward::plan(&params, &place, date, tz);
+    if opts.open_meteo_urls {
+        print_open_meteo_urls(&plan, date);
+        return Ok(());
+    }
+    let conditions = load_conditions(&opts, &plan)?;
 
     let events = choose_events(
         opts.event.as_deref(),
@@ -466,8 +482,8 @@ fn run() -> Result<(), String> {
         }
         let timeline = build_timeline_event(&params, &place, date, tz, *event);
         print_report(&timeline, &params, &place, tz);
-        if let Some(series) = &conditions {
-            print_best_glow(&params, &place, series, &timeline);
+        if let Some(weather) = &conditions {
+            print_best_glow(&params, &place, weather, &timeline);
         }
         timelines.push(timeline);
     }
@@ -511,12 +527,13 @@ fn run_observation(path: &str, opts: &Options) -> Result<(), String> {
     let date = time::parse_date(&obs.date)?;
     let params = load_params(obs.pack.as_ref().or(opts.pack.as_ref()))?;
     // Conditions given on the command line replace the observation's own.
-    let from_command_line = load_conditions(opts)?;
+    let plan = sunward::plan(&params, &place, date, tz);
+    let from_command_line = load_conditions(opts, &plan)?;
     let replaced = from_command_line.is_some() && obs.conditions.is_some();
     let conditions = match (from_command_line, &obs.conditions) {
         (Some(c), _) => Some(c),
         (None, Some(block)) => Some(
-            observation_conditions(block, Path::new(path))
+            observation_conditions(block, Path::new(path), &plan)
                 .map_err(|e| format!("observation file '{path}', conditions: {e}"))?,
         ),
         (None, None) => None,
@@ -538,8 +555,8 @@ fn run_observation(path: &str, opts: &Options) -> Result<(), String> {
         }
         let timeline = build_timeline_event(&params, &place, date, tz, *event);
         print_report(&timeline, &params, &place, tz);
-        if let Some(series) = &conditions {
-            print_best_glow(&params, &place, series, &timeline);
+        if let Some(weather) = &conditions {
+            print_best_glow(&params, &place, weather, &timeline);
         }
     }
     if !obs.notes.is_empty() {
@@ -710,11 +727,17 @@ fn print_report(t: &Timeline, params: &Params, place: &Place, tz: f64) {
     } else {
         println!("Cloud layers: when Earth's shadow reaches a layer directly overhead:");
     }
+    if t.elevation_m / 1000.0 >= HIGH_GROUND_KM {
+        println!(
+            "  (heights above sea level; the pack counts layers from the ground, here {:.2} km up)",
+            t.elevation_m / 1000.0
+        );
+    }
     for l in &t.layers {
         println!(
-            "  {:<5} {:>5.1} km   {} overhead at {}   (sun {:.2}\u{b0} below horizon)",
+            "  {:<5} {}   {} overhead at {}   (sun {:.2}\u{b0} below horizon)",
             l.name,
-            l.height_km,
+            height_text(l.height_km, l.above_ground_km),
             if rising { "lit" } else { "dark" },
             clock(l.overhead_shadow_jd, t.tz_hours),
             l.shadow_depression_deg
@@ -737,23 +760,92 @@ fn print_at(
     date: (i32, u32, u32),
     tz: f64,
     hours: f64,
-    conditions: Option<&ConditionsSeries>,
+    conditions: Option<&Weather>,
 ) {
     let jd = time::jd_from_local(date, hours, tz);
     print_sky_at(params, place, jd, tz);
-    if let Some(series) = conditions {
-        print_conditions(series, jd, tz);
-        print_glow(params, place, series, jd);
+    if let Some(weather) = conditions {
+        if let Some(series) = &weather.here {
+            print_conditions(series, jd, tz);
+        }
+        print_glow(params, place, weather, jd);
+    }
+}
+
+/// The two Open-Meteo addresses for this place and date: the place itself,
+/// then points toward sunset and sunrise. Coordinates rounded to 0.01 deg.
+fn print_open_meteo_urls(plan: &WeatherPlan, date: (i32, u32, u32)) {
+    let list = |f: fn(&sunward::GeoPoint) -> f64| {
+        plan.points.iter().map(|p| format!("{:.2}", f(p))).collect::<Vec<_>>().join(",")
+    };
+    let day = (time::julian_day(date.0, date.1, date.2, 12.0) - 2_440_588.0).round() as i64;
+    let iso = |d: i64| {
+        let (y, m, dd) = time::civil_from_days(d);
+        format!("{y:04}-{m:02}-{dd:02}")
+    };
+    let common = format!(
+        "latitude={}&longitude={}&start_date={}&end_date={}&timezone=GMT&timeformat=unixtime",
+        list(|p| p.lat),
+        list(|p| p.lon),
+        iso(day - 1),
+        iso(day + 1)
+    );
+    println!("Save each answer to a file, then pass both with --open-meteo:");
+    println!();
+    println!("https://api.open-meteo.com/v1/forecast?{common}&hourly={}", openmeteo::FORECAST_HOURLY);
+    println!();
+    println!("https://air-quality-api.open-meteo.com/v1/air-quality?{common}&hourly={}", openmeteo::AIR_QUALITY_HOURLY);
+    println!();
+    let describe = |name: &str, d: &Option<sunward::Direction>| match d {
+        Some(d) => format!(
+            "{} points toward {name} (azimuth {:.0}\u{b0}, {} km)",
+            d.distances_km.len(),
+            d.azimuth_deg,
+            d.distances_km.iter().map(|k| format!("{k:.0}")).collect::<Vec<_>>().join(", ")
+        ),
+        None => format!("no {name} today, so no points toward it"),
+    };
+    println!(
+        "These ask about {} places: this one, {}, and {}. In PowerShell, put each address in quotes.",
+        plan.points.len(),
+        describe("sunset", &plan.sunset),
+        describe("sunrise", &plan.sunrise)
+    );
+}
+
+/// Ground at least this high (km above sea level) gets both heights printed.
+const HIGH_GROUND_KM: f64 = 0.5;
+
+/// A layer's height: above sea level, and at a high place also above the ground.
+fn height_text(height_km: f64, above_ground_km: f64) -> String {
+    if height_km - above_ground_km >= HIGH_GROUND_KM {
+        format!("{height_km:>5.1} km ({above_ground_km:.1} km above ground)")
+    } else {
+        format!("{height_km:>5.1} km")
     }
 }
 
 /// The glow score per layer, with every factor, when conditions are known.
-fn print_glow(params: &Params, place: &Place, series: &ConditionsSeries, jd: f64) {
-    let g = glow::glow_at(params, place, Some(series), jd);
+fn print_glow(params: &Params, place: &Place, weather: &Weather, jd: f64) {
+    let g = glow::glow_at(params, place, Some(weather), jd);
     if !g.has_conditions {
         return;
     }
-    println!("  Glow score, 0-10 (a rough guide, not calibrated yet):");
+    println!(
+        "  Glow score, 0-10 (a rough guide, not calibrated yet; sunbeam path: {}):",
+        if g.along_sun { "forecast along the sun's direction" } else { "local forecast only" }
+    );
+    match &g.highest_cloud {
+        Some(h) => println!(
+            "    highest cloud overhead: {} cloud ({:.0}%), somewhere from {:.1} to {:.1} km above sea level (forecasts give no cloud tops; {:.0} km is the highest a cloud can be)",
+            h.level.word(),
+            h.cover_pct,
+            h.range_km[0],
+            h.range_km[1],
+            params.cloud_ceiling_km
+        ),
+        None => println!("    highest cloud overhead: none (under {:.0}% at every level)", glow::TRACE_COVER_PCT),
+    }
     for l in &g.layers {
         let f = &l.factors;
         let score = match (l.score, &l.word) {
@@ -762,12 +854,20 @@ fn print_glow(params: &Params, place: &Place, series: &ConditionsSeries, jd: f64
         };
         let cover = f.cover.map_or("?".to_string(), |c| format!("{c:.2}"));
         println!(
-            "    {:<5} {:>5.1} km  {}  = 10 x light {:.2} x sun {:.2} x colour {:.2} x cover {} x path {:.2} x view {:.2} x haze {:.2} x humidity {:.2}",
-            l.name, l.height_km, score, f.light, f.sun, f.colour, cover, f.path, f.view, f.haze, f.humidity
+            "    {:<5} {}  {}  = 10 x light {:.2} x sun {:.2} x colour {:.2} x cover {} x path {:.2} x view {:.2} x haze {:.2} x humidity {:.2}",
+            l.name, height_text(l.height_km, l.above_ground_km), score, f.light, f.sun, f.colour, cover, f.path, f.view, f.haze, f.humidity
         );
         if f.path < 1.0 {
-            let names: Vec<&str> = l.blocked_by.iter().map(|lv| lv.word()).collect();
-            println!("                       sunbeam passes through {} cloud", names.join(" and "));
+            let where_: Vec<String> = l
+                .crossings
+                .iter()
+                .filter(|c| c.cover_pct.is_some_and(|p| p > 0.0))
+                .map(|c| format!("{} cloud {:.0} km toward the sun ({:.0}%)", c.level.word(), c.distance_km, c.cover_pct.unwrap_or(0.0)))
+                .collect();
+            println!("                       sunbeam crosses {}", where_.join(", "));
+        }
+        if let Some(kind) = &l.cloud_type {
+            println!("                       likely {kind} (a guess from the cover)");
         }
         if !l.unknown.is_empty() {
             println!("                       not known, so not counted: {}", l.unknown.join(", "));
@@ -777,12 +877,12 @@ fn print_glow(params: &Params, place: &Place, series: &ConditionsSeries, jd: f64
 
 /// The best glow moment around an event (the same windows as the web app's
 /// colour strips), when conditions are known.
-fn print_best_glow(params: &Params, place: &Place, series: &ConditionsSeries, t: &Timeline) {
+fn print_best_glow(params: &Params, place: &Place, weather: &Weather, t: &Timeline) {
     let Some(jd) = t.event_jd.or(t.sea_event_jd) else { return };
     let (before, after) = if t.event == Event::Sunrise { (60.0, 40.0) } else { (40.0, 60.0) };
     // Step on whole clock minutes, so the time printed is the minute checked.
     let on_minute = |x: f64| (x * 1440.0).round() / 1440.0;
-    match glow::best_glow(params, place, series, on_minute(jd - before / 1440.0), on_minute(jd + after / 1440.0), 1.0) {
+    match glow::best_glow(params, place, weather, on_minute(jd - before / 1440.0), on_minute(jd + after / 1440.0), 1.0) {
         Ok(Some(best)) if best.score > 0.0 => println!(
             "Best glow (rough guide): {} cloud ({:.1} km) around {}, {:.1}/10, {}.",
             best.layer,
@@ -797,8 +897,8 @@ fn print_best_glow(params: &Params, place: &Place, series: &ConditionsSeries, t:
     }
 }
 
-/// The readings from a `--conditions` file at one instant, with how they were
-/// worked out. Numbers only: no judgement about what they do to the sky yet.
+/// The readings for this place at one instant, with how they were worked
+/// out. The glow score (printed after) is what they mean for the sky.
 fn print_conditions(series: &ConditionsSeries, jd: f64, tz: f64) {
     let hhmm = |j: f64| time::format_clock(j, tz)[..5].to_string();
     let Some(reading) = series.at(jd) else {
@@ -868,21 +968,21 @@ fn print_sky_at(params: &Params, place: &Place, jd: f64, tz: f64) {
                     None => String::new(),
                 };
                 println!(
-                    "  {:<5} {:>5.1} km   lit overhead; sunlight skims {:.1} km above ground{}",
-                    l.name, l.height_km, grazing_km, hint
+                    "  {:<5} {}   lit overhead; sunlight skims {:.1} km above sea level{}",
+                    l.name, height_text(l.height_km, l.above_ground_km), grazing_km, hint
                 );
             }
             LayerLight::ShadowOverhead => println!(
-                "  {:<5} {:>5.1} km   in Earth's shadow overhead",
-                l.name, l.height_km
+                "  {:<5} {}   in Earth's shadow overhead",
+                l.name, height_text(l.height_km, l.above_ground_km)
             ),
             LayerLight::EdgeBeyondHorizon => println!(
-                "  {:<5} {:>5.1} km   shadow edge is past your horizon: none of this layer is lit",
-                l.name, l.height_km
+                "  {:<5} {}   shadow edge is past your horizon: none of this layer is lit",
+                l.name, height_text(l.height_km, l.above_ground_km)
             ),
             LayerLight::LitTowardSun { edge_elevation_deg, edge_distance_km } => println!(
-                "  {:<5} {:>5.1} km   lit only below {:.1}\u{b0} elevation toward the sun (shadow edge {:.0} km away; edge light is deep red-pink)",
-                l.name, l.height_km, edge_elevation_deg, edge_distance_km
+                "  {:<5} {}   lit only below {:.1}\u{b0} elevation toward the sun (shadow edge {:.0} km away; edge light is deep red-pink)",
+                l.name, height_text(l.height_km, l.above_ground_km), edge_elevation_deg, edge_distance_km
             ),
         }
     }

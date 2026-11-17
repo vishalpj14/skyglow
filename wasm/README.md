@@ -17,9 +17,11 @@ It speaks **JSON text** both ways:
 | `conditionsFromOpenMeteo(answers, source)` | Merge the text of Open-Meteo answers (a JSON list of texts) into a conditions series. The page fetches; the engine only reads |
 | `conditionsAt(series, jd)` | The conditions at one instant from a series, or `null` if nothing is close enough |
 | `openMeteoForecastHourly()`, `openMeteoAirQualityHourly()` | The `hourly=` lists to ask Open-Meteo for |
-| `glowAt(place, pack, series, jd)` | The glow score of every layer at one instant, with all factors. An empty series means "no forecast": only the potential |
-| `glowSeries(place, pack, series, jdStart, jdEnd, stepMinutes)` | The glow at many instants, on the same grid as `skySeries` |
-| `bestGlow(place, pack, series, jdStart, jdEnd, stepMinutes)` | The best glow moment in a window, or `null` |
+| `weatherPlan(place, pack, year, month, day, tz)` | The places to ask the forecast about: the place, then points toward sunset and sunrise |
+| `weatherFromOpenMeteo(plan, answers, source)` | Read Open-Meteo answers for those places (each a list, one entry per place) into weather |
+| `glowAt(place, pack, weather, jd)` | The glow score of every layer at one instant, with all factors. `weather` is the bundle above or a plain conditions series; empty means "no forecast": only the potential |
+| `glowSeries(place, pack, weather, jdStart, jdEnd, stepMinutes)` | The glow at many instants, on the same grid as `skySeries` |
+| `bestGlow(place, pack, weather, jdStart, jdEnd, stepMinutes)` | The best glow moment in a window, or `null` |
 | `defaultPack()` | Text of the built-in pack |
 | `jdFromLocal`, `formatClock`, `solarNoon` | Clock helpers |
 

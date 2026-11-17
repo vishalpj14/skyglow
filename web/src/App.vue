@@ -141,10 +141,12 @@ const sunriseStrip = computed(() => windowAround(timelines.value[0], 60, 40));
 const sunsetStrip = computed(() => windowAround(timelines.value[1], 40, 60));
 
 // ---- the forecast and the glow score -----------------------------------------
-const conditions = useConditions(place, date);
+/** The places to ask the forecast about: here, and toward sunset and sunrise. */
+const plan = computed(() => safe(() => engine.weatherPlan(place.value, packText.value, date.value, tz.value), null));
+const conditions = useConditions(place, date, plan);
 /** The glow on the same minute grid as a strip, when there is a forecast. */
 function glowFor(strip: SkyState[]): Glow[] | undefined {
-  const text = conditions.seriesText.value;
+  const text = conditions.weatherText.value;
   if (!text || !strip.length) return undefined;
   return safe(() => engine.glowSeries(place.value, packText.value, text, strip[0].jd, strip[strip.length - 1].jd, 1), undefined);
 }

@@ -73,8 +73,11 @@ pub enum LayerLight {
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct LayerState {
     pub name: String,
-    /// Height above sea level, km (from the pack).
+    /// Height above sea level, km: the pack's height above the ground, added
+    /// to the place's ground height, and never above the pack's ceiling.
     pub height_km: f64,
+    /// Height above the place's ground, km.
+    pub above_ground_km: f64,
     pub light: LayerLight,
 }
 
@@ -148,7 +151,8 @@ pub fn sky_state(params: &Params, place: &Place, jd: f64) -> SkyState {
         .map(|l| {
             // Use the signed depression (negative while the sun is up) so the
             // cloud formulas see the true sun position.
-            let mut light = layer_light(params, l.height_km, -elevation, r, alt_km);
+            let h = params.layer_height_km(l, alt_km);
+            let mut light = layer_light(params, h, -elevation, r, alt_km);
             if elevation >= 0.0 {
                 if let LayerLight::LitOverhead { colour, swatch, .. } = &mut light {
                     *colour = None;
@@ -157,7 +161,8 @@ pub fn sky_state(params: &Params, place: &Place, jd: f64) -> SkyState {
             }
             LayerState {
                 name: l.name.clone(),
-                height_km: l.height_km,
+                height_km: h,
+                above_ground_km: h - alt_km,
                 light,
             }
         })

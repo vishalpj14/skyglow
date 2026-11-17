@@ -24,7 +24,10 @@ pub const DEFAULT_PACK_JSON: &str = include_str!("../../packs/default.json");
 pub struct CloudLayer {
     /// Short label such as `low`, `mid`, `high`.
     pub name: String,
-    /// Typical height above the ground in kilometres.
+    /// Typical height above the ground in kilometres. Weather forecasts
+    /// count low, middle and high cloud from the ground up, so at a high
+    /// place every layer sits higher above sea level (see
+    /// [`Params::layer_height_km`]).
     pub height_km: f64,
 }
 
@@ -76,6 +79,12 @@ pub struct Params {
     /// atmospheric refraction and the sun's apparent radius).
     pub sunset_elevation_deg: f64,
     pub cloud_layers: Vec<CloudLayer>,
+    /// The highest a cloud can sit, km above sea level (about the top of the
+    /// weather layer, the tropopause, in the tropics). A layer never goes
+    /// above it, however high the place. Optional in a pack file: a pack
+    /// without it uses the built-in default pack's.
+    #[serde(default = "default_ceiling")]
+    pub cloud_ceiling_km: f64,
     pub stages: Vec<Stage>,
     /// Optional colour hints keyed by grazing height (see `cloud::grazing_height_km`).
     #[serde(default)]
@@ -97,7 +106,25 @@ fn default_glow() -> GlowParams {
         .glow
 }
 
+/// `cloud_ceiling_km` of the built-in default pack, for packs that leave it out.
+fn default_ceiling() -> f64 {
+    #[derive(Deserialize)]
+    struct OnlyCeiling {
+        cloud_ceiling_km: f64,
+    }
+    serde_json::from_str::<OnlyCeiling>(DEFAULT_PACK_JSON)
+        .expect("the built-in default pack must have cloud_ceiling_km")
+        .cloud_ceiling_km
+}
+
 impl Params {
+    /// Where a layer sits above sea level, km, for ground `ground_km` above
+    /// sea level: the pack's height above the ground, but never above
+    /// `cloud_ceiling_km`.
+    pub fn layer_height_km(&self, layer: &CloudLayer, ground_km: f64) -> f64 {
+        (ground_km + layer.height_km).min(self.cloud_ceiling_km)
+    }
+
     /// Parse and validate a pack from JSON text.
     pub fn from_json(json: &str) -> Result<Params, String> {
         let params: Params =
@@ -148,10 +175,13 @@ impl Params {
         if !(self.earth_radius_km > 1000.0 && self.earth_radius_km < 10_000.0) {
             return Err("earth_radius_km must be between 1000 and 10000".to_string());
         }
+        if !(self.cloud_ceiling_km > 0.0 && self.cloud_ceiling_km < 50.0) {
+            return Err("cloud_ceiling_km must be between 0 and 50 km".to_string());
+        }
         for layer in &self.cloud_layers {
-            if !(layer.height_km > 0.0 && layer.height_km < 50.0) {
+            if !(layer.height_km > 0.0 && layer.height_km < self.cloud_ceiling_km) {
                 return Err(format!(
-                    "cloud layer '{}' height must be between 0 and 50 km",
+                    "cloud layer '{}' height must be above 0 and below cloud_ceiling_km",
                     layer.name
                 ));
             }
@@ -241,6 +271,26 @@ mod tests {
         // A pack's own glow section wins, and is checked.
         let bad = DEFAULT_PACK_JSON.replace("\"low_top_km\": 3.0", "\"low_top_km\": 30.0");
         assert!(Params::from_json(&bad).unwrap_err().contains("low_top_km"));
+    }
+
+    #[test]
+    fn layers_count_from_the_ground_up_to_the_ceiling() {
+        let p = Params::builtin();
+        let low = &p.cloud_layers[0];
+        assert_eq!(low.height_km, 1.5);
+        // Sea level: unchanged. Leh (3.47 km): 1.5 km above its ground.
+        assert!((p.layer_height_km(low, 0.0) - 1.5).abs() < 1e-12);
+        assert!((p.layer_height_km(low, 3.47) - 4.97).abs() < 1e-12);
+        // Never above the ceiling, however high the place.
+        let high = &p.cloud_layers[2];
+        assert_eq!(p.layer_height_km(high, 8.0), p.cloud_ceiling_km);
+        // A pack without a ceiling borrows the default's.
+        let kerala = Params::from_json(include_str!("../../packs/kerala.json")).unwrap();
+        assert_eq!(kerala.cloud_ceiling_km, p.cloud_ceiling_km);
+        // A layer at or above the ceiling is rejected.
+        let mut bad = Params::builtin();
+        bad.cloud_layers[2].height_km = bad.cloud_ceiling_km;
+        assert!(bad.validate().unwrap_err().contains("cloud_ceiling_km"));
     }
 
     #[test]

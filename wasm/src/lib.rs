@@ -16,7 +16,8 @@
 //! `#[wasm_bindgen]` wrappers at the bottom only convert errors for
 //! JavaScript.
 
-use skyglow_core::conditions::ConditionsSeries;
+use skyglow_core::conditions::{ConditionsSeries, Weather};
+use skyglow_core::sunward::{self, WeatherPlan};
 use skyglow_core::glow;
 use skyglow_core::openmeteo;
 use skyglow_core::params::{Params, DEFAULT_PACK_JSON};
@@ -149,45 +150,73 @@ pub fn conditions_at_json(series_json: &str, jd: f64) -> Result<String, String> 
     to_json(&series.at(jd))
 }
 
-/// A conditions series from its JSON text; empty text means "no conditions".
-fn load_series(series_json: &str) -> Result<Option<ConditionsSeries>, String> {
-    if series_json.trim().is_empty() {
+/// Weather from its JSON text: a weather bundle (here, sunset, sunrise) or a
+/// plain conditions series (here only). Empty text means "no conditions".
+fn load_weather(weather_json: &str) -> Result<Option<Weather>, String> {
+    if weather_json.trim().is_empty() {
         Ok(None)
     } else {
-        ConditionsSeries::from_json(series_json).map(Some)
+        Weather::from_json(weather_json).map(Some)
     }
 }
 
-/// The glow of every layer at one instant (see `core/src/glow.rs`).
-pub fn glow_at_json(place_json: &str, pack_json: &str, series_json: &str, jd: f64) -> Result<String, String> {
+/// The places to ask the forecast about for a place and local date: the
+/// place, then points toward sunset and sunrise (see `core/src/sunward.rs`).
+pub fn weather_plan_json(
+    place_json: &str,
+    pack_json: &str,
+    year: i32,
+    month: u32,
+    day: u32,
+    tz_hours: f64,
+) -> Result<String, String> {
     let place = load_place(place_json)?;
     let params = load_pack(pack_json)?;
-    let series = load_series(series_json)?;
+    let date = check_date(year, month, day)?;
+    to_json(&sunward::plan(&params, &place, date, tz_hours))
+}
+
+/// Read Open-Meteo answers for the places in a plan (each answer a list, one
+/// entry per place, or a single answer for the place alone) into weather.
+pub fn weather_from_open_meteo_json(plan_json: &str, responses_json: &str, source: &str) -> Result<String, String> {
+    let plan: WeatherPlan = serde_json::from_str(plan_json).map_err(|e| format!("bad plan JSON: {e}"))?;
+    let texts: Vec<String> = serde_json::from_str(responses_json)
+        .map_err(|e| format!("expected a JSON list of answer texts: {e}"))?;
+    let refs: Vec<&str> = texts.iter().map(String::as_str).collect();
+    to_json(&openmeteo::weather_from_responses(&plan, &refs, source)?)
+}
+
+/// The glow of every layer at one instant (see `core/src/glow.rs`).
+pub fn glow_at_json(place_json: &str, pack_json: &str, weather_json: &str, jd: f64) -> Result<String, String> {
+    let place = load_place(place_json)?;
+    let params = load_pack(pack_json)?;
+    let weather = load_weather(weather_json)?;
     if !jd.is_finite() {
         return Err("time must be a finite Julian Day".to_string());
     }
-    to_json(&glow::glow_at(&params, &place, series.as_ref(), jd))
+    to_json(&glow::glow_at(&params, &place, weather.as_ref(), jd))
 }
 
 /// The glow at evenly spaced instants, like `sky_series` (same limits).
 pub fn glow_series_json(
     place_json: &str,
     pack_json: &str,
-    series_json: &str,
+    weather_json: &str,
     jd_start: f64,
     jd_end: f64,
     step_minutes: f64,
 ) -> Result<String, String> {
     let place = load_place(place_json)?;
     let params = load_pack(pack_json)?;
-    let series = load_series(series_json)?;
+    let weather = load_weather(weather_json)?;
     // Reuse sky_series for its checks and spacing.
     let skies = sky_series(&place, &params, jd_start, jd_end, step_minutes)?;
     let out: Vec<glow::Glow> = skies
         .iter()
         .map(|st| {
-            let reading = series.as_ref().and_then(|s| s.at(st.jd));
-            glow::glow(&params, st, reading.as_ref().map(|r| &r.conditions))
+            let here = weather.as_ref().and_then(|w| w.here_at(st.jd));
+            let along = weather.as_ref().map_or_else(Vec::new, |w| w.along_at(st.rising, st.jd));
+            glow::glow(&params, st, here.as_ref(), &along)
         })
         .collect();
     to_json(&out)
@@ -197,15 +226,15 @@ pub fn glow_series_json(
 pub fn best_glow_json(
     place_json: &str,
     pack_json: &str,
-    series_json: &str,
+    weather_json: &str,
     jd_start: f64,
     jd_end: f64,
     step_minutes: f64,
 ) -> Result<String, String> {
     let place = load_place(place_json)?;
     let params = load_pack(pack_json)?;
-    match load_series(series_json)? {
-        Some(series) => to_json(&glow::best_glow(&params, &place, &series, jd_start, jd_end, step_minutes)?),
+    match load_weather(weather_json)? {
+        Some(weather) => to_json(&glow::best_glow(&params, &place, &weather, jd_start, jd_end, step_minutes)?),
         None => Ok("null".to_string()),
     }
 }
@@ -268,9 +297,19 @@ pub fn conditions_at(series_json: &str, jd: f64) -> Result<String, JsError> {
     js(conditions_at_json(series_json, jd))
 }
 
+#[wasm_bindgen(js_name = weatherPlan)]
+pub fn weather_plan(place_json: &str, pack_json: &str, year: i32, month: u32, day: u32, tz_hours: f64) -> Result<String, JsError> {
+    js(weather_plan_json(place_json, pack_json, year, month, day, tz_hours))
+}
+
+#[wasm_bindgen(js_name = weatherFromOpenMeteo)]
+pub fn weather_from_open_meteo(plan_json: &str, responses_json: &str, source: &str) -> Result<String, JsError> {
+    js(weather_from_open_meteo_json(plan_json, responses_json, source))
+}
+
 #[wasm_bindgen(js_name = glowAt)]
-pub fn glow_at(place_json: &str, pack_json: &str, series_json: &str, jd: f64) -> Result<String, JsError> {
-    js(glow_at_json(place_json, pack_json, series_json, jd))
+pub fn glow_at(place_json: &str, pack_json: &str, weather_json: &str, jd: f64) -> Result<String, JsError> {
+    js(glow_at_json(place_json, pack_json, weather_json, jd))
 }
 
 #[wasm_bindgen(js_name = glowSeries)]
@@ -436,6 +475,34 @@ mod tests {
         assert_eq!(b["score"], 0.0);
         assert_eq!(best_glow_json(KOCHI, "", "", jd, jd + 0.02, 1.0).unwrap(), "null");
         assert!(glow_at_json(KOCHI, "", "{", jd).is_err());
+    }
+
+    #[test]
+    fn a_plan_and_its_answers_make_weather_for_the_glow() {
+        // Kochi, 15 Nov, default pack: the place plus 5 points each toward
+        // sunset and sunrise.
+        let plan_json = weather_plan_json(KOCHI, "", 2026, 11, 15, 5.5).unwrap();
+        let plan: Value = serde_json::from_str(&plan_json).unwrap();
+        let n = plan["points"].as_array().unwrap().len();
+        assert_eq!(n, 11);
+        assert_eq!(plan["sunset"]["first"], 1);
+        assert_eq!(plan["sunrise"]["first"], 6);
+        // One answer listing all 11 places, the same high cloud everywhere
+        // except a solid low deck along the way.
+        let one = |low: i32| format!(r#"{{"hourly":{{"time":[1794744000,1794747600],"cloud_cover_low":[{low},{low}],"cloud_cover_high":[60,60]}}}}"#);
+        let answer = format!("[{}]", (0..n).map(|i| one(if i == 0 { 0 } else { 100 })).collect::<Vec<_>>().join(","));
+        let list = serde_json::to_string(&[answer]).unwrap();
+        let weather = weather_from_open_meteo_json(&plan_json, &list, "test").unwrap();
+        // 18:00 IST = 12:30 UTC, inside the readings.
+        let jd = jd_from_local(2026, 11, 15, 18.0, 5.5);
+        let g: Value = serde_json::from_str(&glow_at_json(KOCHI, "", &weather, jd).unwrap()).unwrap();
+        assert_eq!(g["along_sun"], true);
+        // The plain series still works as "here only".
+        let here_only: Value = serde_json::from_str(&weather).unwrap();
+        let plain = serde_json::to_string(&here_only["here"]).unwrap();
+        let g: Value = serde_json::from_str(&glow_at_json(KOCHI, "", &plain, jd).unwrap()).unwrap();
+        assert_eq!(g["along_sun"], false);
+        assert!(weather_from_open_meteo_json("{", &list, "t").is_err());
     }
 
     #[test]

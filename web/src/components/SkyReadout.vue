@@ -3,7 +3,7 @@
 // the CLI's `--at`, because both read the same SkyState from the core.
 import { computed } from "vue";
 import type { Pack, SkyState } from "../lib/types";
-import { describeLayer, describeSun } from "../lib/describe";
+import { describeLayer, describeSun, heightText } from "../lib/describe";
 import { layerCell, skyCell } from "../lib/strip";
 
 const props = defineProps<{ s: SkyState; pack: Pack }>();
@@ -22,7 +22,7 @@ const stageText = computed(() => {
     <table v-if="s.elevation_deg < 0">
       <tbody>
         <tr v-for="(l, i) in s.layers" :key="l.name">
-          <td class="num"><span class="swatch" :style="{ background: layerCell(s, i).colour }"></span>{{ l.name }} {{ l.height_km.toFixed(1) }} km</td>
+          <td class="num"><span class="swatch" :style="{ background: layerCell(s, i).colour }"></span>{{ l.name }} {{ heightText(l) }}</td>
           <td>{{ describeLayer(l) }}</td>
         </tr>
       </tbody>

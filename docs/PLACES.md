@@ -37,7 +37,7 @@ A place is a small JSON file: where you are, how high up, what is on the skyline
 - **Height.** Lowers the sea horizon by about `0.0293 x sqrt(elevation_m)` degrees, so the flat-horizon sunset comes later. The shadow edge is also computed from your height.
 - **Skyline.** For the sun's bearing, the higher of the `horizon` line and any `peak` bump is the skyline. A peak's angle is `atan(height difference / distance)` minus a little for Earth's curve. The sun counts as hidden once it is below that angle (refraction corrected).
 - **Sunrise too.** The same skyline and height are used in the morning: a ridge in the east delays the sunrise you see, and standing higher advances it.
-- **Heights are above sea level.** Cloud heights in packs are above sea level too.
+- **Heights are above sea level.** Cloud heights in packs are different: they are above the ground, so from Leh (3.5 km up) the default pack's low cloud is at 5 km above sea level. The command line and the app show both heights for places 500 m or more up.
 
 ## Honest limits
 

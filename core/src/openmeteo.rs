@@ -26,7 +26,8 @@ use std::collections::BTreeMap;
 
 use serde_json::Value;
 
-use crate::conditions::{parse_utc, Conditions, ConditionsSeries, Sample};
+use crate::conditions::{parse_utc, Conditions, ConditionsSeries, Sample, Sunward, SunwardPoint, Weather};
+use crate::sunward::{Direction, WeatherPlan};
 
 /// The `hourly=` list to ask the forecast service for.
 pub const FORECAST_HOURLY: &str =
@@ -76,8 +77,7 @@ fn unix_seconds(time: &Value, utc_offset_seconds: f64) -> Result<i64, String> {
 
 /// Read one answer into `into`, keyed by Unix seconds. Values already there
 /// are kept unless this answer knows the same value too.
-fn read_response(text: &str, into: &mut BTreeMap<i64, Conditions>) -> Result<(), String> {
-    let v: Value = serde_json::from_str(text).map_err(|e| format!("not JSON: {e}"))?;
+fn read_response(v: &Value, into: &mut BTreeMap<i64, Conditions>) -> Result<(), String> {
     if v.get("error").and_then(Value::as_bool) == Some(true) {
         let reason = v.get("reason").and_then(Value::as_str).unwrap_or("no reason given");
         return Err(format!("Open-Meteo said: {reason}"));
@@ -137,8 +137,14 @@ pub fn series_from_responses(responses: &[&str], source: &str) -> Result<Conditi
     }
     let mut by_time = BTreeMap::new();
     for (i, text) in responses.iter().enumerate() {
-        read_response(text, &mut by_time).map_err(|e| format!("Open-Meteo answer {}: {e}", i + 1))?;
+        let v: Value = serde_json::from_str(text).map_err(|e| format!("Open-Meteo answer {}: not JSON: {e}", i + 1))?;
+        read_response(&v, &mut by_time).map_err(|e| format!("Open-Meteo answer {}: {e}", i + 1))?;
     }
+    to_series(by_time, source)?.ok_or_else(|| "Open-Meteo answered, but with none of the values skyglow reads".to_string())
+}
+
+/// Readings keyed by Unix seconds into a series; `None` if nothing usable.
+fn to_series(by_time: BTreeMap<i64, Conditions>, source: &str) -> Result<Option<ConditionsSeries>, String> {
     let samples: Vec<Sample> = by_time
         .into_iter()
         .filter(|(_, c)| !c.is_empty())
@@ -148,14 +154,73 @@ pub fn series_from_responses(responses: &[&str], source: &str) -> Result<Conditi
         })
         .collect();
     if samples.is_empty() {
-        return Err("Open-Meteo answered, but with none of the values skyglow reads".to_string());
+        return Ok(None);
     }
-    ConditionsSeries::new(source, samples)
+    ConditionsSeries::new(source, samples).map(Some)
+}
+
+/// Read Open-Meteo answers that cover the places in `plan` (asked for in a
+/// single request with comma-separated coordinates, so each answer is a list
+/// with one entry per place, in the plan's order) into a [`Weather`].
+///
+/// An answer for a single place (not a list) is read as "here" only, so
+/// answers saved for just the place itself still work. A place along the way
+/// with nothing usable is simply left out; the place itself must have data.
+pub fn weather_from_responses(plan: &WeatherPlan, responses: &[&str], source: &str) -> Result<Weather, String> {
+    if responses.is_empty() {
+        return Err("no Open-Meteo answers to read".to_string());
+    }
+    // Each answer as a list of per-place answers.
+    let mut per_answer: Vec<Vec<Value>> = Vec::new();
+    for (i, text) in responses.iter().enumerate() {
+        let v: Value = serde_json::from_str(text).map_err(|e| format!("Open-Meteo answer {}: not JSON: {e}", i + 1))?;
+        per_answer.push(match v {
+            Value::Array(items) => items,
+            single => vec![single],
+        });
+    }
+    let places = per_answer[0].len();
+    if per_answer.iter().any(|a| a.len() != places) {
+        return Err("the Open-Meteo answers cover different numbers of places".to_string());
+    }
+    if places != 1 && places != plan.points.len() {
+        return Err(format!(
+            "the Open-Meteo answers cover {places} places; this place and date need {} (or 1 for the place alone)",
+            plan.points.len()
+        ));
+    }
+    let mut series: Vec<Option<ConditionsSeries>> = Vec::with_capacity(places);
+    for place in 0..places {
+        let mut by_time = BTreeMap::new();
+        for (i, answer) in per_answer.iter().enumerate() {
+            read_response(&answer[place], &mut by_time).map_err(|e| format!("Open-Meteo answer {}: {e}", i + 1))?;
+        }
+        series.push(to_series(by_time, source)?);
+    }
+    let here = series[0].take().ok_or("Open-Meteo answered, but with none of the values skyglow reads for this place")?;
+    if places == 1 {
+        return Ok(Weather::here_only(here));
+    }
+    let direction = |d: &Option<Direction>, series: &mut Vec<Option<ConditionsSeries>>| {
+        d.as_ref().map(|d| Sunward {
+            azimuth_deg: d.azimuth_deg,
+            points: d
+                .distances_km
+                .iter()
+                .enumerate()
+                .filter_map(|(k, km)| series[d.first + k].take().map(|s| SunwardPoint { distance_km: *km, series: s }))
+                .collect(),
+        })
+    };
+    let sunset = direction(&plan.sunset, &mut series);
+    let sunrise = direction(&plan.sunrise, &mut series);
+    Ok(Weather { here: Some(here), sunset, sunrise })
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::sunward::GeoPoint;
 
     /// 2000-01-01 12:00 UTC: Julian Day 2451545.0 (the J2000 epoch) and Unix
     /// time 946728000 (946684800 is that day's midnight, plus 12 x 3600).
@@ -245,6 +310,43 @@ mod tests {
         assert_eq!(s.samples.len(), 1);
         assert!((s.samples[0].jd - (J2000 + HOUR)).abs() < 1e-9);
         assert_eq!(s.samples[0].conditions.cloud_high_pct, Some(30.0));
+    }
+
+    #[test]
+    fn answers_for_several_places_become_weather_along_the_sun() {
+        // A plan of three places: here, one point toward sunset (200 km) and
+        // one toward sunrise (200 km). Each answer is a list in that order.
+        let plan = WeatherPlan {
+            points: vec![GeoPoint { lat: 0.0, lon: 0.0 }, GeoPoint { lat: 0.0, lon: -1.8 }, GeoPoint { lat: 0.0, lon: 1.8 }],
+            sunset: Some(Direction { azimuth_deg: 270.0, first: 1, distances_km: vec![200.0] }),
+            sunrise: Some(Direction { azimuth_deg: 90.0, first: 2, distances_km: vec![200.0] }),
+        };
+        let one = |high: i32| format!(r#"{{"hourly":{{"time":[946728000],"cloud_cover_high":[{high}]}}}}"#);
+        let weather = format!("[{},{},{}]", one(10), one(20), one(30));
+        let air = r#"[{"hourly":{"time":[946728000],"aerosol_optical_depth":[0.1]}},
+                      {"hourly":{"time":[946728000],"aerosol_optical_depth":[null]}},
+                      {"hourly":{"time":[946728000],"aerosol_optical_depth":[0.3]}}]"#;
+        let w = weather_from_responses(&plan, &[&weather, air], "test").unwrap();
+        assert_eq!(w.here_at(J2000).unwrap().cloud_high_pct, Some(10.0));
+        assert_eq!(w.here_at(J2000).unwrap().aerosol_optical_depth, Some(0.1));
+        let set = w.sunset.as_ref().unwrap();
+        assert_eq!(set.azimuth_deg, 270.0);
+        assert_eq!(set.points[0].distance_km, 200.0);
+        assert_eq!(w.along_at(false, J2000)[0].1.cloud_high_pct, Some(20.0));
+        assert_eq!(w.along_at(true, J2000)[0].1.cloud_high_pct, Some(30.0));
+        assert_eq!(w.along_at(true, J2000)[0].1.aerosol_optical_depth, Some(0.3));
+
+        // A single-place answer is "here" only.
+        let w = weather_from_responses(&plan, &[&one(40)], "test").unwrap();
+        assert_eq!(w.here_at(J2000).unwrap().cloud_high_pct, Some(40.0));
+        assert!(w.sunset.is_none());
+
+        // Wrong counts are reported in words.
+        let two = format!("[{},{}]", one(1), one(2));
+        assert!(weather_from_responses(&plan, &[&two], "test").unwrap_err().contains("cover 2 places"));
+        assert!(weather_from_responses(&plan, &[&weather, &one(5)], "test").unwrap_err().contains("different numbers"));
+        let nothing_here = format!("[{},{},{}]", r#"{"hourly":{"time":[946728000],"cloud_cover_high":[null]}}"#, one(2), one(3));
+        assert!(weather_from_responses(&plan, &[&nothing_here], "test").unwrap_err().contains("this place"));
     }
 
     #[test]

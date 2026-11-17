@@ -91,7 +91,7 @@ The engine itself never goes online (see [DECISIONS.md](DECISIONS.md), 0020 and 
 
 With online extras on (the default), the **Conditions** card under the time scrubber looks up the forecast for the chosen place and date and shows the reading at the scrubber's time. It says which forecast hours the reading was worked out from, where it came from and how old it is.
 
-- **What is sent:** the place's coordinates rounded to two decimals (about 1 km) and three dates (the day before, the day, the day after). Nothing else.
+- **What is sent:** the place's coordinates rounded to two decimals (about 1 km), the same for ten points along the lines toward sunset and sunrise (50 to 600 km away, so the glow score can use the cloud the sunbeam crosses, see [GLOW.md](GLOW.md)), and three dates (the day before, the day, the day after). All eleven go in one request to each service. Nothing else. The points are worked out from the place, so together they still say roughly where it is.
 - **Saved for offline:** each answer is kept in the browser (the twelve most recent place-and-date pairs). A copy less than an hour old is used without asking again. Offline, or if Open-Meteo cannot be reached, the saved copy is shown with its age, however old.
 - **Refresh** asks again straight away.
 - **Save as file** downloads the forecast as a conditions file (times in UTC, no coordinates), to keep with an observation of that evening. See [OBSERVATIONS.md](OBSERVATIONS.md).
@@ -100,15 +100,15 @@ With online extras on (the default), the **Conditions** card under the time scru
 
 ### On the command line
 
-The command line never goes online either. Save the answers yourself, then point skyglow at the files:
+The command line never goes online either. Ask it for the two addresses, save the answers yourself, then point skyglow at the files:
 
 ```powershell
-$where = "latitude=9.93&longitude=76.27&start_date=2026-11-15&end_date=2026-11-15"
-curl.exe -o weather.json "https://api.open-meteo.com/v1/forecast?$where&hourly=cloud_cover_low,cloud_cover_mid,cloud_cover_high,relative_humidity_2m,total_column_integrated_water_vapour"
-curl.exe -o air.json "https://air-quality-api.open-meteo.com/v1/air-quality?$where&hourly=aerosol_optical_depth"
-
+cargo run -p skyglow-core -- --place kochi 2026-11-15 --open-meteo-urls
+# copy each printed address into: curl.exe -o weather.json "<address>"   (and air.json)
 cargo run -p skyglow-core -- --place kochi 2026-11-15 --at 18:08 --open-meteo weather.json --open-meteo air.json
 ```
+
+`--open-meteo-urls` prints addresses covering the place and the points toward sunset and sunrise, worked out exactly as the web app does, with the same rounding. Answers saved from them let the glow score use the cloud along the sunbeam. An answer for the place alone (one pair of coordinates) also works: then the local forecast stands in for the whole path.
 
 `--open-meteo` can be given once or twice, in either order; the answers are merged by time. Times in the answers may be in UTC (the default), in a local time zone (`&timezone=...`), or Unix seconds (`&timeformat=unixtime`); skyglow reads all three. Use `--conditions` or `--open-meteo`, not both. Change the coordinates and dates to yours, and keep saved answers for a private spot in `test/`.
 

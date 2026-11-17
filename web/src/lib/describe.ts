@@ -5,6 +5,20 @@ import type { LayerState, SkyState } from "./types";
 
 const deg = "°";
 
+/** Ground at least this high (km above sea level) gets both heights shown (same as the CLI). */
+export const HIGH_GROUND_KM = 0.5;
+
+/** True when a layer's place is high enough to show its height above the ground too. */
+export function isHighGround(l: { height_km: number; above_ground_km: number }): boolean {
+  return l.height_km - l.above_ground_km >= HIGH_GROUND_KM;
+}
+
+/** "5.0 km", or at a high place "5.0 km (1.5 km above ground)". */
+export function heightText(l: { height_km: number; above_ground_km: number }): string {
+  const asl = `${l.height_km.toFixed(1)} km`;
+  return isHighGround(l) ? `${asl} (${l.above_ground_km.toFixed(1)} km above ground)` : asl;
+}
+
 export function describeSun(s: SkyState): string[] {
   if (s.elevation_deg >= 0) {
     const lines = [`Sun is above the horizon: ${s.elevation_deg.toFixed(2)}${deg} elevation, azimuth ${s.azimuth_deg.toFixed(0)}${deg}.`];
@@ -30,7 +44,7 @@ export function describeLayer(l: LayerState): string {
   const L = l.light;
   switch (L.kind) {
     case "lit_overhead":
-      return `Lit overhead; sunlight skims ${L.grazing_km.toFixed(1)} km above the ground${L.colour ? `, likely ${L.colour}` : ""}.`;
+      return `Lit overhead; sunlight skims ${L.grazing_km.toFixed(1)} km above sea level${L.colour ? `, likely ${L.colour}` : ""}.`;
     case "lit_toward_sun":
       return `Lit only below ${L.edge_elevation_deg.toFixed(1)}${deg} elevation toward the sun (shadow edge ${L.edge_distance_km.toFixed(0)} km away; edge light is deep red-pink).`;
     case "edge_beyond_horizon":

@@ -12,7 +12,7 @@ A phone-friendly web app that runs the real Skyglow engine (the Rust code in `co
 - **See:**
   - the **time scrubber**: drag through the whole day and read the sky at any minute, in the same words as the command line's `--at`;
   - the **sun's height through the day**, with the light stages as coloured bands (and your skyline, if you set one);
-  - **colour strips** around sunrise and sunset: minute by minute, the sky stage and whether each cloud height is lit, and with what light;
+  - **colour strips** around sunrise and sunset: minute by minute, the sky stage and whether each cloud height is lit, and with what light. With a forecast, a cloud height whose cover stays under 5% the whole time is left out (a clear evening shows only the sky). Hover a row's name for that layer's heights, the forecast level's range, the highest a cloud can be, cover, likely cloud type and best glow. The glow card also names the highest cloud overhead and the heights it could be at. At places 500 m or more up, rows give the height above sea level and above the ground (pack heights count from the ground);
   - **glow forecast**: a rough 0-10 score per cloud height from the forecast and the geometry, the best moment around sunrise and sunset (tap **Go** to jump there), and under **Why** every factor behind each score. With a forecast, the colour strips also fade each cloud row into the sky where the weather says it will not show (see [docs/GLOW.md](../docs/GLOW.md));
   - **conditions**: the weather forecast's cloud cover (low, middle, high), humidity, water vapour and haze at the scrubber's time, from Open-Meteo. It says which forecast hours it was worked out from and how old it is, is saved for offline, and has a Refresh button. **Save as file** downloads it (UTC times, no coordinates) to keep with notes of that evening; see [docs/OBSERVATIONS.md](../docs/OBSERVATIONS.md). For information only: it does not change the timings or colours yet (see [docs/CONDITIONS.md](../docs/CONDITIONS.md));
   - **sunrise and sunset tables**: the same numbers as the command line's report.
@@ -36,7 +36,7 @@ Everything runs in your browser. Only these send anything, and only while you ar
 | Pick on a map | the map area you look at, to fetch map pictures | OpenStreetMap tile servers |
 | Online extras (on unless switched off) | the coordinates of places you pick, rounded to about 100 m | Open-Meteo (time zone, ground height) and OpenStreetMap Nominatim (name) |
 
-| Conditions (part of online extras) | the coordinates of the place on screen, rounded to about 1 km, and three dates | Open-Meteo (weather forecast, and the CAMS aerosol forecast) |
+| Conditions (part of online extras) | the coordinates of the place on screen and of ten points 50 to 600 km toward sunset and sunrise, all rounded to about 1 km, and three dates | Open-Meteo (weather forecast, and the CAMS aerosol forecast) |
 
 Online-extras answers are cached in the browser, so the same spot is not looked up twice. Forecasts are kept too (the twelve most recent place-and-date pairs), reused for an hour, and shown with their age when you are offline. Each request gives up after 8 seconds, so a slow service never blocks the app. The footer shows whether you are online or offline.
 

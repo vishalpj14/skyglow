@@ -59,7 +59,7 @@ The sun descends at roughly `15 degrees/hour x cos(latitude)` near the horizon. 
 | Cloud there or not, low cloud blocking the sunbeam, lower cloud hiding the view | glow score ([GLOW.md](GLOW.md)), rough rules, uncalibrated |
 | Aerosol effects: haze dulls colour, most for low beams | glow score, following published notes, uncalibrated |
 | Moisture: humidity adds haze | glow score, uncalibrated; column water vapour shown but not used |
-| Cloud along the sunbeam's path toward the sun (not just overhead) | not yet: uses local forecast cover as a stand-in |
+| Cloud along the sunbeam's path toward the sun (not just overhead) | glow score: forecast at five points toward the sun, read where the beam crosses each level ([GLOW.md](GLOW.md)) |
 | Grazing height as the colour variable | modelled (geometry), colour labels uncalibrated |
 | True sky colour (radiative transfer) | planned, via lookup tables from the lab |
 

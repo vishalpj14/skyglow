@@ -9,6 +9,7 @@
     { "name": "mid",  "height_km": 5.0 },
     { "name": "high", "height_km": 9.0 }
   ],
+  "cloud_ceiling_km": 16.0,
   "stages": [
     {
       "name": "golden_hour",
@@ -66,6 +67,7 @@
     "note": "UNCALIBRATED first guesses from public sources and photographers' rules of thumb, not fitted to observations. Where each number comes from: docs/GLOW.md.",
     "low_top_km": 3.0,
     "high_base_km": 8.0,
+    "sunward_km": [50, 150, 300, 450, 600],
     "opacity": { "low": 0.8, "mid": 0.6, "high": 0.3 },
     "cover": [[0, 0], [10, 0.35], [30, 0.8], [50, 1], [80, 1], [100, 0.8]],
     "colour": [[0, 0.35], [1, 0.85], [3, 1], [6, 0.85], [12, 0.6]],
@@ -80,6 +82,23 @@
       { "min_score": 2, "word": "modest" },
       { "min_score": 4, "word": "good" },
       { "min_score": 6.5, "word": "vivid" }
-    ]
+    ],
+    "cloud_types": {
+      "low": [
+        { "min_cover_pct": 1, "label": "scattered cumulus or stratocumulus" },
+        { "min_cover_pct": 60, "label": "stratocumulus" },
+        { "min_cover_pct": 90, "label": "stratus or a stratocumulus deck" }
+      ],
+      "mid": [
+        { "min_cover_pct": 1, "label": "patches of altocumulus" },
+        { "min_cover_pct": 60, "label": "altocumulus" },
+        { "min_cover_pct": 90, "label": "altostratus or an altocumulus sheet" }
+      ],
+      "high": [
+        { "min_cover_pct": 1, "label": "cirrus streaks" },
+        { "min_cover_pct": 60, "label": "cirrus and cirrocumulus" },
+        { "min_cover_pct": 90, "label": "a cirrostratus veil" }
+      ]
+    }
   }
 }

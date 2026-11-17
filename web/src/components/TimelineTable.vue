@@ -4,6 +4,7 @@
 import { computed } from "vue";
 import type { Pack, Timeline } from "../lib/types";
 import { formatClock } from "../lib/engine";
+import { heightText } from "../lib/describe";
 
 const props = defineProps<{ t: Timeline; pack: Pack }>();
 const emit = defineEmits<{ seek: [jd: number] }>();
@@ -55,7 +56,7 @@ const terrainMin = computed(() => {
       <thead><tr><th>Layer</th><th>{{ rising ? "First lit" : "Goes dark" }}</th><th>Sun below horizon</th></tr></thead>
       <tbody>
         <tr v-for="l in t.layers" :key="l.name">
-          <td>{{ l.name }} {{ l.height_km }} km</td>
+          <td>{{ l.name }} {{ heightText(l) }}</td>
           <td class="num">{{ clock(l.overhead_shadow_jd) }}</td>
           <td class="num">{{ l.shadow_depression_deg.toFixed(2) }}&deg;</td>
         </tr>

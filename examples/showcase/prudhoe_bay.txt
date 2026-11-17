@@ -27,7 +27,7 @@ Morning light stages (by sun elevation, in the order they happen):
                 Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.
 
 Cloud layers: when sunlight first reaches a layer directly overhead:
-  low     1.5 km   lit overhead at --:--:--   (sun 1.24° below horizon)
+  low     1.5 km   lit overhead at --:--:--   (sun 1.25° below horizon)
   mid     5.0 km   lit overhead at --:--:--   (sun 2.27° below horizon)
   high    9.0 km   lit overhead at --:--:--   (sun 3.04° below horizon)
 
@@ -55,7 +55,7 @@ Evening light stages (by sun elevation):
                 Deep blue sky, cloud colour mostly gone. Time to switch to twilight and star work.
 
 Cloud layers: when Earth's shadow reaches a layer directly overhead:
-  low     1.5 km   dark overhead at --:--:--   (sun 1.24° below horizon)
+  low     1.5 km   dark overhead at --:--:--   (sun 1.25° below horizon)
   mid     5.0 km   dark overhead at --:--:--   (sun 2.27° below horizon)
   high    9.0 km   dark overhead at --:--:--   (sun 3.04° below horizon)
 
@@ -86,7 +86,7 @@ Morning light stages (by sun elevation, in the order they happen):
                 Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.
 
 Cloud layers: when sunlight first reaches a layer directly overhead:
-  low     1.5 km   lit overhead at --:--:--   (sun 1.24° below horizon)
+  low     1.5 km   lit overhead at --:--:--   (sun 1.25° below horizon)
   mid     5.0 km   lit overhead at --:--:--   (sun 2.27° below horizon)
   high    9.0 km   lit overhead at --:--:--   (sun 3.04° below horizon)
 
@@ -114,7 +114,7 @@ Evening light stages (by sun elevation):
                 Deep blue sky, cloud colour mostly gone. Time to switch to twilight and star work.
 
 Cloud layers: when Earth's shadow reaches a layer directly overhead:
-  low     1.5 km   dark overhead at --:--:--   (sun 1.24° below horizon)
+  low     1.5 km   dark overhead at --:--:--   (sun 1.25° below horizon)
   mid     5.0 km   dark overhead at --:--:--   (sun 2.27° below horizon)
   high    9.0 km   dark overhead at --:--:--   (sun 3.04° below horizon)
 

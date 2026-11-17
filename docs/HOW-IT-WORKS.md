@@ -80,7 +80,7 @@ Two things about where *you* stand change when *you* see the sun go, without cha
 - **Height above sea level.** From higher up you can see farther, so the sea horizon sits slightly *below* eye level. The sun has to sink that much further before it touches it. The dip is about 0.0293 x the square root of your height in metres (2850 m gives roughly 1.6 degrees, so sunset comes a few minutes later near the equator).
 - **Mountains in the way.** A ridge toward the sun hides it long before it reaches the true horizon. Skyglow lets you describe the skyline as a few `peaks` (bearing, distance, height) or as `horizon` points, and works out the angle for you.
 
-Earth's shadow still arrives at the clouds on its own schedule, so high clouds keep glowing after the ground is in shade. That gap is the glow you see from a valley. See [PLACES.md](PLACES.md) for the format. Cloud heights in packs are heights above sea level, and the skyline is an approximation, so treat mountain results as a guide, not a measurement.
+Earth's shadow still arrives at the clouds on its own schedule, so high clouds keep glowing after the ground is in shade. That gap is the glow you see from a valley. See [PLACES.md](PLACES.md) for the format. Cloud heights in packs are heights above the ground, as weather forecasts count them: at a high place every layer sits higher above sea level (but never above the pack's `cloud_ceiling_km`). The skyline is an approximation, so treat mountain results as a guide, not a measurement.
 
 ### The sky at one moment
 

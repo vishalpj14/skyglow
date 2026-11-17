@@ -10,11 +10,13 @@
 // engine.ts), so the web app and the command line translate identically.
 //
 // What is sent: the place's coordinates rounded to two decimals (about 1 km;
-// the forecast grid is coarser than that anyway) and three dates. Nothing else.
+// the forecast grid is coarser than that anyway), the same for a few points
+// along the lines toward sunset and sunrise (so the glow score can use the
+// cloud the sunbeam crosses), and three dates. Nothing else.
 
 import * as engine from "./engine";
 import { round } from "./geo";
-import type { ConditionsSeries, LocalDate } from "./types";
+import type { ConditionsSeries, GeoPoint, LocalDate, Weather, WeatherPlan } from "./types";
 
 /** Shown next to the numbers. */
 export const SOURCE = "Open-Meteo forecast";
@@ -24,12 +26,15 @@ export const FRESH_MS = 60 * 60 * 1000;
 
 /** How many place-and-date answers to keep in this browser. */
 const KEEP = 12;
-const CACHE = "skyglow.conditions.v1";
+const CACHE = "skyglow.conditions.v2";
 /** Give up on a service after this long, so a stalled connection never hangs the app. */
 const TIMEOUT_MS = 8000;
 
 export interface StoredConditions {
+  /** The readings for the place itself (the Conditions card, Save as file). */
   series: ConditionsSeries;
+  /** Everything: here, and along the sun's direction when it was asked for. */
+  weather: Weather;
   /** When it was fetched, milliseconds since 1970 on this device's clock. */
   fetchedAt: number;
   /** Which of the two services answered usefully. */
@@ -60,11 +65,11 @@ export function shiftDate(d: LocalDate, days: number): string {
  * day after are included, because the local day of a place far from Greenwich
  * spills over both ends of the UTC day.
  */
-export function conditionsUrls(lat: number, lon: number, date: LocalDate): { weather: URL; aerosols: URL } {
+export function conditionsUrls(points: GeoPoint[], date: LocalDate): { weather: URL; aerosols: URL } {
   const hourly = engine.openMeteoHourly();
   const common = {
-    latitude: String(round(lat, 2)),
-    longitude: String(round(lon, 2)),
+    latitude: points.map((p) => round(p.lat, 2)).join(","),
+    longitude: points.map((p) => round(p.lon, 2)).join(","),
     start_date: shiftDate(date, -1),
     end_date: shiftDate(date, 1),
     timezone: "GMT",
@@ -100,7 +105,7 @@ function readAll(store: Store | null): Record<string, StoredConditions> {
 
 export function readSaved(key: string, store: Store | null = browserStore()): StoredConditions | null {
   const hit = readAll(store)[key];
-  return hit && Array.isArray(hit.series?.samples) && typeof hit.fetchedAt === "number" ? hit : null;
+  return hit && Array.isArray(hit.series?.samples) && hit.weather && typeof hit.fetchedAt === "number" ? hit : null;
 }
 
 function writeSaved(key: string, value: StoredConditions, store: Store | null) {
@@ -133,6 +138,8 @@ export interface LoadOptions {
   online: boolean;
   /** Ask again even if the saved answer is fresh (the Refresh button). */
   force?: boolean;
+  /** The places to ask about (engine.weatherPlan). Without one, only the place itself. */
+  plan?: WeatherPlan | null;
   now?: number;
   fetchText?: (url: URL) => Promise<string>;
   store?: Store | null;
@@ -154,7 +161,8 @@ export async function loadConditions(lat: number, lon: number, date: LocalDate, 
   if (!opts.online) return fallback();
 
   const get = opts.fetchText ?? fetchText;
-  const urls = conditionsUrls(lat, lon, date);
+  const plan: WeatherPlan = opts.plan ?? { points: [{ lat, lon }], sunset: null, sunrise: null };
+  const urls = conditionsUrls(plan.points, date);
   const answers = await Promise.allSettled([get(urls.weather), get(urls.aerosols)]);
 
   // Keep each answer the core can read on its own; remember why the others failed.
@@ -166,7 +174,7 @@ export async function loadConditions(lat: number, lon: number, date: LocalDate, 
       return false;
     }
     try {
-      engine.conditionsFromOpenMeteo([a.value], SOURCE);
+      engine.weatherFromOpenMeteo(plan, [a.value], SOURCE);
       good.push(a.value);
       return true;
     } catch (e) {
@@ -176,8 +184,11 @@ export async function loadConditions(lat: number, lon: number, date: LocalDate, 
   });
   if (!good.length) return fallback(problems[0]);
 
+  const weather = engine.weatherFromOpenMeteo(plan, good, SOURCE);
+  if (!weather.here) return fallback("Open-Meteo had nothing for this place");
   const stored: StoredConditions = {
-    series: engine.conditionsFromOpenMeteo(good, SOURCE),
+    series: weather.here,
+    weather,
     fetchedAt: now,
     parts: { weather: usable[0], aerosols: usable[1] },
   };

@@ -56,7 +56,10 @@ export interface Pack {
   description: string;
   earth_radius_km: number;
   sunset_elevation_deg: number;
+  /** Layer heights are above the ground; the engine adds the place's height. */
   cloud_layers: { name: string; height_km: number }[];
+  /** The highest a cloud can sit, km above sea level. */
+  cloud_ceiling_km: number;
   stages: Stage[];
   grazing_colours: GrazingColour[];
 }
@@ -72,7 +75,9 @@ export interface StageTime {
 
 export interface LayerReport {
   name: string;
+  /** Above sea level, km. */
   height_km: number;
+  above_ground_km: number;
   shadow_depression_deg: number;
   overhead_shadow_jd: number | null;
 }
@@ -103,7 +108,9 @@ export type LayerLight =
 
 export interface LayerState {
   name: string;
+  /** Above sea level, km. */
   height_km: number;
+  above_ground_km: number;
   light: LayerLight;
 }
 
@@ -168,11 +175,27 @@ export interface GlowFactors {
   humidity: number;
 }
 
+/** Where the sunbeam crosses another cloud level on its way (core/src/glow.rs). */
+export interface Crossing {
+  level: Level;
+  /** Distance toward the sun, km. */
+  distance_km: number;
+  cover_pct: number | null;
+}
+
 export interface LayerGlow {
   name: string;
+  /** Above sea level, km. */
   height_km: number;
+  above_ground_km: number;
   level: Level;
+  /** The heights this forecast level spans here, km above sea level: [bottom, top]. */
+  range_km: [number, number];
+  /** A likely cloud type from the forecast cover (a rough guess), or null. */
+  cloud_type: string | null;
   beam_low_km: number | null;
+  /** How far toward the sun the lit part you see is, km (0 overhead). */
+  cover_at_km: number;
   cover_pct: number | null;
   factors: GlowFactors;
   /** Geometry only, 0 to 10: the score if cloud were there and the air clear. */
@@ -181,13 +204,25 @@ export interface LayerGlow {
   score: number | null;
   word: string | null;
   blocked_by: Level[];
+  crossings: Crossing[];
   seen_through: Level[];
   unknown: string[];
 }
 
+/** The highest forecast level with cloud overhead (core/src/glow.rs). */
+export interface HighestCloud {
+  level: Level;
+  cover_pct: number;
+  /** km above sea level; forecasts give no cloud tops, so the cloud is somewhere in here. */
+  range_km: [number, number];
+}
+
 export interface Glow {
   jd: number;
+  highest_cloud: HighestCloud | null;
   has_conditions: boolean;
+  /** True when the forecast along the sun's direction was used for the sunbeam's path. */
+  along_sun: boolean;
   layers: LayerGlow[];
 }
 
@@ -197,6 +232,37 @@ export interface GlowMoment {
   height_km: number;
   score: number;
   word: string;
+}
+
+export interface GeoPoint {
+  lat: number;
+  lon: number;
+}
+
+/** Where one direction's points sit in a WeatherPlan (core/src/sunward.rs). */
+export interface Direction {
+  azimuth_deg: number;
+  first: number;
+  distances_km: number[];
+}
+
+/** The places to ask the forecast about: the place, then toward sunset, then toward sunrise. */
+export interface WeatherPlan {
+  points: GeoPoint[];
+  sunset: Direction | null;
+  sunrise: Direction | null;
+}
+
+export interface Sunward {
+  azimuth_deg: number;
+  points: { distance_km: number; series: ConditionsSeries }[];
+}
+
+/** All the readings for one place and date (core/src/conditions.rs). */
+export interface Weather {
+  here: ConditionsSeries | null;
+  sunset: Sunward | null;
+  sunrise: Sunward | null;
 }
 
 export interface LocalDate {

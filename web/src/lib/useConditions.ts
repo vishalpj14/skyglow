@@ -3,12 +3,12 @@
 // changes (after a short pause, so typing coordinates sends one request), and
 // again when the connection or the online-extras switch comes back.
 import { computed, onBeforeUnmount, ref, watch, type Ref } from "vue";
-import type { LocalDate, Place } from "./types";
+import type { LocalDate, Place, WeatherPlan } from "./types";
 import { cacheKey, loadConditions, type StoredConditions } from "./conditions";
 import { isOnline } from "./network";
 import { onlineExtras } from "./saved";
 
-export function useConditions(place: Ref<Place>, date: Ref<LocalDate>) {
+export function useConditions(place: Ref<Place>, date: Ref<LocalDate>, plan: Ref<WeatherPlan | null>) {
   const stored = ref<StoredConditions | null>(null);
   const from = ref<"network" | "saved" | "none">("none");
   const problem = ref("");
@@ -21,7 +21,7 @@ export function useConditions(place: Ref<Place>, date: Ref<LocalDate>) {
   async function load(force = false) {
     const mine = ++latest;
     busy.value = true;
-    const r = await loadConditions(place.value.lat, place.value.lon, date.value, { online: mayFetch.value, force });
+    const r = await loadConditions(place.value.lat, place.value.lon, date.value, { online: mayFetch.value, force, plan: plan.value });
     if (mine !== latest) return;
     stored.value = r.stored;
     from.value = r.from;
@@ -44,7 +44,10 @@ export function useConditions(place: Ref<Place>, date: Ref<LocalDate>) {
   /** The series as JSON text for the engine; "" when there is none. */
   const seriesText = computed(() => (stored.value ? JSON.stringify(stored.value.series) : ""));
 
-  return { stored, from, problem, busy, mayFetch, load, seriesText };
+  /** Everything (here and along the sun's direction) as JSON text for the glow; "" when there is none. */
+  const weatherText = computed(() => (stored.value ? JSON.stringify(stored.value.weather) : ""));
+
+  return { stored, from, problem, busy, mayFetch, load, seriesText, weatherText };
 }
 
 export type ConditionsState = ReturnType<typeof useConditions>;

@@ -265,6 +265,105 @@ impl ConditionsSeries {
     }
 }
 
+/// One point along the sun's direction, with its readings.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct SunwardPoint {
+    /// Distance from the place toward the sun, along the ground, km.
+    pub distance_km: f64,
+    pub series: ConditionsSeries,
+}
+
+/// Readings at points along the sun's direction (see `crate::sunward`), so
+/// the glow score can use the cloud the sunbeam actually passes through.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct Sunward {
+    /// Compass direction of the points, degrees from north.
+    pub azimuth_deg: f64,
+    /// Nearest first.
+    pub points: Vec<SunwardPoint>,
+}
+
+/// All the readings for one place and date: here, and (if known) along the
+/// sun's direction at sunset and at sunrise. Every part is optional.
+#[derive(Debug, Clone, PartialEq, Default, Serialize)]
+pub struct Weather {
+    pub here: Option<ConditionsSeries>,
+    pub sunset: Option<Sunward>,
+    pub sunrise: Option<Sunward>,
+}
+
+impl Weather {
+    /// Readings for this place only.
+    pub fn here_only(series: ConditionsSeries) -> Self {
+        Weather { here: Some(series), sunset: None, sunrise: None }
+    }
+
+    /// Read a weather bundle (as written by serde: `here`, `sunset`,
+    /// `sunrise`), or a plain conditions file, which becomes `here` only.
+    pub fn from_json(text: &str) -> Result<Self, String> {
+        let v: Value = serde_json::from_str(text).map_err(|e| format!("invalid weather JSON: {e}"))?;
+        if v.get("samples").is_some() {
+            return ConditionsSeries::from_json(text).map(Weather::here_only);
+        }
+        let map = v.as_object().ok_or("weather must be an object")?;
+        let series = |v: &Value| ConditionsSeries::from_json(&v.to_string());
+        let sunward = |v: &Value, which: &str| -> Result<Option<Sunward>, String> {
+            if v.is_null() {
+                return Ok(None);
+            }
+            let azimuth_deg = v
+                .get("azimuth_deg")
+                .and_then(Value::as_f64)
+                .ok_or_else(|| format!("{which}: needs azimuth_deg"))?;
+            let mut points = Vec::new();
+            for p in v.get("points").and_then(Value::as_array).ok_or_else(|| format!("{which}: needs points"))? {
+                let distance_km = p
+                    .get("distance_km")
+                    .and_then(Value::as_f64)
+                    .filter(|d| d.is_finite() && *d > 0.0)
+                    .ok_or_else(|| format!("{which}: every point needs a distance_km above 0"))?;
+                let s = series(p.get("series").ok_or_else(|| format!("{which}: every point needs a series"))?)
+                    .map_err(|e| format!("{which}: {e}"))?;
+                points.push(SunwardPoint { distance_km, series: s });
+            }
+            points.sort_by(|a, b| a.distance_km.total_cmp(&b.distance_km));
+            Ok(Some(Sunward { azimuth_deg, points }))
+        };
+        for key in map.keys() {
+            if !["here", "sunset", "sunrise"].contains(&key.as_str()) {
+                return Err(format!("weather has an unknown field '{key}'"));
+            }
+        }
+        Ok(Weather {
+            here: match map.get("here") {
+                Some(h) if !h.is_null() => Some(series(h).map_err(|e| format!("here: {e}"))?),
+                _ => None,
+            },
+            sunset: map.get("sunset").map_or(Ok(None), |v| sunward(v, "sunset"))?,
+            sunrise: map.get("sunrise").map_or(Ok(None), |v| sunward(v, "sunrise"))?,
+        })
+    }
+
+    /// The readings here at `jd`, if any are close enough.
+    pub fn here_at(&self, jd: f64) -> Option<Conditions> {
+        self.here.as_ref().and_then(|s| s.at(jd)).map(|r| r.conditions)
+    }
+
+    /// Readings along the sun's direction at `jd`, nearest first, as
+    /// (distance km, conditions). Uses the sunrise points while the sun is
+    /// rising and the sunset points while it is sinking. Points with nothing
+    /// close enough in time are left out.
+    pub fn along_at(&self, rising: bool, jd: f64) -> Vec<(f64, Conditions)> {
+        let which = if rising { &self.sunrise } else { &self.sunset };
+        which.as_ref().map_or_else(Vec::new, |w| {
+            w.points
+                .iter()
+                .filter_map(|p| p.series.at(jd).map(|r| (p.distance_km, r.conditions)))
+                .collect()
+        })
+    }
+}
+
 /// Julian Day for a UTC date and time written like `2026-11-15T12:00`,
 /// `2026-11-15T12:00:30Z` or `2026-11-15 12:00`.
 pub fn parse_utc(text: &str) -> Result<f64, String> {
@@ -440,6 +539,38 @@ mod tests {
         assert!(bad(r#"{"utc":"noon","cloud_high_pct":5}"#).contains("sample 1"));
         assert!(bad(r#"{"utc":"2000-01-01T12:00","cloud_high_pct":"lots"}"#).contains("sample 1"));
         assert!(ConditionsSeries::from_json("{").is_err());
+    }
+
+    #[test]
+    fn weather_reads_a_bundle_or_a_plain_file_and_picks_the_right_direction() {
+        let one = |pct: f64| ConditionsSeries::new("t", vec![Sample { jd: J2000, conditions: high(pct) }]).unwrap();
+        let w = Weather {
+            here: Some(one(10.0)),
+            sunset: Some(Sunward {
+                azimuth_deg: 250.0,
+                points: vec![
+                    SunwardPoint { distance_km: 100.0, series: one(20.0) },
+                    SunwardPoint { distance_km: 300.0, series: one(30.0) },
+                ],
+            }),
+            sunrise: Some(Sunward { azimuth_deg: 110.0, points: vec![SunwardPoint { distance_km: 100.0, series: one(90.0) }] }),
+        };
+        let back = Weather::from_json(&serde_json::to_string(&w).unwrap()).unwrap();
+        assert_eq!(back, w);
+        assert_eq!(w.here_at(J2000).unwrap().cloud_high_pct, Some(10.0));
+        let evening: Vec<(f64, Option<f64>)> = w.along_at(false, J2000).iter().map(|(d, c)| (*d, c.cloud_high_pct)).collect();
+        assert_eq!(evening, vec![(100.0, Some(20.0)), (300.0, Some(30.0))]);
+        assert_eq!(w.along_at(true, J2000)[0].1.cloud_high_pct, Some(90.0));
+        // Far from the readings in time: nothing along the way either.
+        assert!(w.along_at(false, J2000 + 1.0).is_empty());
+
+        // A plain conditions file is "here" only.
+        let plain = Weather::from_json(&serde_json::to_string(&one(5.0)).unwrap()).unwrap();
+        assert_eq!(plain.here_at(J2000).unwrap().cloud_high_pct, Some(5.0));
+        assert!(plain.sunset.is_none() && plain.along_at(false, J2000).is_empty());
+
+        assert!(Weather::from_json(r#"{"hre": null}"#).unwrap_err().contains("hre"));
+        assert!(Weather::from_json(r#"{"sunset": {"points": []}}"#).unwrap_err().contains("azimuth"));
     }
 
     #[test]

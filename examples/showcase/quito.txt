@@ -28,9 +28,10 @@ Morning light stages (by sun elevation, in the order they happen):
                 Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.
 
 Cloud layers: when sunlight first reaches a layer directly overhead:
-  low     1.5 km   lit overhead at 06:06:12   (sun 1.24° below horizon)
-  mid     5.0 km   lit overhead at 06:01:43   (sun 2.27° below horizon)
-  high    9.0 km   lit overhead at 05:58:21   (sun 3.04° below horizon)
+  (heights above sea level; the pack counts layers from the ground, here 2.85 km up)
+  low     4.3 km (1.5 km above ground)   lit overhead at 06:02:23   (sun 2.12° below horizon)
+  mid     7.8 km (5.0 km above ground)   lit overhead at 05:59:13   (sun 2.84° below horizon)
+  high   11.8 km (9.0 km above ground)   lit overhead at 05:56:23   (sun 3.49° below horizon)
 
 Clouds toward the sun are lit earlier than these overhead times.
 
@@ -57,9 +58,10 @@ Evening light stages (by sun elevation):
                 Deep blue sky, cloud colour mostly gone. Time to switch to twilight and star work.
 
 Cloud layers: when Earth's shadow reaches a layer directly overhead:
-  low     1.5 km   dark overhead at 18:17:55   (sun 1.24° below horizon)
-  mid     5.0 km   dark overhead at 18:22:23   (sun 2.27° below horizon)
-  high    9.0 km   dark overhead at 18:25:46   (sun 3.04° below horizon)
+  (heights above sea level; the pack counts layers from the ground, here 2.85 km up)
+  low     4.3 km (1.5 km above ground)   dark overhead at 18:21:44   (sun 2.12° below horizon)
+  mid     7.8 km (5.0 km above ground)   dark overhead at 18:24:54   (sun 2.84° below horizon)
+  high   11.8 km (9.0 km above ground)   dark overhead at 18:27:43   (sun 3.49° below horizon)
 
 Clouds toward the sun stay lit longer than these overhead times.
 
@@ -89,9 +91,10 @@ Morning light stages (by sun elevation, in the order they happen):
                 Low, warm light as the sun climbs. Clouds near the sun glow gold and shadows are long.
 
 Cloud layers: when sunlight first reaches a layer directly overhead:
-  low     1.5 km   lit overhead at 06:10:35   (sun 1.24° below horizon)
-  mid     5.0 km   lit overhead at 06:06:06   (sun 2.27° below horizon)
-  high    9.0 km   lit overhead at 06:02:44   (sun 3.04° below horizon)
+  (heights above sea level; the pack counts layers from the ground, here 2.85 km up)
+  low     4.3 km (1.5 km above ground)   lit overhead at 06:06:46   (sun 2.12° below horizon)
+  mid     7.8 km (5.0 km above ground)   lit overhead at 06:03:36   (sun 2.84° below horizon)
+  high   11.8 km (9.0 km above ground)   lit overhead at 06:00:47   (sun 3.49° below horizon)
 
 Clouds toward the sun are lit earlier than these overhead times.
 
@@ -118,8 +121,9 @@ Evening light stages (by sun elevation):
                 Deep blue sky, cloud colour mostly gone. Time to switch to twilight and star work.
 
 Cloud layers: when Earth's shadow reaches a layer directly overhead:
-  low     1.5 km   dark overhead at 18:20:54   (sun 1.24° below horizon)
-  mid     5.0 km   dark overhead at 18:25:23   (sun 2.27° below horizon)
-  high    9.0 km   dark overhead at 18:28:45   (sun 3.04° below horizon)
+  (heights above sea level; the pack counts layers from the ground, here 2.85 km up)
+  low     4.3 km (1.5 km above ground)   dark overhead at 18:24:43   (sun 2.12° below horizon)
+  mid     7.8 km (5.0 km above ground)   dark overhead at 18:27:53   (sun 2.84° below horizon)
+  high   11.8 km (9.0 km above ground)   dark overhead at 18:30:43   (sun 3.49° below horizon)
 
 Clouds toward the sun stay lit longer than these overhead times.

@@ -47,7 +47,7 @@ When skyglow has the weather forecast, it puts all of this together as a **glow 
 
 - Is the cloud **lit** by the sun, and how rich is the colour of that light?
 - Is there **cloud at that height** at all? Some broken cloud is best; none means nothing to light.
-- Is other cloud **in the sunbeam's way**? Only cloud higher than the beam's lowest point can block it, which is why low cloud spoils the *end* of a sunset more than the start.
+- Is other cloud **in the sunbeam's way**? Only cloud higher than the beam's lowest point can block it, which is why low cloud spoils the *end* of a sunset more than the start. That cloud is often hundreds of kilometres toward the sun, so skyglow checks the forecast out there, not just above you.
 - Can you **see it** past lower cloud overhead?
 - How much **haze** and **damp air** is there?
 

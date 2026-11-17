@@ -11,9 +11,10 @@
 //! boundaries are shared, and only the names (see `morning_name` in packs) and
 //! the direction of travel differ.
 //!
-//! Stages and cloud layers are about the *sky*, so they do not depend on your
-//! height or skyline. Only the sunset/sunrise times do: those are about what
-//! *you* can see.
+//! Stages are about the *sky*, so they do not depend on your height or
+//! skyline. Cloud layers depend on your ground height only because the pack
+//! counts them from the ground up. The sunset/sunrise times depend on both:
+//! those are about what *you* can see.
 
 use serde::Serialize;
 
@@ -69,7 +70,10 @@ pub struct StageTime {
 #[derive(Debug, Clone, Serialize)]
 pub struct LayerReport {
     pub name: String,
+    /// Height above sea level, km (see `Params::layer_height_km`).
     pub height_km: f64,
+    /// Height above the place's ground, km.
+    pub above_ground_km: f64,
     /// Sun depression at which the layer is on the edge of Earth's shadow overhead.
     pub shadow_depression_deg: f64,
     /// Evening: when the layer goes dark overhead. Morning: when it first
@@ -198,10 +202,13 @@ pub fn build_timeline_event(
         .cloud_layers
         .iter()
         .map(|l| {
-            let depression = cloud::shadow_depression_deg(l.height_km, params.earth_radius_km);
+            let ground_km = place.elevation_m / 1000.0;
+            let h = params.layer_height_km(l, ground_km);
+            let depression = cloud::shadow_depression_deg(h, params.earth_radius_km);
             LayerReport {
                 name: l.name.clone(),
-                height_km: l.height_km,
+                height_km: h,
+                above_ground_km: h - ground_km,
                 shadow_depression_deg: depression,
                 overhead_shadow_jd: cross(-depression),
             }

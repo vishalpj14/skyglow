@@ -13,7 +13,7 @@ Only a few conveniences use the internet, and only while you are online:
 - **Searching for a place** sends the text you type, so you can find any town in the world.
 - **The map** loads map pictures for the area you are looking at.
 - **Online extras** fill in a picked place's time zone, ground height and name. They send only the place's rough coordinates (to about 100 m), never who you are.
-- **Conditions**, also part of online extras, look up the weather forecast for the place and date on screen. They send even rougher coordinates (to about 1 km) and the date. The answer is kept on your device so it is still there offline.
+- **Conditions**, also part of online extras, look up the weather forecast for the place and date on screen. They send even rougher coordinates (to about 1 km) and the date, plus ten points 50 to 600 km away along the lines toward sunset and sunrise, because the light that colours the clouds comes from that far. The answer is kept on your device so it is still there offline.
 
 You can switch online extras off at any time: tap the **Online** pill at the top of the page.
 

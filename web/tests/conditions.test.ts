@@ -54,7 +54,7 @@ function service(weather: string | Error, aerosols: string | Error) {
 
 describe("asking Open-Meteo", () => {
   it("sends only rounded coordinates and three dates", () => {
-    const { weather, aerosols } = conditionsUrls(9.931234, 76.267891, { year: 2026, month: 11, day: 15 });
+    const { weather, aerosols } = conditionsUrls([{ lat: 9.931234, lon: 76.267891 }], { year: 2026, month: 11, day: 15 });
     expect(weather.origin + weather.pathname).toBe("https://api.open-meteo.com/v1/forecast");
     expect(aerosols.origin + aerosols.pathname).toBe("https://air-quality-api.open-meteo.com/v1/air-quality");
     for (const u of [weather, aerosols]) {
@@ -68,6 +68,19 @@ describe("asking Open-Meteo", () => {
     expect(weather.searchParams.get("hourly")).toContain("cloud_cover_high");
     expect(weather.searchParams.get("hourly")).toContain("total_column_integrated_water_vapour");
     expect(aerosols.searchParams.get("hourly")).toBe("aerosol_optical_depth");
+  });
+
+  it("asks about several places in one request, in order", () => {
+    const { weather } = conditionsUrls(
+      [
+        { lat: 9.931, lon: 76.268 },
+        { lat: 9.784, lon: 75.836 },
+        { lat: -0.004, lon: -179.999 },
+      ],
+      { year: 2026, month: 11, day: 15 },
+    );
+    expect(weather.searchParams.get("latitude")).toBe("9.93,9.78,0");
+    expect(weather.searchParams.get("longitude")).toBe("76.27,75.84,-180");
   });
 
   it("steps dates across month and year ends", () => {
@@ -185,6 +198,35 @@ describe("loading conditions", () => {
     expect(readSaved(cacheKey(9.93, 76.27, { ...jan1, day: 2 }), store)).toBeNull();
     expect(readSaved(cacheKey(9.93, 76.27, { ...jan1, day: 3 }), store)).not.toBeNull();
     expect(readSaved(cacheKey(9.93, 76.27, { ...jan1, day: 14 }), store)).not.toBeNull();
+  });
+});
+
+describe("the forecast along the sun's direction", () => {
+  it("reads one answer per place from a plan and keeps the place's own readings for the card", async () => {
+    // A plan of three places: here, 200 km toward sunset, 200 km toward sunrise.
+    const plan = {
+      points: [
+        { lat: 9.93, lon: 76.27 },
+        { lat: 9.3, lon: 74.5 },
+        { lat: 9.3, lon: 78.0 },
+      ],
+      sunset: { azimuth_deg: 250, first: 1, distances_km: [200] },
+      sunrise: { azimuth_deg: 110, first: 2, distances_km: [200] },
+    };
+    const one = (high: number) => ({ hourly: { time: [T0, T0 + 3600], cloud_cover_high: [high, high] } });
+    const weather = JSON.stringify([one(10), one(20), one(30)]);
+    const air = JSON.stringify([0.1, 0.2, 0.3].map((a) => ({ hourly: { time: [T0, T0 + 3600], aerosol_optical_depth: [a, a] } })));
+    const s = service(weather, air);
+    const r = await loadConditions(9.93, 76.27, jan1, { online: true, plan, fetchText: s.fetchText, store: memoryStore() });
+    expect(s.asked[0].searchParams.get("latitude")).toBe("9.93,9.3,9.3");
+    expect(r.from).toBe("network");
+    expect(r.stored!.series.samples[0].cloud_high_pct).toBe(10);
+    expect(r.stored!.weather.sunset!.points[0].distance_km).toBe(200);
+    expect(r.stored!.weather.sunset!.points[0].series.samples[0].cloud_high_pct).toBe(20);
+    expect(r.stored!.weather.sunrise!.points[0].series.samples[0].aerosol_optical_depth).toBe(0.3);
+    // The glow uses the bundle: evening readings come from the sunset points.
+    const evening = engine.glowAt({ name: "", lat: 0, lon: 0, elevation_m: 0, horizon: [], peaks: [] }, "", JSON.stringify(r.stored!.weather), J2000);
+    expect(evening.has_conditions).toBe(true);
   });
 });
 

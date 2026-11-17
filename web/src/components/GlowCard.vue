@@ -7,7 +7,8 @@ import { computed } from "vue";
 import type { Glow, GlowMoment, Place, Timeline } from "../lib/types";
 import * as engine from "../lib/engine";
 import type { ConditionsState } from "../lib/useConditions";
-import { explainLayer, levelWord, times } from "../lib/glowText";
+import { explainLayer, highestCloudText, levelWord, rangeText, times } from "../lib/glowText";
+import { heightText } from "../lib/describe";
 
 const props = defineProps<{
   place: Place;
@@ -19,7 +20,7 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{ seek: [jd: number] }>();
 
-const series = computed(() => props.state.seriesText.value);
+const series = computed(() => props.state.weatherText.value);
 
 function safely<T>(fn: () => T, fallback: T): T {
   try {
@@ -45,9 +46,19 @@ const best = computed(() =>
 );
 
 const now = computed<Glow | null>(() => safely(() => engine.glowAt(props.place, props.packText, series.value, props.cursorJd), null));
-const reading = computed(() => (series.value ? safely(() => engine.conditionsAt(series.value, props.cursorJd), null) : null));
+const here = computed(() => props.state.seriesText.value);
+const reading = computed(() => (here.value ? safely(() => engine.conditionsAt(here.value, props.cursorJd), null) : null));
 
+const ceilingKm = computed(() => safely(() => engine.packInfo(props.packText).cloud_ceiling_km, 16));
+const highest = computed(() => (now.value ? highestCloudText(now.value, ceilingKm.value) : null));
 const hhmm = (jd: number) => engine.formatClock(jd, props.tz).slice(0, 5);
+/** Is the sun climbing at the scrubber's time? Decides which direction's points apply. */
+const skyRising = computed(() => safely(() => engine.skyAt(props.place, props.packText, props.cursorJd).rising, false));
+const farthest = computed(() => {
+  const s = props.state.stored.value?.weather;
+  const dir = skyRising.value ? s?.sunrise : s?.sunset;
+  return dir?.points.length ? Math.round(dir.points[dir.points.length - 1].distance_km) : 0;
+});
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 </script>
 
@@ -77,12 +88,18 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
     <template v-if="now">
       <h3>At {{ hhmm(cursorJd) }}</h3>
+      <p v-if="highest" class="small highest">{{ highest }}</p>
+      <p v-if="now.has_conditions" class="muted small">
+        Sunbeam's path:
+        <template v-if="now.along_sun">forecast at points up to {{ farthest }} km toward the {{ skyRising ? "sunrise" : "sunset" }}.</template>
+        <template v-else>local forecast only, standing in for the whole way to the sun.</template>
+      </p>
       <p v-if="!now.has_conditions" class="muted small">
         No forecast for this time, so these are only the <em>potential</em>: how well each height would glow if cloud were there and the air were clear.
       </p>
       <div v-for="l in now.layers" :key="l.name" class="layer">
         <div class="row">
-          <span class="name">{{ l.name }} <small>{{ l.height_km.toFixed(1) }} km, {{ levelWord(l.level) }}</small></span>
+          <span class="name">{{ l.name }} <small>{{ heightText(l) }}, {{ levelWord(l.level) }}</small></span>
           <span class="bar" role="img" :aria-label="`${l.name}: ${l.score != null ? l.score.toFixed(1) : 'potential ' + l.potential.toFixed(1)} out of 10`">
             <i class="potential" :style="{ width: l.potential * 10 + '%' }"></i>
             <i v-if="l.score != null" class="score-bar" :style="{ width: l.score * 10 + '%' }"></i>
@@ -92,8 +109,10 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
             <template v-else><small>could be</small> {{ l.potential.toFixed(1) }}</template>
           </span>
         </div>
+        <p v-if="l.cloud_type" class="muted small kind">{{ l.cover_pct?.toFixed(0) }}% cover: likely {{ l.cloud_type }} (a guess from the cover)</p>
         <details>
           <summary>Why</summary>
+          <p class="muted small">{{ rangeText(l) }}</p>
           <ul class="why">
             <li v-for="(f, i) in explainLayer(l, reading?.conditions ?? null)" :key="i">
               <span>{{ f.text }}</span><span class="x">{{ times(f.value) }}</span>

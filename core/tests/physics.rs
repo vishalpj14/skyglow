@@ -194,3 +194,24 @@ fn midnight_sun_and_polar_night_have_no_sunrise() {
         assert!(tl.event_jd.is_none(), "unexpected sunrise on {date:?}");
     }
 }
+
+#[test]
+fn cloud_layers_count_from_the_ground_at_a_high_place() {
+    // Leh, ground 3467 m. The default pack's low cloud is 1.5 km above the
+    // ground, so 4.967 km above sea level. Earth's shadow reaches a cloud
+    // overhead at height h when the sun is acos(R / (R + h)) below the
+    // horizon: acos(6371 / 6375.967) = 2.262 deg (at sea level, 1.5 km gives
+    // acos(6371 / 6372.5) = 1.243 deg).
+    use skyglow_core::place::Place;
+    use skyglow_core::timeline::build_timeline_for_place;
+    let params = Params::builtin();
+    let mut leh = Place::flat(34.16, 77.58);
+    leh.elevation_m = 3467.0;
+    let tl = build_timeline_for_place(&params, &leh, (2026, 11, 18), IST);
+    let low = &tl.layers[0];
+    assert!((low.height_km - 4.967).abs() < 1e-9, "{}", low.height_km);
+    assert!((low.above_ground_km - 1.5).abs() < 1e-9);
+    assert!((low.shadow_depression_deg - 2.262).abs() < 0.002, "{}", low.shadow_depression_deg);
+    let sea = build_timeline(&params, 34.16, 77.58, (2026, 11, 18), IST);
+    assert!((sea.layers[0].shadow_depression_deg - 1.243).abs() < 0.002);
+}
